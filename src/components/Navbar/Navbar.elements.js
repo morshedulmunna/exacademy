@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { Container } from "../../globalStyle";
+import { NavbarContainer } from "../../globalStyle";
 import { FaMagento } from "react-icons/fa";
 
 export const Nav = styled.nav`
@@ -13,15 +13,20 @@ export const Nav = styled.nav`
   position: sticky;
   top: 0;
   z-index: 999;
+
+  @media screen and (max-width: 960px) {
+    border-bottom: 18px solid #0a254c;
+  }
 `;
 
-export const NavContainer = styled(Container)`
+export const NavContainer = styled(NavbarContainer)`
   display: flex;
+  margin-top: 1rem;
   justify-content: space-between;
   align-items: center;
   height: 60px;
 
-  ${Container}
+  ${NavbarContainer}
 `;
 
 export const NavLogo = styled(Link)`

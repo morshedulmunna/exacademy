@@ -9,10 +9,25 @@ const CreateGlobalStyle = createGlobalStyle`
   background: #0A192F;
 }
 
+p,h1,h2,h3,h4,h5,h6{
+  color: #fff;
+}
+
 `;
+export const NavbarContainer = styled.div`
+  z-index: 1;
+  width: 100%;
+  padding: 0 100px 0 100px;
+
+  @media screen and (max-width: 991px) {
+    padding: 0 30px 0 30px;
+  }
+`;
+
 export const Container = styled.div`
   z-index: 1;
   width: 100%;
+  max-width: 1300px;
   padding: 0 100px 0 100px;
 
   @media screen and (max-width: 991px) {
