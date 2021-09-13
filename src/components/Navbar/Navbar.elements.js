@@ -13,15 +13,10 @@ export const Nav = styled.nav`
   position: sticky;
   top: 0;
   z-index: 999;
-
-  @media screen and (max-width: 960px) {
-    border-bottom: 18px solid #0a254c;
-  }
 `;
 
 export const NavContainer = styled(NavbarContainer)`
   display: flex;
-  margin-top: 1rem;
   justify-content: space-between;
   align-items: center;
   height: 60px;
@@ -119,16 +114,19 @@ export const Button = styled.button`
   background: transparent;
   border: 2px solid #28a645;
   color: #28a645;
+  outline: none;
   cursor: pointer;
   font-size: 0.9rem;
 
   &:hover {
     background: #28a645;
     color: #fff;
+    transition: all 0.9s;
   }
   @media screen and (max-width: 960px) {
     margin-top: 2rem;
     text-align: center;
     display: table;
+    width: 50%;
   }
 `;
