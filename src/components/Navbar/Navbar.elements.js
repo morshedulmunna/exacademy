@@ -1,27 +1,27 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { NavbarContainer } from "../../globalStyle";
+import { Container } from "../../globalStyle";
 import { FaMagento } from "react-icons/fa";
 
 export const Nav = styled.nav`
   background: #0a192f;
-  height: 60px;
+  /* height: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1rem;
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 999; */
 `;
 
-export const NavContainer = styled(NavbarContainer)`
+export const NavContainer = styled(Container)`
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 60px;
 
-  ${NavbarContainer}
+  ${Container}
 `;
 
 export const NavLogo = styled(Link)`
@@ -42,11 +42,14 @@ export const MobileIcon = styled.div`
   display: none;
 
   @media screen and (max-width: 960px) {
-    display: block;
+    /* display: block;
     position: absolute;
     top: 0;
     right: 0;
     transform: translate(-100%, 50%);
+    font-size: 1.8rem;
+    cursor: pointer; */
+    display: block;
     font-size: 1.8rem;
     cursor: pointer;
   } ;
@@ -76,10 +79,10 @@ export const NavItem = styled.li`
   height: 60px;
 
   @media screen and (max-width: 960px) {
-    width: 100%;
-    &::hover {
+    /* width: 100%; */
+    /* &::hover {
       border: none;
-    }
+    } */
   }
 `;
 
@@ -93,7 +96,7 @@ export const NavLinks = styled(Link)`
 
   &:hover {
     color: #0df2c9;
-    transition: all 0.03s ease;
+    transition: all 0.05s ease;
   }
   @media screen and (max-width: 960px) {
     text-align: center;
@@ -103,7 +106,7 @@ export const NavLinks = styled(Link)`
 
     &:hover {
       color: #0df2c9;
-      transition: all 0.03s ease;
+      transition: all 0.05s ease;
     }
   }
 `;

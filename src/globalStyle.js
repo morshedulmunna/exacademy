@@ -1,6 +1,6 @@
 import styled, { createGlobalStyle } from "styled-components";
 
-const CreateGlobalStyle = createGlobalStyle`
+const GlobalStyle = createGlobalStyle`
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,25 +9,19 @@ const CreateGlobalStyle = createGlobalStyle`
 }
 
 `;
-export const NavbarContainer = styled.div`
-  z-index: 1;
-  width: 100%;
-  padding: 0 100px 0 100px;
-
-  @media screen and (max-width: 991px) {
-    padding: 0 30px 0 30px;
-  }
-`;
 
 export const Container = styled.div`
   z-index: 1;
   width: 100%;
   max-width: 1300px;
-  padding: 0 100px 0 100px;
-
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 50px;
+  padding-left: 50px;
   @media screen and (max-width: 991px) {
-    padding: 0 30px 0 30px;
+    padding-right: 30px;
+    padding-left: 30px;
   }
 `;
 
-export default CreateGlobalStyle;
+export default GlobalStyle;
