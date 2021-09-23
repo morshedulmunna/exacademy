@@ -1,27 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, Navink } from "react-router-dom";
 import styled from "styled-components";
-import { Container } from "../../globalStyle";
+import { NavContainer } from "../../globalStyle";
 import { FaMagento } from "react-icons/fa";
 
-export const Nav = styled.nav`
-  background: #0a192f;
-  /* height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1rem;
-  position: sticky;
-  top: 0;
-  z-index: 999; */
-`;
-
-export const NavContainer = styled(Container)`
+export const Nav = styled(NavContainer)`
+  position: fixed;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 60px;
-
-  ${Container}
+  background: #0a192f;
+  box-shadow: 0px -5px 13px 0px rgba(0, 0, 0, 1);
+  -webkit-box-shadow: 0px -5px 13px 0px rgba(0, 0, 0, 1);
+  -moz-box-shadow: 0px -5px 13px 0px rgba(0, 0, 0, 1);
+  ${NavContainer}
 `;
 
 export const NavLogo = styled(Link)`
@@ -32,6 +24,10 @@ export const NavLogo = styled(Link)`
   font-size: 1.8rem;
   display: flex;
   align-items: center;
+  margin-left: 5rem;
+  @media screen and (max-width: 960px) {
+    margin-left: 0px;
+  }
 `;
 
 export const NavIcon = styled(FaMagento)`
@@ -42,13 +38,6 @@ export const MobileIcon = styled.div`
   display: none;
 
   @media screen and (max-width: 960px) {
-    /* display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translate(-100%, 50%);
-    font-size: 1.8rem;
-    cursor: pointer; */
     display: block;
     font-size: 1.8rem;
     cursor: pointer;
@@ -60,12 +49,13 @@ export const NavMenu = styled.ul`
   align-items: center;
   list-style: none;
   text-align: center;
+  margin-right: 5rem;
 
   @media screen and (max-width: 960px) {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 60vh;
+    height: 100vh;
     position: absolute;
     top: 60px;
     left: ${({ click }) => (click ? 0 : "-100%")};
@@ -76,38 +66,37 @@ export const NavMenu = styled.ul`
 `;
 
 export const NavItem = styled.li`
-  height: 60px;
-
-  @media screen and (max-width: 960px) {
-    /* width: 100%; */
-    /* &::hover {
-      border: none;
-    } */
-  }
-`;
-
-export const NavLinks = styled(Link)`
-  color: #fff;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
   padding: 0 1.5rem 0 1.5rem;
-  height: 100%;
-
-  &:hover {
-    color: #0df2c9;
-    transition: all 0.05s ease;
-  }
   @media screen and (max-width: 960px) {
-    text-align: center;
-    padding: 2rem;
-    width: 100%;
-    display: table;
+    padding: 2rem 0;
+  }
+  a {
+    color: #fff;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    height: 100%;
 
     &:hover {
       color: #0df2c9;
       transition: all 0.05s ease;
     }
+    @media screen and (max-width: 960px) {
+      text-align: center;
+      width: 100%;
+      display: table;
+
+      &:hover {
+        color: #0df2c9;
+        transition: all 0.05s ease;
+      }
+    }
+  }
+
+  .nav-active {
+    border-top: 1px solid #0df2c9;
+    width: 100%;
+    padding-top: 4px;
   }
 `;
 
@@ -129,7 +118,41 @@ export const Button = styled.button`
   @media screen and (max-width: 960px) {
     margin-top: 2rem;
     text-align: center;
-    display: table;
-    width: 50%;
+    width: 100%;
   }
+`;
+
+export const Sidebar = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  @media screen and (max-width: 960px) {
+    left: 10px;
+  }
+`;
+
+export const SideIcon = styled.div`
+  margin: 10px 0 10px 0;
+  &::hover {
+    margin-bottom: 10px;
+  }
+  a {
+    color: #fff;
+  }
+`;
+export const SocialIcon = styled.div`
+  margin: 20px 0 20px 0;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+`;
+export const SideLine = styled.div`
+  width: 1px;
+  height: 150px;
+  background: #fff;
 `;
