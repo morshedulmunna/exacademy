@@ -73,3 +73,56 @@ export const HeaderDiscription = styled.p`
   color: #fff;
   line-height: 25px;
 `;
+
+export const HeaderBtn = styled.div`
+  margin-top: 30px;
+  display: flex;
+  width: 50%;
+  /* background: #fff; */
+  justify-content: space-between;
+  a {
+    text-decoration: none;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: transparent;
+    border: 2px solid #28a645;
+    color: #28a645;
+    outline: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    width: 120px;
+    &:hover {
+      background: #218838;
+      color: #fff;
+    }
+    &.aboutBtn {
+      background: #28a645;
+      color: white;
+      &.aboutBtn::hover {
+        background: #218838;
+      }
+    }
+  }
+  @media screen and (max-width: 960px) {
+    flex-direction: column;
+    a {
+      margin: 20px 20px 20px 0px;
+      padding: 10px 10px;
+      width: 120px;
+      &:hover {
+        background: #28a645;
+        color: #fff;
+      }
+      &.aboutBtn {
+        background: #28a645;
+        color: white;
+        &.aboutBtn::hover {
+          background: #218838;
+        }
+      }
+    }
+  }
+`;
+
+/* Header 2nd Part Few Workd */

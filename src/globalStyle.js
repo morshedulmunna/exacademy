@@ -54,15 +54,9 @@ export const Button = styled.button`
   cursor: pointer;
   font-size: 0.9rem;
 
-  &:hover {
-    background: #28a645;
-    color: #fff;
-    transition: all 0.9s;
-  }
   @media screen and (max-width: 960px) {
     margin-top: 2rem;
     text-align: center;
-    width: 100%;
   }
 `;
 
