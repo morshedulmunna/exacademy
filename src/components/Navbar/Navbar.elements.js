@@ -1,4 +1,4 @@
-import { Link, Navink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { NavContainer } from "../../globalStyle";
 import { FaMagento } from "react-icons/fa";
