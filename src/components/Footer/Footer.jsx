@@ -6,7 +6,7 @@ import { BiGitRepoForked } from "react-icons/bi";
 const Footer = () => {
   return (
     <>
-      <div className="container footer">
+      <div className="footer">
         <p>
           Designed & Built by
           <a href="https://github.com/morshedulmunna"> morshedul munna </a>
