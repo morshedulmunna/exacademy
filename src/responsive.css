@@ -1,0 +1,29 @@
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  .wrapper {
+    padding-top: 100px;
+    flex-direction: column;
+  }
+  .wrapper img {
+    width: 100%;
+  }
+}
+@media screen and (max-width: 767px) {
+  .wrapper {
+    padding-top: 100px;
+    flex-direction: column-reverse;
+  }
+  .wrapper img {
+    width: 120%;
+  }
+  .text__area h1 {
+    font-size: 2rem;
+    white-space: nowrap;
+  }
+  ul {
+    white-space: nowrap;
+  }
+  .text__area p {
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+}

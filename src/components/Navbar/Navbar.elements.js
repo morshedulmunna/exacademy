@@ -10,7 +10,6 @@ export const Nav = styled.nav`
   align-items: center;
   height: 60px;
   background: #0a192f;
-  box-shadow: 0px -5px 13px 0px rgba(0, 0, 0, 1);
   padding: 0 5rem;
   @media screen and (max-width: 991px) {
     padding: 0 2rem;
