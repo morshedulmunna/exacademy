@@ -9,7 +9,14 @@ const Footer = () => {
       <div className="footer">
         <p>
           Designed & Built by
-          <a href="https://github.com/morshedulmunna"> morshedul munna </a>
+          <a
+            rel="noreferrer"
+            target="_blank"
+            href="https://github.com/morshedulmunna"
+          >
+            {" "}
+            morshedul munna{" "}
+          </a>
         </p>
         <div className="star__forks">
           <i>
@@ -20,7 +27,12 @@ const Footer = () => {
             <BiGitRepoForked />
           </i>
           <p>Forks</p>
-          <a id="byMe" href="https://github.com/morshedulmunna">
+          <a
+            id="byMe"
+            rel="noreferrer"
+            target="_blank"
+            href="https://github.com/morshedulmunna"
+          >
             By Me
           </a>
         </div>
