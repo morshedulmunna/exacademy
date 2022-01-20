@@ -1,13 +1,4 @@
-import styled, { createGlobalStyle } from "styled-components";
-
-const GlobalStyle = createGlobalStyle`
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: "Roboto";
-}
-`;
+import styled from "styled-components";
 
 export const BodyContiner = styled.div`
   background: #0a192f;
@@ -59,5 +50,3 @@ export const Button = styled.button`
     text-align: center;
   }
 `;
-
-export default GlobalStyle;

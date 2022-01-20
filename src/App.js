@@ -1,20 +1,10 @@
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Home from "./components/Home/Home";
-import Navbar from "./components/Navbar/Navbar";
-import CreateGlobalStyle from "./globalStyle";
-import { BodyContiner } from "./globalStyle";
+import { Routes, Route } from "react-router-dom";
+import Home from "./Route/Home.js";
 function App() {
   return (
-    <Router>
-      <CreateGlobalStyle />
-      <Navbar />
-      <BodyContiner>
-        <Switch>
-          <Route to="/" component={Home} />
-          <Route to="/home" component={Home} />
-        </Switch>
-      </BodyContiner>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Home />} />
+    </Routes>
   );
 }
 
