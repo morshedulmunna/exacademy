@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { NavContainer } from "../../globalStyle";
 import { FaMagento } from "react-icons/fa";
 
-export const Nav = styled(NavContainer)`
+export const Nav = styled.nav`
+  width: 100%;
   position: fixed;
   display: flex;
   justify-content: space-between;
@@ -11,9 +11,10 @@ export const Nav = styled(NavContainer)`
   height: 60px;
   background: #0a192f;
   box-shadow: 0px -5px 13px 0px rgba(0, 0, 0, 1);
-  -webkit-box-shadow: 0px -5px 13px 0px rgba(0, 0, 0, 1);
-  -moz-box-shadow: 0px -5px 13px 0px rgba(0, 0, 0, 1);
-  ${NavContainer}
+  padding: 0 5rem;
+  @media screen and (max-width: 991px) {
+    padding: 0 2rem;
+  }
 `;
 
 export const NavLogo = styled(Link)`

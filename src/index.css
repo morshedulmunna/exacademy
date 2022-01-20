@@ -8,4 +8,9 @@
 }
 body {
   font-family: "Roboto", sans-serif;
+  background-color: var(--bg-color);
+}
+
+:root {
+  --bg-color: #0a192f;
 }
