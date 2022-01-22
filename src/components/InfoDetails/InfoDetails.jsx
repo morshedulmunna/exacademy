@@ -1,6 +1,5 @@
 import React from "react";
 import "./InfoDetailsStyle.css";
-import "../../responsive.css";
 import H_Image from "../../../src/images/infosecimg.png";
 const InfoDetails = () => {
   return (

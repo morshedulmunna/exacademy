@@ -32,12 +32,10 @@ body {
 @media screen and (min-width: 768px) and (max-width: 1023px) {
   .container {
     width: 75%;
-    padding-top: 50px;
   }
 }
 @media screen and (max-width: 767px) {
   .container {
     width: 85%;
-    padding-top: 50px;
   }
 }

@@ -1,6 +1,5 @@
 import React from "react";
 import "./ContactInfo.css";
-import "../responsive.css";
 
 const ContactInfo = () => {
   return (

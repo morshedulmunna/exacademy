@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { FaMagento } from "react-icons/fa";
 
 export const Padding = styled.div`
-  height: 100px;
+  height: 80px;
 `;
 export const Nav = styled.nav`
   width: 100%;
