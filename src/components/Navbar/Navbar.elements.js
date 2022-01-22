@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { FaMagento } from "react-icons/fa";
 
+export const Padding = styled.div`
+  height: 100px;
+`;
 export const Nav = styled.nav`
   width: 100%;
   position: fixed;

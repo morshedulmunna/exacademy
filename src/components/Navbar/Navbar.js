@@ -10,6 +10,7 @@ import {
   NavMenu,
   NavItem,
   Button,
+  Padding,
 } from "./Navbar.elements";
 import { NavLink } from "react-router-dom";
 
@@ -58,6 +59,7 @@ const Navbar = () => {
             </a>
           </NavMenu>
         </Nav>
+        <Padding></Padding>
       </IconContext.Provider>
     </>
   );
