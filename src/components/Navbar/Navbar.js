@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaFacebook, FaTimes, FaYoutube } from "react-icons/fa";
+import { GoMarkGithub } from "react-icons/go";
+import { TiSocialTwitter, TiSocialLinkedin } from "react-icons/ti";
 import { IconContext } from "react-icons/lib";
 
 import {
@@ -11,6 +13,10 @@ import {
   NavItem,
   Button,
   Padding,
+  SideLine,
+  Sidebar,
+  SocialIcon,
+  SideIcon,
 } from "./Navbar.elements";
 import { NavLink } from "react-router-dom";
 
@@ -61,6 +67,45 @@ const Navbar = () => {
         </Nav>
         <Padding></Padding>
       </IconContext.Provider>
+      <Sidebar>
+        <SocialIcon>
+          <SideIcon>
+            <a target="/blank" href="https://github.com/morshedulmunna">
+              <GoMarkGithub />
+            </a>
+          </SideIcon>
+          <SideIcon>
+            <a target="/blank" href="https://twitter.com/morshedulmunna">
+              <TiSocialTwitter />
+            </a>
+          </SideIcon>
+          <SideIcon>
+            <a
+              target="/blank"
+              href="https://www.linkedin.com/in/morshedulmunna/"
+            >
+              <TiSocialLinkedin />
+            </a>
+          </SideIcon>
+          <SideIcon>
+            <a
+              target="/blank"
+              href="https://www.youtube.com/channel/UCRuGYF7DvCpbtinkNKNSe3A"
+            >
+              <FaYoutube />
+            </a>
+          </SideIcon>
+          <SideIcon>
+            <a
+              target="/blank"
+              href="https://www.facebook.com/morshedulmunna.id/"
+            >
+              <FaFacebook />
+            </a>
+          </SideIcon>
+        </SocialIcon>
+        <SideLine></SideLine>
+      </Sidebar>
     </>
   );
 };
