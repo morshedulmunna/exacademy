@@ -1,0 +1,22 @@
+.someWork {
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+.allWork {
+  display: flex;
+  align-items: center;
+}
+.allWork span {
+  width: 200px;
+  margin-left: 2rem;
+  height: 2px;
+  background-color: var(--span-color);
+}
+.someWork a {
+  color: var(--span-color);
+  text-decoration: none;
+  border: 1px solid var(--span-color);
+  padding: 0.2rem 1rem;
+  border-radius: 5px;
+}
