@@ -30,9 +30,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* flex-direction: column; */
 }
 .project .workImage {
   width: 60%;
+  /* width: 100%; */
 }
 .project .workImage img {
   width: 100%;
@@ -41,5 +43,16 @@
 
 .project .workContent {
   width: 40%;
-  background-color: #fff;
+  /* width: 100%; */
+  background-color: var(--bg-seondary);
+  padding: 1rem;
+  border-radius: 5px;
+}
+.workContent p,
+h2 {
+  color: var(--text-color);
+}
+
+.workContent span {
+  color: var(--span-color);
 }

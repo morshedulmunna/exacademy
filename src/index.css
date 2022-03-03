@@ -20,6 +20,7 @@ body {
   --primary-color: #28a645;
   --secendory-color: #1b8b35;
   --bg-color: #0a192f;
+  --bg-seondary: #172a45;
   --span-color: #64ffda;
   --text-color: #fff;
 }
@@ -38,4 +39,17 @@ body {
   .container {
     width: 85%;
   }
+}
+
+.skills__set p {
+  display: inline-block;
+  padding: 0.5rem;
+  background: #4b5769;
+  margin-right: 5px;
+  margin-top: 5px;
+  border-radius: 3px;
+  padding: 3px 10px;
+  font-size: 13px;
+  height: 26px;
+  color: #fff;
 }

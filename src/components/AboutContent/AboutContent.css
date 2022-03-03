@@ -42,18 +42,6 @@
   margin-top: 7px;
   background-color: #64ffda;
 }
-.skills__set p {
-  display: inline-block;
-  padding: 0.5rem;
-  background: #4b5769;
-  margin-right: 5px;
-  margin-top: 5px;
-  border-radius: 3px;
-  padding: 3px 10px;
-  font-size: 13px;
-  height: 26px;
-  color: #fff;
-}
 
 @media screen and (min-width: 768px) and (max-width: 1023px) {
   .about__content {
