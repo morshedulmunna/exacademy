@@ -31,7 +31,7 @@ const SomeWork = () => {
             animi voluptatum aspernatur deleniti alias!
           </p>
           <div className="skills__set">
-            <p>JavaScript</p>/
+            <p>JavaScript</p>
           </div>
         </div>
       </div>

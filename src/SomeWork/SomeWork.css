@@ -47,6 +47,7 @@
   background-color: var(--bg-seondary);
   padding: 1rem;
   border-radius: 5px;
+  height: 300px;
 }
 .workContent p,
 h2 {
