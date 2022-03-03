@@ -1,4 +1,4 @@
-const data = [
+const Data = [
   {
     id: 1,
     name: "Red Onion Food",
@@ -38,4 +38,46 @@ const data = [
       "JavaScript",
     ],
   },
+  {
+    artical: [
+      {
+        id: 1,
+        title: "Simple Introduction to React.js",
+        discription:
+          "React is a library that used to create awesome user interface … hence it is a library it need some other tools to make a complete web application",
+        image: "https://i.ibb.co/rvPKdXX/1-a-Lg1-G2-UAla-Kp-Bop-Rnm-CRg.png",
+        topics: "React.js",
+        date: "3 march 2022",
+      },
+      {
+        id: 2,
+        title: "Getting started with React Router",
+        discription:
+          "React Router is The Powerful tool to create Single Page Web Application (SPA) . Basically it’s deauty is to manage your file path URL . Like....",
+        image: "https://i.ibb.co/Pth1NwP/1-s-X8r-BJBol5d-Bp5-WIJQr-Yyw.png",
+        topics: "React Router Dom",
+        date: "7 march 2022",
+      },
+      {
+        id: 3,
+        title: "Introduction to Javascript",
+        discription:
+          "JavaScript is a single thread, prototype based programming language that support multiple programming paradigm like Object Oriented programming....",
+        image: "https://i.ibb.co/qxXz6JQ/1-QDme-Wi-xn-Fxzfwbs-Trxun-Q.jpg",
+        topics: "JavaScript",
+        date: "13 march 2022",
+      },
+      {
+        id: 4,
+        title: "Modern Javascript ES6",
+        discription:
+          "JavaScript ES6 is also called ECMAScript 6 or ECMAScript 2015 And this was introduced in 2015 as a new version of JavaScript.....",
+        image: "https://i.ibb.co/Tc9YBLf/Javascript-ES6.jpg",
+        topics: "ES6",
+        date: "16 march 2022",
+      },
+    ],
+  },
 ];
+
+export default Data;
