@@ -12,6 +12,14 @@ const SomeWork = () => {
           <Link to="/work">All Works</Link>
         </div>
       </div>
+      <div className="project">
+        <div className="workImage">
+          <img src="https://imgur.com/X3h3ei5.png" alt="" />
+        </div>
+        <div className="workContent">
+          <p>Content122</p>
+        </div>
+      </div>
     </section>
   );
 };

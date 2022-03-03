@@ -2,6 +2,8 @@
   color: #fff;
   display: flex;
   align-items: center;
+  flex-direction: row;
+  margin-top: 2rem;
 }
 .allWork {
   display: flex;
@@ -10,13 +12,34 @@
 .allWork span {
   width: 200px;
   margin-left: 2rem;
-  height: 2px;
+  height: 1px;
   background-color: var(--span-color);
 }
 .someWork a {
   color: var(--span-color);
   text-decoration: none;
   border: 1px solid var(--span-color);
-  padding: 0.2rem 1rem;
+  padding: 0.2rem 0.5rem;
   border-radius: 5px;
+  margin: 1rem 0rem;
+}
+
+/* Project  */
+
+.project {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.project .workImage {
+  width: 60%;
+}
+.project .workImage img {
+  width: 100%;
+  height: auto;
+}
+
+.project .workContent {
+  width: 40%;
+  background-color: #fff;
 }
