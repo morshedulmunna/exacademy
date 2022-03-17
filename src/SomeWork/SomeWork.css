@@ -57,3 +57,11 @@ h2 {
 .workContent span {
   color: var(--span-color);
 }
+
+.workContent .btn {
+  margin-top: 20px;
+}
+
+.workContent .btn .git {
+  margin-left: 20px;
+}

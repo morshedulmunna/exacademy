@@ -2,6 +2,8 @@ import React from "react";
 import "./SomeWork.css";
 import { Link } from "react-router-dom";
 import data from "../data.js";
+import { SiGithub } from "react-icons/si";
+import { VscLiveShare } from "react-icons/vsc";
 
 // eslint-disable-next-line array-callback-return
 data.map((work) => {
@@ -32,6 +34,25 @@ const SomeWork = () => {
           </p>
           <div className="skills__set">
             <p>JavaScript</p>
+            <p>JavaScript</p>
+            <p>JavaScript</p>
+            <p>JavaScript</p>
+            <p>JavaScript</p>
+            <p>JavaScript</p>
+            <p>JavaScript</p>
+            <p>JavaScript</p>
+            <p>JavaScript</p>
+          </div>
+
+          <div className="btn">
+            <span>
+              <VscLiveShare />
+              <span> Live</span>
+            </span>
+            <span className="git">
+              <SiGithub />
+              <span> Code</span>
+            </span>
           </div>
         </div>
       </div>
