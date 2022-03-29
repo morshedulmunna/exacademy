@@ -34,12 +34,12 @@ const SomeWork = () => {
           </p>
           <div className="skills__set">
             <p>JavaScript</p>
-            <p>werwe</p>
-            <p>wer</p>
-            <p>JavaScript</p>
-            <p>sdfgjf</p>
-            <p>wefgfjrwe</p>
-            <p>fgjfgj</p>
+            <p>werfghfghwe</p>
+            <p>wefghfghr</p>
+            <p>JavfghfgaScript</p>
+            <p>sdffghfghgjf</p>
+            <p>wegfhfgfgfjrwe</p>
+            <p>fgjfghfgfgj</p>
             <p>hfghfghfghfgh</p>
             <p>fghfgjfg</p>
           </div>
