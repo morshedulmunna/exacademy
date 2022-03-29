@@ -51,7 +51,7 @@ const SomeWork = () => {
             </span>
             <span className="git">
               <SiGithub />
-              <span>dfgdfgdfg</span>
+              <span>Code</span>
             </span>
           </div>
         </div>
