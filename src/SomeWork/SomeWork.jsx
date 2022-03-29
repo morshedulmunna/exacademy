@@ -28,7 +28,7 @@ const SomeWork = () => {
           <span>01</span>
           <h2>Red Onion Foods</h2>
           <p>
-            Lorem, ipsum fg gfhgh fgherter ghdfg dolor sit amet consectetur adipisicing elit. Deserunt
+            Lorem, ipsum fg gfhgh fgherterdfgd fgdfgdfg  ghdfg dolor sit amet consectetur adipisicing elit. Deserunt
             incidunt cupiditate praesentium dolores consectetur consequuntur
             animi voluptatum aspernatur deleniti alias!
           </p>
