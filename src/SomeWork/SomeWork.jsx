@@ -35,9 +35,9 @@ const SomeWork = () => {
           <div className="skills__set">
             <p>JavaScript</p>
             <p>JavaScript</p>
+            <p>JavasdfsScript</p>
             <p>JavaScript</p>
-            <p>JavaScript</p>
-            <p>JavaScript</p>
+            <p>sdf</p>
             <p>JavaScript</p>
             <p>JavaScript</p>
             <p>JavaScript</p>
