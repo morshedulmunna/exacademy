@@ -60,7 +60,10 @@ const Navbar = () => {
                 Contact
               </NavLink>
             </NavItem>
-            <a target="/blank" href="https://github.com/morshedulmunna">
+            <a
+              target="/blank"
+              href="https://docs.google.com/document/d/141DI-KFmgCFKJRvoPaT-VGQ3HkJRQQSJ-BHzFx4Y1Do"
+            >
               <Button>Resume</Button>
             </a>
           </NavMenu>
