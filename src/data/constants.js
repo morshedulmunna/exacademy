@@ -8,8 +8,7 @@ export const Bio = {
   ],
   description:
     "As a software Developer, I am like an architect who designs and builds digital Product. I use my knowledge and expertise to create modern applications that are both efficient and elegant.",
-  description2:
-    "My passion for technology drives me to continually learn and stay up to date with the latest industry trends. I approach every project with a critical and creative mindset, analyzing problems and finding innovative solutions.",
+  description2: "",
   github: "https://github.com/morshedulmunna",
   resume:
     "https://drive.google.com/file/d/1FAhfRBTKQbM5Bu7fOg4YjT0YzXOO8zII/view?usp=sharing",
