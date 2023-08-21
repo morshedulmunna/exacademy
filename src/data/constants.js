@@ -307,31 +307,65 @@ export const education = [
 ];
 
 export const projects = [
-  // {
-  //   id: 9,
-  //   title: "Trackify",
-  //   date: "Jun 2023 - Jul 2023",
-  //   description:
-  //     "Trackify is a web application designed to streamline task management and enhance productivity in the workplace. It provides a user-friendly interface for employers to keep track of their employees' daily work activities and empowers employees to log their tasks efficiently. \nAdmin Credentials: # Email: testadmin@gmail.com #Password- 123@testadmin, Employee Credentials:	#Email: testemployee@gmail.com	#Password- 123@Testemployee",
-  //   image:
-  //     "https://user-images.githubusercontent.com/64485885/255202416-e1f89b04-2788-45b0-abc2-9dec616669e2.png",
-  //   tags: [
-  //     "Docker",
-  //     "AWS",
-  //     "DuckDNS",
-  //     "Eslint",
-  //     "Husky",
-  //     "CI/CD",
-  //     "React Js",
-  //     "MongoDb",
-  //     "Node Js",
-  //     "Express Js",
-  //     "Redux",
-  //   ],
-  //   category: "web app",
-  //   github: "https://github.com/rishavchanda/Trackify",
-  //   webapp: "https://trackify.duckdns.org",
-  // },
+  {
+    id: 1,
+    title: "Customer Support Management Systems",
+    date: "Jun 2023 - Jul 2023",
+    description:
+      "This project robust web-based e-commerce platform to Support Management System (SMS) that enables efficient communication and resolution of customer problems. The system will facilitate customers in reporting issues, allow administrators to manage and assign these issues, and provide a feedback loop for improved customer satisfaction.",
+    image:
+      "https://user-images.githubusercontent.com/44342051/261830767-8a370285-dfb4-4b10-a458-5a9aaae42333.png",
+    tags: [
+      "Next.js",
+      "Render Cloud",
+      "TailwindCSS",
+      "JWT",
+      "PostgreSQL",
+      "Node Js",
+      "NestJS",
+      "Prisma(ORM)",
+      "Redux",
+    ],
+    category: "web app",
+    github: "https://github.com/morshedulmunna/support-ticket-web",
+    webapp: "https://support-ticket-system-asf.vercel.app/",
+  },
+  {
+    id: 2,
+    title: "Manufacture Shop",
+    date: "Jun 2023 - Jul 2023",
+    description:
+      "This project involves creating a robust web-based e-commerce platform with secure authentication, authorization, and payment systems. Users can log in using email, password, or Google, while administrators manage orders, payments, and user roles. The integration of Stripe enables international card payments, and both users and administrators have personalized profiles. The application, deployed on Firebase and Heroku, offers a responsive interface, ensuring an efficient and secure online shopping experience.",
+    image:
+      "https://user-images.githubusercontent.com/44342051/261831624-f534e032-4980-473b-bf4d-652072263b1e.png",
+    tags: [
+      "React.js",
+      "Firebase",
+      "Render Cloud",
+      "TailwindCSS",
+      "JWT",
+      "CI/CD",
+      "React Js",
+      "MongoDb",
+      "Node Js",
+      "Express Js",
+    ],
+    category: "web app",
+    github: "https://github.com/morshedulmunna/manufacture-shop",
+    webapp: "https://alliance-inc-manufacturer-website-client-side.vercel.app/",
+  },
+  {
+    id: 2,
+    title: "Movie Site",
+    date: "Jun 2023 - Jul 2023",
+    description: "This project involves creating a robust web Show Movie list",
+    image:
+      "https://user-images.githubusercontent.com/44342051/261789762-20b57e7e-edbe-4e21-9e82-74079c6b2194.png",
+    tags: ["HTML", "SCSS", "JavaScript", "vercel"],
+    category: "web app",
+    github: "https://github.com/morshedulmunna/EF-Task",
+    webapp: "ef-task-sooty.vercel.app",
+  },
 ];
 
 // export const TimeLineData = [
