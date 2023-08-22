@@ -23,6 +23,11 @@ export const skills = [
     title: "Frontend",
     skills: [
       {
+        name: "TypeScript",
+        image:
+          "https://th.bing.com/th/id/R.8075e9fb9d9e4d38ab81dae248c6dbd0?rik=m8wEkmr8R1U1gA&riu=http%3a%2f%2fpnbmobile.com%2fimages%2ftypescript_logo.png&ehk=wde0lVRVQLeiYmCgdeE%2bTbW2qlCyP7smtUsY5bfYKwI%3d&risl=&pid=ImgRaw&r=0",
+      },
+      {
         name: "React Js",
         image:
           "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xMS41IC0xMC4yMzE3NCAyMyAyMC40NjM0OCI+CiAgPHRpdGxlPlJlYWN0IExvZ288L3RpdGxlPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSIyLjA1IiBmaWxsPSIjNjFkYWZiIi8+CiAgPGcgc3Ryb2tlPSIjNjFkYWZiIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIi8+CiAgICA8ZWxsaXBzZSByeD0iMTEiIHJ5PSI0LjIiIHRyYW5zZm9ybT0icm90YXRlKDYwKSIvPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIiB0cmFuc2Zvcm09InJvdGF0ZSgxMjApIi8+CiAgPC9nPgo8L3N2Zz4K",
@@ -190,7 +195,7 @@ export const experiences = [
       "NextJS",
       "TailwindCSS",
     ],
-    doc: "https://drive.google.com/file/d/1ATaHjfd4XqnB9-dGgFCIdfsgMjcDjhU0/view?usp=drive_link",
+    doc: "https://private-user-images.githubusercontent.com/44342051/262070236-4a8d5bbd-b1f5-4635-9bb4-9a0b7665b4d2.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE2OTI2MzE5MzMsIm5iZiI6MTY5MjYzMTYzMywicGF0aCI6Ii80NDM0MjA1MS8yNjIwNzAyMzYtNGE4ZDViYmQtYjFmNS00NjM1LTliYjQtOWEwYjc2NjViNGQyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzA4MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMwODIxVDE1MjcxM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTNlODBkODQ2OTI0OTVlZTI5NjIzMmE1ZWFmOTE1Y2VjMzY2NWUwZWQ2Y2YyMGQ0OTk1NzUzMGU3MDlkNzg2ZTQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.vAxz-UNE7fefCnDzAulbkzHcbUnKPiMRmguWtSZu4a4",
     // },
     // {
     //   id: 0,
