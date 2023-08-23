@@ -360,7 +360,7 @@ export const projects = [
     webapp: "https://alliance-inc-manufacturer-website-client-side.vercel.app/",
   },
   {
-    id: 2,
+    id: 3,
     title: "Movie Site",
     date: "Jun 2023 - Jul 2023",
     description: "This project involves creating a robust web Show Movie list",
@@ -370,6 +370,19 @@ export const projects = [
     category: "web app",
     github: "https://github.com/morshedulmunna/EF-Task",
     webapp: "ef-task-sooty.vercel.app",
+  },
+  {
+    id: 4,
+    title: "Cloud Dashboard",
+    date: "23  Auguest 2023",
+    description:
+      "This project involves creating a robust Cloud Dashboard project. using Javascript, HTML-5, CSS-3(SCSS).",
+    image:
+      "https://user-images.githubusercontent.com/44342051/262311995-6a8caa8b-47c6-4ea4-a0dd-c868a7ba0bb0.png",
+    tags: ["HTML", "SCSS", "JavaScript", "vercel", "Vite"],
+    category: "web app",
+    github: "https://github.com/morshedulmunna/cloud-dashboad",
+    webapp: "https://cloud-dashboad.vercel.app/",
   },
 ];
 
