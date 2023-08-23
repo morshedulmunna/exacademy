@@ -366,7 +366,7 @@ export const projects = [
     description: "This project involves creating a robust web Show Movie list",
     image:
       "https://user-images.githubusercontent.com/44342051/261789762-20b57e7e-edbe-4e21-9e82-74079c6b2194.png",
-    tags: ["HTML", "SCSS", "JavaScript", "vercel"],
+    tags: ["HTML", "SCSS", "JavaScript", "vercel", "Vite"],
     category: "web app",
     github: "https://github.com/morshedulmunna/EF-Task",
     webapp: "ef-task-sooty.vercel.app",
