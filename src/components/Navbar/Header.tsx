@@ -39,7 +39,7 @@ export default function Header({}: Props) {
         }`}
       >
         <div className="flex items-center gap-2 mr-12">
-          <Image src="/diverse-avatars.png" alt="Morshedul Munna" width={32} height={32} className="rounded-full" />
+          {/* <Image src="/diverse-avatars.png" alt="Morshedul Munna" width={32} height={32} className="rounded-full" /> */}
           <span className="font-medium">Morshedul Munna</span>
         </div>
         <div className="flex items-center gap-12">

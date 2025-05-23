@@ -55,9 +55,7 @@ export default function YoutubeSection({}: Props) {
               <div className="space-y-8">
                 {/* Video 1 */}
                 <div className="grid md:grid-cols-[200px,1fr] gap-4">
-                  <div className="relative h-32">
-                    <Image src="/placeholder.svg?height=150&width=200&query=system design" alt="System Design for Beginners" fill className="object-cover rounded-lg" />
-                  </div>
+                  <div className="relative h-32">{/* <Image src="/video-placeholder-1.jpg" alt="System Design for Beginners" fill className="object-cover rounded-lg" /> */}</div>
                   <div>
                     <h3 className="font-bold mb-1">System Design for Beginners</h3>
                     <p className="text-gray-500 text-sm mb-2">17 May 2025</p>
@@ -70,7 +68,7 @@ export default function YoutubeSection({}: Props) {
                 {/* Video 2 */}
                 <div className="grid md:grid-cols-[200px,1fr] gap-4">
                   <div className="relative h-32">
-                    <Image src="/placeholder.svg?height=150&width=200&query=ai girlfriend" alt="I Built my AI Girlfriend - Finally!" fill className="object-cover rounded-lg" />
+                    {/* <Image src="/video-placeholder-2.jpg" alt="I Built my AI Girlfriend - Finally!" fill className="object-cover rounded-lg" /> */}
                   </div>
                   <div>
                     <h3 className="font-bold mb-1">I Built my AI Girlfriend - Finally!</h3>
@@ -84,12 +82,7 @@ export default function YoutubeSection({}: Props) {
                 {/* Video 3 */}
                 <div className="grid md:grid-cols-[200px,1fr] gap-4">
                   <div className="relative h-32">
-                    <Image
-                      src="/placeholder.svg?height=150&width=200&query=rbac access control"
-                      alt="Master Role-Based Access Control Patterns"
-                      fill
-                      className="object-cover rounded-lg"
-                    />
+                    {/* <Image src="/video-placeholder-3.jpg" alt="Master Role-Based Access Control Patterns" fill className="object-cover rounded-lg" /> */}
                   </div>
                   <div>
                     <h3 className="font-bold mb-1">Master Role-Based Access Control Patterns</h3>

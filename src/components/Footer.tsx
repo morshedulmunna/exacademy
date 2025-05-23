@@ -12,7 +12,7 @@ export default function Footer({}: Props) {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-center md:justify-between">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <Image src="/diverse-avatars.png" alt="Morshedul Munna" width={32} height={32} className="rounded-full" />
+              {/* <Image src="/diverse-avatars.png" alt="Morshedul Munna" width={32} height={32} className="rounded-full" /> */}
               <span className="font-medium">Morshedul Munna</span>
             </div>
 

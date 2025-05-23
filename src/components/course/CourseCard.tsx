@@ -8,9 +8,7 @@ export default function CourseCard({}: Props) {
   return (
     <>
       <div className="bg-zinc-900 rounded-xl overflow-hidden">
-        <div className="h-48 relative">
-          <Image src="/docker-course.png" alt="Docker Mastery Course" fill className="object-cover" />
-        </div>
+        <div className="h-48 relative">{/* <Image src="/docker-course.png" alt="Docker Mastery Course" fill className="object-cover" /> */}</div>
         <div className="p-6 space-y-4 flex flex-col">
           <div>
             <h3 className="text-xl font-bold">Docker Mastery Course</h3>

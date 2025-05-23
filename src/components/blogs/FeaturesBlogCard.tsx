@@ -9,12 +9,7 @@ export default function FeaturesBlogCard({}: Props) {
     <>
       <div className="h-fit bg-zinc-900 rounded-xl overflow-hidden group hover:bg-zinc-800 transition-colors mb-4">
         <div className="relative h-48 lg:h-60">
-          <Image
-            src="/placeholder.svg?height=400&width=800&query=microservices architecture"
-            alt="Building Scalable Microservices"
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          {/* <Image src="/blog-placeholder.jpg" alt="Building Scalable Microservices" fill className="object-cover group-hover:scale-105 transition-transform duration-300" /> */}
           <div className="absolute top-4 left-4">
             <span className="bg-cyan-400 text-black px-3 py-1 rounded-full text-sm font-medium">Featured</span>
           </div>
@@ -34,7 +29,7 @@ export default function FeaturesBlogCard({}: Props) {
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Image src="/diverse-avatars.png" alt="Piyush Garg" width={32} height={32} className="rounded-full" />
+              {/* <Image src="/diverse-avatars.png" alt="Piyush Garg" width={32} height={32} className="rounded-full" /> */}
               <span className="text-sm text-gray-300">Piyush Garg</span>
             </div>
             <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300">
