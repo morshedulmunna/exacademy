@@ -1,6 +1,7 @@
 import React from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/work-experiance/card";
+import Link from "next/link";
 
 interface WorkExperienceCardProps {
   title: string;
@@ -22,6 +23,9 @@ export default function WorkExperienceCard({ title, period, company, companyLink
               {icon || <div className="bg-zinc-800 w-10 h-10 p-2 rounded-md" />}
               <div className="flex justify-start flex-col">
                 <p className="text-gray-400 group-hover:text-cyan-400 text-lg transition-all ease-linear duration-300">{title}</p>
+                <Link target="_blank" href={"https://google.com/"} className="text-cyan-400 hover:underline text-start text-xs">
+                  {company}
+                </Link>
                 <p className="text-gray-400 text-start text-xs">{period}</p>
               </div>
             </div>
@@ -35,19 +39,17 @@ export default function WorkExperienceCard({ title, period, company, companyLink
               ))}
             </div>
 
-            <div>
-              <div className="mt-4 ml-4 md:ml-12">
-                <h4 className="text-sm text-gray-400 group-hover:text-white font-semibold mb-2">Skills</h4>
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-zinc-800 text-gray-400 group-hover:text-white group-hover:bg-zinc-700 transition-all ease-linear font-medium duration-300 rounded-md text-xs"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+            <div className="mt-4 ml-4 md:ml-12">
+              <h4 className="text-sm text-gray-400 group-hover:text-white font-semibold mb-2">Skills</h4>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-zinc-800 text-gray-400 group-hover:text-white group-hover:bg-zinc-700 transition-all ease-linear font-medium duration-300 rounded-md text-xs"
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
             </div>
           </AccordionContent>

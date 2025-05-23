@@ -10,7 +10,8 @@ const workExperiences = [
     title: "Senior Software Engineer",
     period: "Sep 2024 - Present",
     company: "TechCorp",
-
+    companyLink: "#",
+    companyLogo: "/images/company-logos/techcorp.png",
     responsibilities: [
       "Built robust, high-performance microservices using Golang",
       "Architected scalable microservices-based systems",
@@ -27,6 +28,7 @@ const workExperiences = [
     period: "Sep 2024 - Present",
     company: "Teachyst",
     companyLink: "#",
+    companyLogo: "/images/company-logos/teachyst.png",
     responsibilities: [
       "Developed and launched a white-labeled NextGen LMS platform",
       "Created a platform for educators and creators",
@@ -41,13 +43,13 @@ export default function WorkExperiance({}: Props) {
   return (
     <>
       {/* Work Experience */}
-      <section className="py-20">
+      <section className="py-12">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold mb-4">Work Experience</h2>
           <p className="text-gray-400">I switch a lot of companies. It's mostly about the culture.</p>
           <div className="border-[1px] w-full rounded-full my-6 border-gray-900/30"></div>
           <div className="grid md:grid-cols-3 gap-10">
-            <div className="space-y-6 md:col-span-2">
+            <div className="md:col-span-2">
               {workExperiences.map((experience, index) => (
                 <WorkExperienceCard key={index} {...experience} />
               ))}
