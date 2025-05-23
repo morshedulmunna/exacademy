@@ -1,3 +1,4 @@
+import AnimatedGridBackground from "@/common/Effect/animated-grid-background";
 import MaxWidthWrapper from "@/common/MaxWidthWrapper";
 import Blogs from "@/components/blogs/Blogs";
 import Course from "@/components/course/Course";
