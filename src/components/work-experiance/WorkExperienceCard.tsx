@@ -2,28 +2,34 @@ import React from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/work-experiance/card";
 import Link from "next/link";
+import Image from "next/image";
 
 interface WorkExperienceCardProps {
   title: string;
   period: string;
   company: string;
   companyLink?: string;
+  companyLogo?: string;
   responsibilities: string[];
   skills: string[];
   icon?: React.ReactNode;
 }
 
-export default function WorkExperienceCard({ title, period, company, companyLink, responsibilities, skills, icon }: WorkExperienceCardProps) {
+export default function WorkExperienceCard({ title, period, company, companyLogo, companyLink, responsibilities, skills, icon }: WorkExperienceCardProps) {
   return (
     <Card className="border-none bg-transparent">
       <Accordion type="single" collapsible className="w-full group">
         <AccordionItem value={title.toLowerCase().replace(/\s+/g, "-")} className="border-none">
           <AccordionTrigger className="hover:no-underline outline-none">
             <div className="flex items-center gap-3">
-              {icon || <div className="bg-zinc-800 w-10 h-10 p-2 rounded-md" />}
+              {icon || (
+                <div className="bg-zinc-800 w-10 h-10  rounded-md">
+                  <img src={companyLogo} alt={company} width={40} height={40} />
+                </div>
+              )}
               <div className="flex justify-start flex-col">
                 <p className="text-gray-400 group-hover:text-cyan-400 text-lg transition-all ease-linear duration-300">{title}</p>
-                <Link target="_blank" href={"https://google.com/"} className="text-cyan-400 hover:underline text-start text-xs">
+                <Link target="_blank" href={companyLink || "#"} className="text-cyan-400 w-fit hover:underline text-start text-xs">
                   {company}
                 </Link>
                 <p className="text-gray-400 text-start text-xs">{period}</p>

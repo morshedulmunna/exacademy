@@ -1,6 +1,5 @@
 import Link from "next/link";
 import React from "react";
-import Image from "next/image";
 import { Youtube, Twitter, Linkedin, Github, Check } from "lucide-react";
 import { Button } from "./ui/button";
 
