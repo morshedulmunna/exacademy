@@ -14,8 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={` antialiased w-full min-h-screen bg-black text-white`}>
-        <main className="flex-1"> {children}</main>
+      <body className={`antialiased w-full min-h-screen bg-black text-white relative`}>
+        <main className="flex-1 relative z-10"> {children}</main>
       </body>
     </html>
   );

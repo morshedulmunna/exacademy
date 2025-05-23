@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Header from "@/components/Navbar/Header";
 import NewsLatter from "@/components/NewsLatter/NewsLatter";
-import WorkExperiance from "@/components/WorkExperiance";
+import WorkExperiance from "@/components/work-experiance/WorkExperiance";
 import YoutubeSection from "@/components/Youtube/YoutubeSection";
 
 export default function Home() {
