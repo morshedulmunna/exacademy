@@ -13,7 +13,7 @@ export default function Home() {
     <MaxWidthWrapper className="max-w-[1020px] h-screen">
       <div className="flex flex-col h-full">
         <Header />
-        <main className="flex-1">
+        <main className="flex-1 pt-24">
           <Hero />
           <WorkExperiance />
           <Course />
