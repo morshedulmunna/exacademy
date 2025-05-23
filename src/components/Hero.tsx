@@ -19,7 +19,7 @@ export default function Hero({}: Props) {
               Meet Piyush Garg, content creator, educator, and entrepreneur known for his expertise in the tech industry. He has successfully launched numerous technical courses on
               various platforms. Founder of Teachyst, white- labeled Learning Management System (LMS) to help educators monetize their content globally.
             </p>
-            <p className="text-gray-500 text-xs sm:text-sm">— ChatGPT</p>
+            <p className="text-gray-500 text-xs sm:text-sm">— Morshedul Munna</p>
 
             <div className="pt-2 sm:pt-4">
               <p className="flex items-center gap-2 text-sm sm:text-base">
@@ -52,7 +52,7 @@ export default function Hero({}: Props) {
               Join Discord
             </Button>
           </div>
-          <div className="relative border h-full order-first md:order-last mb-8 md:mb-0"></div>
+          <div className="relative border h-full order-first rounded-md md:order-last mb-8 md:mb-0"></div>
         </div>
 
         <div className="flex justify-center md:justify-end gap-4 mt-6">

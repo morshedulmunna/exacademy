@@ -1,5 +1,3 @@
-import { Check } from "lucide-react";
-import Link from "next/link";
 import React from "react";
 import WorkExperienceCard from "./WorkExperienceCard";
 import ExecuteSoft from "./ExecuteSoft/ExecuteSoft";
@@ -113,7 +111,7 @@ const workExperiences = [
     title: "Associate Software Engineer",
     period: "February 2022 - January 2023",
     company: "Axios Byte",
-    companyLink: "https://biztechsolutions.com/",
+    companyLink: "#",
     companyLogo:
       "https://media.licdn.com/dms/image/v2/D560BAQHPQwkiJZSA4A/company-logo_200_200/company-logo_200_200/0/1693415429733/axios_byte_logo?e=1753315200&v=beta&t=k3TgJN9CE9to16o8zVZ0q399xCfY27TpHyK7X8wc-Wc",
     responsibilities: [
