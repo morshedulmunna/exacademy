@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/themes/ThemeProvider";
 import AnimatedGridBackground from "@/common/Effect/animated-grid-background";
 import CursorGlow from "@/common/Effect/CursorGlow";
 import CursorLaser from "@/common/Effect/CursorLaser";
+import TechLogosBackground from "@/common/Effect/tech-logos-background";
 
 export const metadata: Metadata = {
   title: "Morshedul Islam Munna - Software Engineer",
@@ -20,6 +21,7 @@ export default function RootLayout({
       <body className={`antialiased w-full min-h-screen bg-black text-white relative`}>
         <AnimatedGridBackground gridSize={250} gridOpacity={0.3} waveFrequency={1000} waveIntensity={0.65} waveSpeed={0.5} />
         <CursorGlow />
+        <TechLogosBackground />
         <main className="flex-1 relative z-10"> {children}</main>
       </body>
     </html>
