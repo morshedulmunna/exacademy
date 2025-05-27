@@ -11,7 +11,7 @@ import YoutubeSection from "@/components/Youtube/YoutubeSection";
 
 export default function Home() {
   return (
-    <MaxWidthWrapper className="max-w-[1010px] h-screen">
+    <MaxWidthWrapper className="max-w-[1000px] h-screen">
       <div className="flex flex-col h-full">
         <Header />
         <main className="flex-1 pt-24">
