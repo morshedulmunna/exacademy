@@ -18,9 +18,7 @@ export default function Home() {
           <Hero />
           <WorkExperiance />
           <Course />
-
           <Blogs />
-
           <NewsLatter />
           <YoutubeSection />
         </main>

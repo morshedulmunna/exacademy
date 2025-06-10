@@ -28,9 +28,7 @@ export default function WorkExperienceCard({ title, period, company, companyLogo
                 </div>
               )}
               <div className="flex flex-col min-w-0">
-                <p className="text-gray-400 group-hover:text-cyan-400 whitespace-pre-wrap text-start text-sm sm:text-base truncate transition-all ease-linear duration-300">
-                  {title}
-                </p>
+                <p className="text-gray-400 group-hover:text-cyan-400 whitespace-pre-wrap text-start text-sm sm:text-base truncate transition-all ease-linear duration-300">{title}</p>
                 <Link target="_blank" href={companyLink || "#"} className="text-cyan-400 w-fit hover:underline text-start text-xs sm:text-sm truncate">
                   {company}
                 </Link>
@@ -51,10 +49,7 @@ export default function WorkExperienceCard({ title, period, company, companyLogo
               <h4 className="text-xs sm:text-sm text-gray-400 group-hover:text-white font-semibold mb-2">Skills</h4>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-800 text-gray-400 group-hover:text-white group-hover:bg-zinc-700 transition-all ease-linear font-medium duration-300 rounded-md text-[10px] sm:text-xs"
-                  >
+                  <span key={index} className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-800 text-gray-400 group-hover:text-white group-hover:bg-zinc-700 transition-all ease-linear font-medium duration-300 rounded-md text-[10px] sm:text-xs">
                     {skill}
                   </span>
                 ))}
