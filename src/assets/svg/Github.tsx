@@ -8,18 +8,18 @@ export default function Github({}: Props) {
       <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="28px" height="28px" viewBox="0,0,256,256">
         <g
           fill="#ffffff"
-          fill-rule="nonzero"
+          fillRule="nonzero"
           stroke="none"
-          stroke-width="1"
-          stroke-linecap="butt"
-          stroke-linejoin="miter"
-          stroke-miterlimit="10"
-          stroke-dasharray=""
-          stroke-dashoffset="0"
-          font-family="none"
-          font-weight="none"
-          font-size="none"
-          text-anchor="none"
+          strokeWidth="1"
+          strokeLinecap="butt"
+          strokeLinejoin="miter"
+          strokeMiterlimit="10"
+          strokeDasharray=""
+          strokeDashoffset="0"
+          fontFamily="none"
+          fontWeight="none"
+          fontSize="none"
+          textAnchor="none"
           style={{ mixBlendMode: "normal" }}
         >
           <g transform="scale(3.55556,3.55556)">
