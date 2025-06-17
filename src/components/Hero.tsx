@@ -3,6 +3,8 @@ import React from "react";
 import { Youtube, Twitter, Linkedin, Github, Check } from "lucide-react";
 import { Button } from "./ui/button";
 import AnimatedSvg from "@/common/Effect/AnimatedSvg";
+import { munna_image } from "@/assets";
+import Image from "next/image";
 
 type Props = {};
 
@@ -10,8 +12,8 @@ export default function Hero({}: Props) {
   return (
     <>
       {/* Hero Section */}
-      <section className="container mx-auto  py-12 sm:py-16 lg:py-20">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+      <section className="container mx-auto py-0  md:py-12 sm:py-16 lg:py-20">
+        <div className="grid md:grid-cols-2 gap-0 md:gap-10 items-center">
           <div className="space-y-4 sm:space-y-6">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
               Trust me, I'm a <span className="text-cyan-400">software engineer</span>.
@@ -40,7 +42,7 @@ export default function Hero({}: Props) {
             <div className="pt-2 sm:pt-4">
               <p className="flex items-center gap-2 text-sm sm:text-base">
                 Building <span className="font-semibold">Jobsyarch</span>
-                <span className="text-gray-400 text-xs">next-gen Job Portal $ review platform</span>
+                <span className="text-gray-400 text-xs">next-gen Job Portal & review platform</span>
                 <span className="text-white text-base">✨</span>
               </p>
             </div>
@@ -57,7 +59,8 @@ export default function Hero({}: Props) {
               Join Discord
             </Link>
           </div>
-          <div className="relative  h-full order-first rounded-md md:order-last mb-8 md:mb-0">
+          <div className="relative w-full aspect-square  mx-auto order-first rounded-md md:order-last ">
+            <Image src={munna_image} alt="Morshedul Munna" className="rounded-full absolute object-cover w-fit h-fit" priority />
             <AnimatedSvg />
           </div>
         </div>

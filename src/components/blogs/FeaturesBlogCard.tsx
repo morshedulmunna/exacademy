@@ -14,7 +14,7 @@ export default function FeaturesBlogCard({}: Props) {
             <span className="bg-cyan-400 text-black px-3 py-1 rounded-full text-sm font-medium">Featured</span>
           </div>
         </div>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           <div className="flex items-center gap-4 mb-4 text-sm text-gray-400">
             <span>Dec 15, 2024</span>
             <span>•</span>
