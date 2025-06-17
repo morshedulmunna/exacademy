@@ -17,31 +17,26 @@ export default function Footer({}: Props) {
             </div>
 
             <div className="flex items-center gap-6">
-              <Link href="#about" className="text-sm hover:text-gray-300 transition">
-                About
-              </Link>
-              <Link href="#guest-book" className="text-sm hover:text-gray-300 transition">
-                Guest Book
-              </Link>
-              <Link href="#discord" className="text-sm hover:text-gray-300 transition">
+              <Link href="https://discord.gg/gkjQHgcD" className="text-sm hover:text-gray-300 transition">
                 Discord
               </Link>
-              <Link href="#cohort" className="text-sm hover:text-gray-300 transition">
-                Cohort
+
+              <Link href="https://www.youtube.com/@morshedulmunna1" className="text-sm hover:text-gray-300 transition">
+                Youtube
               </Link>
             </div>
 
             <div className="flex gap-4 mt-4 md:mt-0">
-              <Link href="https://youtube.com" aria-label="YouTube">
+              <Link target="_blank" href="https://www.youtube.com/@morshedulmunna1" aria-label="YouTube">
                 <Youtube className="w-5 h-5 text-gray-500 hover:text-white transition" />
               </Link>
-              <Link href="https://twitter.com" aria-label="Twitter">
+              <Link target="_blank" href="https://x.com/morshedulmunna" aria-label="Twitter">
                 <Twitter className="w-5 h-5 text-gray-500 hover:text-white transition" />
               </Link>
-              <Link href="https://linkedin.com" aria-label="LinkedIn">
+              <Link target="_blank" href="https://www.linkedin.com/in/morshedulmunna" aria-label="LinkedIn">
                 <Linkedin className="w-5 h-5 text-gray-500 hover:text-white transition" />
               </Link>
-              <Link href="https://github.com" aria-label="GitHub">
+              <Link target="_blank" href="https://github.com/morshedulmunna" aria-label="GitHub">
                 <Github className="w-5 h-5 text-gray-500 hover:text-white transition" />
               </Link>
             </div>

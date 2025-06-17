@@ -23,12 +23,8 @@ export default function Hero({}: Props) {
               <span className="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 text-transparent bg-clip-text font-bold animate-gradient-x  relative inline-block after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-r after:from-cyan-400/20 after:via-purple-500/20 after:to-pink-500/20 after:blur-xl after:-z-10">
                 Morshedul Munna
               </span>
-              , a passionate software engineer and educator dedicated to sharing knowledge and building innovative solutions. With extensive experience in web development and technical education, I craft engaging content and courses that make tech learning fun and accessible.
-              Currently building{" "}
-              <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 text-transparent bg-clip-text font-bold italic text-sm underline relative inline-block after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-r after:from-blue-500/20 after:via-indigo-500/20 after:to-violet-500/20 after:blur-xl after:-z-10 hover:scale-105 transition-transform duration-300">
-                Jobsyarch
-              </span>
-              , a revolutionary Job Portal and company review platform that empowers job seekers and employers to connect worldwide.
+              , a passionate software engineer and educator dedicated to sharing knowledge and building innovative solutions. With extensive experience in developing scalable web applications and technical education, I craft engaging content and courses that make tech learning
+              fun and accessible.
             </p>
             <div className="flex flex-col gap-1">
               <p className="text-gray-500 text-xs sm:text-base hover:font-bold transition-all duration-300 font-medium">— Morshedul Munna</p>
@@ -41,7 +37,7 @@ export default function Hero({}: Props) {
 
             <div className="pt-2 sm:pt-4">
               <p className="flex items-center gap-2 text-sm sm:text-base">
-                Building <span className="font-semibold">Jobsyarch</span>
+                Building <span className="font-semibold">careaar</span>
                 <span className="text-gray-400 text-xs">next-gen Job Portal & review platform</span>
                 <span className="text-white text-base">✨</span>
               </p>

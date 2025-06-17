@@ -45,6 +45,10 @@ export default function Header({}: Props) {
               {label}
             </Link>
           ))}
+          {/* <Link href="/login" className="text-sm cursor-pointer relative px-4 py-1 rounded-md border border-gray-700 hover:text-blue-500 transition-all duration-300 flex items-center group">
+            <span className="relative z-10">Login</span>
+            <span className="absolute inset-0 rounded-md border-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></span>
+          </Link> */}
         </div>
       </nav>
     </header>
