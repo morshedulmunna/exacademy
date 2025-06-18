@@ -34,11 +34,11 @@ export default function FeaturesBlogCard({ title, description, excerpt, date, re
         {/* Featured Badge */}
         {featured && <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-cyan-500 to-blue-500 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">⭐ FEATURED</div>}
         {/* Image */}
-        <Link href={url} target="_blank" className="block relative h-48 lg:h-96">
+        <Link href={url} target="_blank" className="block relative h-48 lg:h-[350px]">
           {imageUrl && <Image src={imageUrl} alt={title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Link>
-        <div className="p-4 md:p-8">
+        <div className="p-4 ">
           {/* Meta Info */}
           <div className="flex items-center gap-4 mb-4 text-sm text-gray-400 flex-wrap">
             <span className="flex items-center gap-1">📅 {date}</span>
