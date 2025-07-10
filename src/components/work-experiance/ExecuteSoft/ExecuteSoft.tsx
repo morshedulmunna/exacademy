@@ -20,18 +20,7 @@ export default function ExecuteSoft({}: Props) {
         </div>
 
         <div className="space-y-2 mt-4">
-          {[
-            "White Labeled NextGen LMS",
-            "Platform for educators and creators",
-            "Built scalable microservices architecture",
-            "Implemented real-time collaboration features",
-            "Developed custom analytics dashboard",
-            "Integrated payment gateway systems",
-            "Created automated testing pipeline",
-            "Optimized database performance",
-            "Implemented CI/CD workflows",
-            "Built RESTful APIs",
-          ].map((item, index) => (
+          {[].map((item, index) => (
             <div key={index} className="flex items-start gap-2">
               <Check className="w-5 h-5 text-cyan-400 mt-0.5" />
               <span className="text-gray-300">{item}</span>
