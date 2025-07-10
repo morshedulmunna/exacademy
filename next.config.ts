@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
         port: "", // Allows all ports
         pathname: "**", // Allows all paths
       },
+      {
+        protocol: "https",
+        hostname: "cdn.hashnode.com",
+        port: "",
+        pathname: "**",
+      },
     ],
   },
 };
