@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
-  distDir: "build",
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -10,17 +8,25 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**", // Allows all hostnames
-        port: "", // Allows all ports
-        pathname: "**", // Allows all paths
-      },
-      {
-        protocol: "https",
         hostname: "cdn.hashnode.com",
         port: "",
         pathname: "**",
       },
+      {
+        protocol: "https",
+        hostname: "media.licdn.com",
+        port: "",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+        port: "",
+        pathname: "**",
+      },
     ],
+    formats: ["image/webp", "image/avif"],
+    minimumCacheTTL: 60,
   },
 };
 
