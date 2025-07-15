@@ -17,7 +17,7 @@ export default function Home() {
         <main className="flex-1 pt-12">
           <Hero />
           <WorkExperiance />
-          {/* <Course /> */}
+          <Course />
           <Blogs />
           <NewsLatter />
           <YoutubeSection />
