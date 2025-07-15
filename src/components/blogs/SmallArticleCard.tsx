@@ -2,8 +2,6 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { StaticImageData } from "next/image";
-import ImageWithFallback from "../ui/image-with-fallback";
-import PlaceholderImage from "../ui/placeholder-image";
 
 interface SmallArticleCardProps {
   title: string;
@@ -36,13 +34,9 @@ export default function SmallArticleCard({ title, description, excerpt, date, re
         {featured && <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black text-xs font-bold px-3 py-1 text-center">FEATURED</div>}
 
         {/* Image */}
-        {imageUrl ? (
+        {imageUrl && (
           <div className="relative h-32 overflow-hidden">
-            <ImageWithFallback src={imageUrl} alt={title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 768px) 100vw, 33vw" fallbackComponent={<PlaceholderImage title={title} size="sm" />} />
-          </div>
-        ) : (
-          <div className="h-32">
-            <PlaceholderImage title={title} size="sm" />
+            <Image src={imageUrl} alt={title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
         )}
 
@@ -83,18 +77,7 @@ export default function SmallArticleCard({ title, description, excerpt, date, re
           {/* Author and Stats */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {authorImage ? (
-                <ImageWithFallback
-                  src={authorImage}
-                  alt={author || "Author"}
-                  width={20}
-                  height={20}
-                  className="rounded-full"
-                  fallbackComponent={author ? <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-medium">{author.charAt(0).toUpperCase()}</div> : null}
-                />
-              ) : author ? (
-                <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-medium">{author.charAt(0).toUpperCase()}</div>
-              ) : null}
+              {authorImage && <Image src={authorImage} alt={author || "Author"} width={20} height={20} className="rounded-full" />}
               {author && <span className="text-xs text-gray-300">{author}</span>}
             </div>
 

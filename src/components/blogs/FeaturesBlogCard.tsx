@@ -3,8 +3,6 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { StaticImageData } from "next/image";
-import ImageWithFallback from "../ui/image-with-fallback";
-import PlaceholderImage from "../ui/placeholder-image";
 
 interface FeaturesBlogCardProps {
   title: string;
@@ -37,19 +35,7 @@ export default function FeaturesBlogCard({ title, description, excerpt, date, re
         {featured && <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-cyan-500 to-blue-500 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">⭐ FEATURED</div>}
         {/* Image */}
         <Link href={url} target="_blank" className="block relative h-48 lg:h-[350px]">
-          {imageUrl ? (
-            <ImageWithFallback
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              priority={featured}
-              fallbackComponent={<PlaceholderImage title={title} size="lg" />}
-            />
-          ) : (
-            <PlaceholderImage title={title} size="lg" />
-          )}
+          {imageUrl && <Image src={imageUrl} alt={title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Link>
         <div className="p-4 ">
@@ -83,18 +69,7 @@ export default function FeaturesBlogCard({ title, description, excerpt, date, re
           {/* Author and Stats */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              {authorImage ? (
-                <ImageWithFallback
-                  src={authorImage}
-                  alt={author}
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-zinc-700"
-                  fallbackComponent={<div className="w-10 h-10 rounded-full border-2 border-zinc-700 bg-zinc-800 flex items-center justify-center text-sm font-medium">{author.charAt(0).toUpperCase()}</div>}
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full border-2 border-zinc-700 bg-zinc-800 flex items-center justify-center text-sm font-medium">{author.charAt(0).toUpperCase()}</div>
-              )}
+              {authorImage && <Image src={authorImage} alt={author} width={40} height={40} className="rounded-full border-2 border-zinc-700" />}
               <div>
                 <span className="text-sm font-medium text-gray-300 block">{author}</span>
                 <span className="text-xs text-gray-500">Author</span>
