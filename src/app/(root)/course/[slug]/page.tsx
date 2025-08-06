@@ -3,5 +3,5 @@ import React from "react";
 type Props = {};
 
 export default function CourseDetailsPage({}: Props) {
-  return <div>page</div>;
+  return <div>CourseDetailsPage</div>;
 }
