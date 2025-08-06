@@ -1,197 +1,136 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import MaxWidthWrapper from "@/common/MaxWidthWrapper";
-import { formatDate } from "@/lib/utils";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth-utils";
+import { prisma } from "@/lib/db";
 import Link from "next/link";
 
-interface Post {
-  id: string;
-  title: string;
-  slug: string;
-  published: boolean;
-  featured: boolean;
-  createdAt: string;
-  publishedAt?: string | null;
-  author: {
-    name: string;
-  };
-  _count: {
-    views: number;
-    likes: number;
-  };
-}
+/**
+ * Admin Posts Management Page
+ * Only accessible to users with ADMIN role
+ */
+export default async function AdminPostsPage() {
+  const user = await getCurrentUser();
 
-export default function AdminPostsPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch("/api/posts?limit=50");
-      const data = await response.json();
-      setPosts(data.posts);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const togglePublish = async (postId: string, published: boolean) => {
-    try {
-      const post = posts.find((p) => p.id === postId);
-      if (!post) return;
-
-      const response = await fetch(`/api/posts/${post.slug}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          published: !published,
-          publishedAt: !published ? new Date() : null,
-        }),
-      });
-
-      if (response.ok) {
-        setPosts(posts.map((p) => (p.id === postId ? { ...p, published: !published, publishedAt: !published ? new Date().toISOString() : undefined } : p)));
-      }
-    } catch (error) {
-      console.error("Error updating post:", error);
-    }
-  };
-
-  const toggleFeatured = async (postId: string, featured: boolean) => {
-    try {
-      const post = posts.find((p) => p.id === postId);
-      if (!post) return;
-
-      const response = await fetch(`/api/posts/${post.slug}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          featured: !featured,
-        }),
-      });
-
-      if (response.ok) {
-        setPosts(posts.map((p) => (p.id === postId ? { ...p, featured: !featured } : p)));
-      }
-    } catch (error) {
-      console.error("Error updating post:", error);
-    }
-  };
-
-  const deletePost = async (postId: string) => {
-    if (!confirm("Are you sure you want to delete this post?")) return;
-
-    try {
-      const post = posts.find((p) => p.id === postId);
-      if (!post) return;
-
-      const response = await fetch(`/api/posts/${post.slug}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setPosts(posts.filter((p) => p.id !== postId));
-      }
-    } catch (error) {
-      console.error("Error deleting post:", error);
-    }
-  };
-
-  if (loading) {
-    return (
-      <MaxWidthWrapper>
-        <div className="py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </MaxWidthWrapper>
-    );
+  // Redirect if not authenticated or not admin
+  if (!user || user.role !== "ADMIN") {
+    redirect("/dashboard");
   }
 
+  // Fetch all posts with author information
+  const posts = await prisma.post.findMany({
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+        },
+      },
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+          likes: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return (
-    <MaxWidthWrapper>
-      <div className="py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Manage Posts</h1>
-          <Link href="/admin-handler/posts/new" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Manage Posts</h1>
+            <p className="mt-2 text-gray-600">Create, edit, and manage your blog posts</p>
+          </div>
+          <Link href="/admin-handler/posts/new" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
             Create New Post
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {posts?.map((post) => (
-                <tr key={post.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{post.title}</div>
-                        <div className="text-sm text-gray-500">{post.slug}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{post.author.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${post.published ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>{post.published ? "Published" : "Draft"}</span>
-                      {post.featured && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Featured</span>}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(post.createdAt)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{post._count?.views || 0}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      <Link href={`/blog/${post.slug}`} className="text-blue-600 hover:text-blue-900">
-                        View
-                      </Link>
-                      <Link href={`/admin-handler/posts/${post.slug}/edit`} className="text-indigo-600 hover:text-indigo-900">
-                        Edit
-                      </Link>
-                      <button onClick={() => togglePublish(post.id, post.published)} className={`${post.published ? "text-yellow-600 hover:text-yellow-900" : "text-green-600 hover:text-green-900"}`}>
-                        {post.published ? "Unpublish" : "Publish"}
-                      </button>
-                      <button onClick={() => toggleFeatured(post.id, post.featured)} className={`${post.featured ? "text-gray-600 hover:text-gray-900" : "text-purple-600 hover:text-purple-900"}`}>
-                        {post.featured ? "Unfeature" : "Feature"}
-                      </button>
-                      <button onClick={() => deletePost(post.id)} className="text-red-600 hover:text-red-900">
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+        {/* Posts Table */}
+        <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">All Posts</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {posts.map((post) => (
+                  <tr key={post.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          {post.coverImage ? (
+                            <img className="h-10 w-10 rounded-lg object-cover" src={post.coverImage} alt={post.title} />
+                          ) : (
+                            <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{post.title}</div>
+                          <div className="text-sm text-gray-500">{post.slug}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{post.author.name}</div>
+                      <div className="text-sm text-gray-500">@{post.author.username}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${post.published ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>{post.published ? "Published" : "Draft"}</span>
+                      {post.featured && <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Featured</span>}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{post.viewCount}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <Link href={`/admin-handler/posts/${post.id}/edit`} className="text-blue-600 hover:text-blue-900">
+                          Edit
+                        </Link>
+                        <Link href={`/blog/${post.slug}`} className="text-green-600 hover:text-green-900">
+                          View
+                        </Link>
+                        <button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => {
+                            // TODO: Implement delete functionality
+                            console.log("Delete post:", post.id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </MaxWidthWrapper>
+    </div>
   );
 }
