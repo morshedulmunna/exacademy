@@ -11,28 +11,34 @@ interface Props {
   }>;
 }
 
-async function getPosts(params: {
-  page?: string;
-  tag?: string;
-  search?: string;
-}) {
+async function getPosts(params: { page?: string; tag?: string; search?: string }) {
   try {
     const searchParams = new URLSearchParams();
-    if (params.page) searchParams.set('page', params.page);
-    if (params.tag) searchParams.set('tag', params.tag);
-    if (params.search) searchParams.set('search', params.search);
-    
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts?${searchParams}`, {
-      cache: 'no-store'
+    if (params.page) searchParams.set("page", params.page);
+    if (params.tag) searchParams.set("tag", params.tag);
+    if (params.search) searchParams.set("search", params.search);
+
+    // Use relative URL to avoid environment variable issues
+    const apiUrl = `/api/posts?${searchParams}`;
+
+    const response = await fetch(apiUrl, {
+      cache: "no-store",
     });
-    
+
     if (!response.ok) {
+      console.error("API response not ok:", response.status, response.statusText);
       return { posts: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
     }
-    
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      console.error("Response is not JSON:", contentType);
+      return { posts: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
+    }
+
     return response.json();
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    console.error("Error fetching posts:", error);
     return { posts: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
   }
 }
@@ -45,7 +51,7 @@ export default async function BlogListPage({ searchParams }: Props) {
     <MaxWidthWrapper className="max-w-screen-lg">
       <div className="py-8">
         <h1 className="text-4xl font-bold mb-8">Blog</h1>
-        
+
         {posts.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-2xl font-semibold text-gray-600 mb-4">No posts found</h2>
@@ -58,24 +64,14 @@ export default async function BlogListPage({ searchParams }: Props) {
                 <div className="flex items-start gap-6">
                   {post.coverImage && (
                     <div className="flex-shrink-0">
-                      <img
-                        src={post.coverImage}
-                        alt={post.title}
-                        className="w-48 h-32 object-cover rounded-lg"
-                      />
+                      <img src={post.coverImage} alt={post.title} className="w-48 h-32 object-cover rounded-lg" />
                     </div>
                   )}
-                  
+
                   <div className="flex-1">
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                       <div className="flex items-center gap-2">
-                        {post.author.avatar && (
-                          <img
-                            src={post.author.avatar}
-                            alt={post.author.name}
-                            className="w-6 h-6 rounded-full"
-                          />
-                        )}
+                        {post.author.avatar && <img src={post.author.avatar} alt={post.author.name} className="w-6 h-6 rounded-full" />}
                         <span>{post.author.name}</span>
                       </div>
                       <span>•</span>
@@ -89,25 +85,17 @@ export default async function BlogListPage({ searchParams }: Props) {
                         </>
                       )}
                     </div>
-                    
+
                     <Link href={`/blog/${post.slug}`}>
-                      <h2 className="text-2xl font-bold mb-2 hover:text-blue-600 transition-colors">
-                        {post.title}
-                      </h2>
+                      <h2 className="text-2xl font-bold mb-2 hover:text-blue-600 transition-colors">{post.title}</h2>
                     </Link>
-                    
-                    {post.excerpt && (
-                      <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                    )}
-                    
+
+                    {post.excerpt && <p className="text-gray-600 mb-4">{post.excerpt}</p>}
+
                     {post.tags && post.tags.length > 0 && (
                       <div className="flex gap-2">
                         {post.tags.map((tag: any) => (
-                          <span
-                            key={tag.id}
-                            className="px-2 py-1 text-xs rounded-full"
-                            style={{ backgroundColor: tag.color + '20', color: tag.color }}
-                          >
+                          <span key={tag.id} className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: tag.color + "20", color: tag.color }}>
                             {tag.name}
                           </span>
                         ))}
@@ -119,19 +107,15 @@ export default async function BlogListPage({ searchParams }: Props) {
             ))}
           </div>
         )}
-        
+
         {pagination.pages > 1 && (
           <div className="flex justify-center mt-8">
             <div className="flex gap-2">
               {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
                 <Link
                   key={page}
-                  href={`/blog?page=${page}${resolvedSearchParams.tag ? `&tag=${resolvedSearchParams.tag}` : ''}${resolvedSearchParams.search ? `&search=${resolvedSearchParams.search}` : ''}`}
-                  className={`px-4 py-2 rounded-lg ${
-                    page === pagination.page
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  href={`/blog?page=${page}${resolvedSearchParams.tag ? `&tag=${resolvedSearchParams.tag}` : ""}${resolvedSearchParams.search ? `&search=${resolvedSearchParams.search}` : ""}`}
+                  className={`px-4 py-2 rounded-lg ${page === pagination.page ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
                 >
                   {page}
                 </Link>

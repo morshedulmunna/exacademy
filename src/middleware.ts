@@ -6,7 +6,20 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        // Allow public access to GET requests on /api/posts
+        if (req.nextUrl.pathname === "/api/posts" && req.method === "GET") {
+          return true;
+        }
+
+        // Allow public access to GET requests on /api/users/profile
+        if (req.nextUrl.pathname === "/api/users/profile" && req.method === "GET") {
+          return true;
+        }
+
+        // Require authentication for all other routes
+        return !!token;
+      },
     },
   }
 );
