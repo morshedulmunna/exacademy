@@ -154,10 +154,10 @@ export default function Blogs() {
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-16">
             <div>
-              <h2 className="text-3xl font-bold mb-4">Latest Blog Posts</h2>
-              <p className="text-gray-400">Sharing insights on software engineering, tech trends, and development practices.</p>
+              <h2 className="text-3xl font-bold mb-4 text-foreground">Latest Blog Posts</h2>
+              <p className="text-muted-foreground">Sharing insights on software engineering, tech trends, and development practices.</p>
             </div>
-            <Link href="https://morshedulmunna.hashnode.dev" target="_blank" className="bg-white hover:text-cyan-500 font-medium text-black px-4 py-2 rounded-md text-sm md:flex">
+            <Link href="https://morshedulmunna.hashnode.dev" target="_blank" className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-4 py-2 rounded-md text-sm md:flex transition-colors">
               View All Posts
             </Link>
           </div>

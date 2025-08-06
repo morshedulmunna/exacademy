@@ -30,51 +30,51 @@ interface FeaturesBlogCardProps {
 export default function FeaturesBlogCard({ title, description, slug, excerpt, date, readTime, category, author, authorImage, imageUrl, url, likes, comments, views, tags, featured, status }: FeaturesBlogCardProps) {
   return (
     <>
-      <div className="h-fit bg-zinc-900 rounded-xl overflow-hidden group hover:bg-zinc-800 transition-colors mb-4 relative">
+      <div className="h-fit bg-card rounded-xl overflow-hidden group hover:bg-accent transition-colors mb-4 relative border border-border">
         {/* Featured Badge */}
-        {featured && <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-cyan-500 to-blue-500 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">⭐ FEATURED</div>}
+        {featured && <div className="absolute top-4 left-4 z-10 gradient-bg text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">⭐ FEATURED</div>}
         {/* Image */}
         <Link href={`/blog/${slug}`} className="block relative h-48 lg:h-[350px]">
-          {imageUrl && <Image src={imageUrl} alt={title} fill className="object-cover  " />}
+          {imageUrl && <Image src={imageUrl} alt={title} fill className="object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Link>
-        <div className="p-4 ">
+        <div className="p-4">
           {/* Meta Info */}
-          <div className="flex items-center gap-4 mb-4 text-sm text-gray-400 flex-wrap">
+          <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground flex-wrap">
             <span className="flex items-center gap-1">📅 {date}</span>
             <span>•</span>
             <span className="flex items-center gap-1">⏱️ {readTime}</span>
             <span>•</span>
-            <span className="bg-zinc-800 px-3 py-1 rounded-full text-xs font-medium">{category}</span>
+            <span className="bg-secondary px-3 py-1 rounded-full text-xs font-medium text-secondary-foreground">{category}</span>
           </div>
           {/* Title */}
-          <h3 className="text-2xl font-bold mb-4 group-hover:text-cyan-400 transition-colors line-clamp-2">
+          <h3 className="text-2xl font-bold mb-4 group-hover:text-cyan-400 transition-colors line-clamp-2 text-foreground">
             <Link href={`/blog/${slug}`}>{title}</Link>
           </h3>
           {/* Description/Excerpt */}
-          <p className="text-gray-400 mb-4 line-clamp-3">{excerpt || description}</p>
+          <p className="text-muted-foreground mb-4 line-clamp-3">{excerpt || description}</p>
           {/* Tags */}
           {tags && tags.length > 0 && (
             <div className="flex items-center gap-2 mb-6 flex-wrap">
               {tags.slice(0, 4).map((tag, index) => (
-                <span key={index} className="bg-zinc-800 px-3 py-1 rounded-full text-xs text-gray-300 hover:bg-zinc-700 transition-colors">
+                <span key={index} className="bg-secondary px-3 py-1 rounded-full text-xs text-secondary-foreground hover:bg-secondary/80 transition-colors">
                   #{tag}
                 </span>
               ))}
-              {tags.length > 4 && <span className="text-xs text-gray-500">+{tags.length - 4} more</span>}
+              {tags.length > 4 && <span className="text-xs text-muted-foreground">+{tags.length - 4} more</span>}
             </div>
           )}
           {/* Author and Stats */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              {authorImage && <Image src={authorImage} alt={author} width={40} height={40} className="rounded-full border-2 border-zinc-700" />}
+              {authorImage && <Image src={authorImage} alt={author} width={40} height={40} className="rounded-full border-2 border-border" />}
               <div>
-                <span className="text-sm font-medium text-gray-300 block">{author}</span>
-                <span className="text-xs text-gray-500">Author</span>
+                <span className="text-sm font-medium text-foreground block">{author}</span>
+                <span className="text-xs text-muted-foreground">Author</span>
               </div>
             </div>
             {/* Engagement Stats */}
-            <div className="flex items-center gap-4 text-sm text-gray-400">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               {views && (
                 <span className="flex items-center gap-1">
                   <span>👁️</span>
@@ -97,7 +97,7 @@ export default function FeaturesBlogCard({ title, description, slug, excerpt, da
           </div>
           {/* Read More Button */}
           <div className="mt-6 flex justify-end">
-            <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-400 hover:text-black transition-colors duration-300 font-medium" asChild>
+            <Button variant="ghost" size="sm" className="font-medium text-foreground hover:underline hover:text-blue-600 dark:hover:text-blue-400" asChild>
               <Link href={url} target="_blank">
                 Read Full Article →
               </Link>
