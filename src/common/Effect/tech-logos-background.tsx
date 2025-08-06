@@ -3,27 +3,28 @@
 import { useEffect, useState } from "react";
 import { Code2, Database, Cloud, Cpu, Globe, Smartphone, Server, GitBranch, Layers, Zap, Box, Terminal } from "lucide-react";
 
+// Tech logos with much darker (lower opacity) colors for a more subdued background effect.
 const techLogos = [
-  { name: "React", component: Code2, color: "text-blue-400/20", size: "w-8 h-8", delay: "0s" },
-  { name: "Next.js", component: Layers, color: "text-white/20", size: "w-7 h-7", delay: "0.5s" },
-  { name: "TypeScript", component: Code2, color: "text-blue-500/20", size: "w-8 h-8", delay: "1s" },
-  { name: "JavaScript", component: Zap, color: "text-yellow-400/20", size: "w-7 h-7", delay: "1.5s" },
-  { name: "Angular", component: Code2, color: "text-red-500/20", size: "w-8 h-8", delay: "3.5s" },
-  { name: "Docker", component: Box, color: "text-blue-400/20", size: "w-8 h-8", delay: "4s" },
-  { name: "Git", component: GitBranch, color: "text-orange-500/20", size: "w-7 h-7", delay: "4.5s" },
-  { name: "AWS", component: Cloud, color: "text-orange-400/20", size: "w-8 h-8", delay: "5s" },
-  { name: "PostgreSQL", component: Database, color: "text-blue-600/20", size: "w-8 h-8", delay: "6s" },
-  { name: "Redis", component: Database, color: "text-red-500/20", size: "w-7 h-7", delay: "6.5s" },
-  { name: "GraphQL", component: Globe, color: "text-pink-400/20", size: "w-8 h-8", delay: "7s" },
-  { name: "Kubernetes", component: Cpu, color: "text-blue-500/20", size: "w-8 h-8", delay: "7.5s" },
-  { name: "Rust", component: Code2, color: "text-orange-600/20", size: "w-8 h-8", delay: "8s" },
-  { name: "Go", component: Code2, color: "text-cyan-400/20", size: "w-7 h-7", delay: "8.5s" },
-  { name: "Java", component: Code2, color: "text-red-600/20", size: "w-8 h-8", delay: "9s" },
-  { name: "C++", component: Terminal, color: "text-purple-400/20", size: "w-7 h-7", delay: "9.5s" },
-  { name: "Flutter", component: Smartphone, color: "text-blue-400/20", size: "w-7 h-7", delay: "10s" },
-  { name: "Swift", component: Smartphone, color: "text-orange-500/20", size: "w-7 h-7", delay: "10.5s" },
-  { name: "Kotlin", component: Smartphone, color: "text-purple-500/20", size: "w-7 h-7", delay: "11s" },
-  { name: "Firebase", component: Zap, color: "text-yellow-500/20", size: "w-7 h-7", delay: "11.5s" },
+  { name: "React", component: Code2, color: "text-blue-400/10", size: "w-8 h-8", delay: "0s" },
+  { name: "Next.js", component: Layers, color: "text-white/10", size: "w-7 h-7", delay: "0.5s" },
+  { name: "TypeScript", component: Code2, color: "text-blue-500/10", size: "w-8 h-8", delay: "1s" },
+  { name: "JavaScript", component: Zap, color: "text-yellow-400/10", size: "w-7 h-7", delay: "1.5s" },
+  { name: "Angular", component: Code2, color: "text-red-500/10", size: "w-8 h-8", delay: "3.5s" },
+  { name: "Docker", component: Box, color: "text-blue-400/10", size: "w-8 h-8", delay: "4s" },
+  { name: "Git", component: GitBranch, color: "text-orange-500/10", size: "w-7 h-7", delay: "4.5s" },
+  { name: "AWS", component: Cloud, color: "text-orange-400/10", size: "w-8 h-8", delay: "5s" },
+  { name: "PostgreSQL", component: Database, color: "text-blue-600/10", size: "w-8 h-8", delay: "6s" },
+  { name: "Redis", component: Database, color: "text-red-500/10", size: "w-7 h-7", delay: "6.5s" },
+  { name: "GraphQL", component: Globe, color: "text-pink-400/10", size: "w-8 h-8", delay: "7s" },
+  { name: "Kubernetes", component: Cpu, color: "text-blue-500/10", size: "w-8 h-8", delay: "7.5s" },
+  { name: "Rust", component: Code2, color: "text-orange-600/10", size: "w-8 h-8", delay: "8s" },
+  { name: "Go", component: Code2, color: "text-cyan-400/10", size: "w-7 h-7", delay: "8.5s" },
+  { name: "Java", component: Code2, color: "text-red-600/10", size: "w-8 h-8", delay: "9s" },
+  { name: "C++", component: Terminal, color: "text-purple-400/10", size: "w-7 h-7", delay: "9.5s" },
+  { name: "Flutter", component: Smartphone, color: "text-blue-400/10", size: "w-7 h-7", delay: "10s" },
+  { name: "Swift", component: Smartphone, color: "text-orange-500/10", size: "w-7 h-7", delay: "10.5s" },
+  { name: "Kotlin", component: Smartphone, color: "text-purple-500/10", size: "w-7 h-7", delay: "11s" },
+  { name: "Firebase", component: Zap, color: "text-yellow-500/10", size: "w-7 h-7", delay: "11.5s" },
 ];
 
 export default function TechLogosBackground() {

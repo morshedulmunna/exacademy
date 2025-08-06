@@ -22,14 +22,7 @@ interface AnimatedGridBackgroundProps {
   className?: string;
 }
 
-export default function AnimatedGridBackground({
-  gridSize = 80,
-  gridOpacity = 0.15,
-  waveFrequency = 3000,
-  waveIntensity = 0.25,
-  waveSpeed = 1.5,
-  className = "",
-}: AnimatedGridBackgroundProps) {
+export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.15, waveFrequency = 3000, waveIntensity = 0.25, waveSpeed = 1.5, className = "" }: AnimatedGridBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

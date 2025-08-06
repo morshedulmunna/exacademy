@@ -1,10 +1,22 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -25,7 +37,12 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password || "");
+          // Only allow password authentication for users with passwords
+          if (!user.password) {
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
           if (!isPasswordValid) {
             return null;
@@ -49,6 +66,35 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google" || account?.provider === "github") {
+        // Generate username from email if not provided
+        if (!user.username) {
+          const emailUsername = user.email?.split("@")[0] || "";
+          let username = emailUsername;
+          let counter = 1;
+
+          // Check if username exists and generate unique one
+          while (true) {
+            const existingUser = await prisma.user.findUnique({
+              where: { username },
+            });
+            if (!existingUser) break;
+            username = `${emailUsername}${counter}`;
+            counter++;
+          }
+
+          // Update user with generated username
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { username },
+          });
+
+          user.username = username;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

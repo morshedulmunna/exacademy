@@ -49,12 +49,9 @@ export default function NotFound() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-12 relative z-20">
-            <Link
-              href="/"
-              className="group relative px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1 hover:scale-105 cursor-pointer"
-            >
+            <Link href="/" className="group relative px-6 py-3 gradient-bg text-white rounded-lg font-semibold  transition-all duration-300 shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1 hover:scale-105 cursor-pointer">
               <span className="relative z-10">Go Home</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 gradient-bg rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
             </Link>
 
             <Link
