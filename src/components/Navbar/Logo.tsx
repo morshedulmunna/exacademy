@@ -5,36 +5,44 @@ import React from "react";
 import { useTheme } from "@/themes/ThemeProvider";
 
 /**
- * Modern minimalist logo with initials and clean typography
+ * Colorful fluid organic "M" logo with vibrant gradients
  */
 export default function Logo() {
   const { theme } = useTheme();
 
   return (
-    <Link href="/" className="flex items-center space-x-3 group">
-      {/* Modern Icon with MM */}
-      <div className="relative w-10 h-10 lg:w-12 lg:h-12 group-hover:scale-105 transition-transform duration-200">
+    <Link href="/" className="flex items-center group">
+      {/* Colorful Fluid Organic M Icon */}
+      <div className="relative w-10 h-10 lg:w-20 lg:h-20 group-hover:scale-110 transition-transform duration-300">
         <svg viewBox="0 0 40 40" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Background circle */}
-          <circle cx="20" cy="20" r="18" className={`${theme === "dark" ? "fill-gray-800" : "fill-gray-50"} group-hover:fill-blue-50 dark:group-hover:fill-blue-900/20 transition-colors duration-200`} />
+          {/* Main fluid M shape with blue gradient */}
+          <path d="M8 28 Q12 20 16 24 Q20 28 24 20 Q28 12 32 24 Q36 28 40 20" stroke="url(#blueGradient)" strokeWidth="3" strokeLinecap="round" fill="none" className="group-hover:opacity-80 transition-opacity duration-300" />
 
-          {/* MM letters */}
-          <path d="M12 26L15 14L18 20L21 14L24 20L27 14L30 26" stroke="url(#mmGradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" className="group-hover:stroke-blue-600 transition-colors duration-200" />
+          {/* Secondary fluid stroke with purple gradient */}
+          <path d="M10 26 Q14 18 18 22 Q22 26 26 18 Q30 10 34 22 Q38 26 40 18" stroke="url(#purpleGradient)" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.8" className="group-hover:opacity-60 transition-opacity duration-300" />
 
-          {/* Gradient definition */}
+          {/* Accent stroke with pink gradient */}
+          <path d="M12 24 Q16 16 20 20 Q24 24 28 16 Q32 8 36 20 Q40 24 40 16" stroke="url(#pinkGradient)" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" className="group-hover:opacity-40 transition-opacity duration-300" />
+
+          {/* Gradient definitions */}
           <defs>
-            <linearGradient id="mmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#1E40AF" />
-              <stop offset="100%" stopColor="#3B82F6" />
+            <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#3B82F6" />
+              <stop offset="50%" stopColor="#1D4ED8" />
+              <stop offset="100%" stopColor="#1E40AF" />
+            </linearGradient>
+            <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#8B5CF6" />
+              <stop offset="50%" stopColor="#7C3AED" />
+              <stop offset="100%" stopColor="#6D28D9" />
+            </linearGradient>
+            <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#EC4899" />
+              <stop offset="50%" stopColor="#DB2777" />
+              <stop offset="100%" stopColor="#BE185D" />
             </linearGradient>
           </defs>
         </svg>
-      </div>
-
-      {/* Text Elements */}
-      <div className="flex flex-col">
-        <span className={`font-bold text-lg lg:text-xl group-hover:text-blue-700 transition-colors duration-200 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>MM</span>
-        <span className={`text-xs lg:text-sm group-hover:text-blue-600 transition-colors duration-200 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>Developer</span>
       </div>
     </Link>
   );
