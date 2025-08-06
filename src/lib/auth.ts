@@ -6,8 +6,45 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
+// Custom adapter to handle username generation
+const customPrismaAdapter = (prisma: any) => {
+  const adapter = PrismaAdapter(prisma);
+
+  return {
+    ...adapter,
+    async createUser(data: any) {
+      // Generate username from email
+      const emailUsername = data.email?.split("@")[0] || "";
+      let username = emailUsername;
+      let counter = 1;
+
+      // Check if username exists and generate unique one
+      while (true) {
+        const existingUser = await prisma.user.findUnique({
+          where: { username },
+        });
+        if (!existingUser) break;
+        username = `${emailUsername}${counter}`;
+        counter++;
+      }
+
+      // Map image to avatar and remove emailVerified if not needed
+      const { image, emailVerified, ...userData } = data;
+
+      // Create user with generated username and mapped avatar
+      return prisma.user.create({
+        data: {
+          ...userData,
+          username,
+          avatar: image || null,
+        },
+      });
+    },
+  };
+};
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: customPrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -67,32 +104,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google" || account?.provider === "github") {
-        // Generate username from email if not provided
-        if (!user.username) {
-          const emailUsername = user.email?.split("@")[0] || "";
-          let username = emailUsername;
-          let counter = 1;
-
-          // Check if username exists and generate unique one
-          while (true) {
-            const existingUser = await prisma.user.findUnique({
-              where: { username },
-            });
-            if (!existingUser) break;
-            username = `${emailUsername}${counter}`;
-            counter++;
-          }
-
-          // Update user with generated username
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { username },
-          });
-
-          user.username = username;
-        }
-      }
+      // Username is now handled by the custom adapter
       return true;
     },
     async jwt({ token, user }) {
