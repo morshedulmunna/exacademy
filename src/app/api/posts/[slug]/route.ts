@@ -6,9 +6,9 @@ import { UpdatePostData } from "@/lib/types";
  * GET /api/posts/[slug]
  * Get a single post by slug
  */
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const post = await prisma.post.findUnique({
       where: { slug },
@@ -64,9 +64,9 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
  * PUT /api/posts/[slug]
  * Update a post
  */
-export async function PUT(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const body: UpdatePostData = await request.json();
 
     const post = await prisma.post.findUnique({
@@ -136,9 +136,9 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
  * DELETE /api/posts/[slug]
  * Delete a post
  */
-export async function DELETE(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const post = await prisma.post.findUnique({
       where: { slug },

@@ -6,9 +6,9 @@ import { formatDate, formatRelativeTime } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 async function getPost(slug: string) {
@@ -29,7 +29,8 @@ async function getPost(slug: string) {
 }
 
 export default async function BlogDetailsPage({ params }: Props) {
-  const post = await getPost(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
 
   if (!post) {
     notFound();

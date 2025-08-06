@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug, calculateReadTime, extractExcerpt } from "@/lib/utils";
 import { CreatePostData } from "@/lib/types";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 /**
  * GET /api/posts
@@ -103,6 +105,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const body: CreatePostData = await request.json();
     const { title, content, excerpt, coverImage, published = false, featured = false, tagIds = [] } = body;
 
@@ -126,7 +137,7 @@ export async function POST(request: NextRequest) {
         featured,
         readTime,
         publishedAt: published ? new Date() : null,
-        authorId: "temp-author-id", // TODO: Get from auth session
+        authorId: session.user.id,
         tags: {
           create: tagIds.map((tagId) => ({
             tag: {
