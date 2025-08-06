@@ -5,6 +5,7 @@ import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { UserRole } from "@/lib/types";
 
 // Custom adapter to handle username generation
 const customPrismaAdapter = (prisma: any) => {
@@ -90,6 +91,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: user.name,
             username: user.username,
+            role: user.role as UserRole,
             avatar: user.avatar || undefined,
           };
         } catch (error) {
@@ -111,6 +113,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.username = user.username;
+        token.role = user.role;
         token.avatar = user.avatar;
       }
       return token;
@@ -119,6 +122,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
+        session.user.role = token.role as UserRole;
         session.user.avatar = token.avatar as string;
       }
       return session;

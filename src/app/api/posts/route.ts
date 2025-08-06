@@ -4,6 +4,7 @@ import { generateSlug, calculateReadTime, extractExcerpt } from "@/lib/utils";
 import { CreatePostData } from "@/lib/types";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-utils";
 
 /**
  * GET /api/posts
@@ -105,14 +106,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
+    // Require admin role for creating posts
+    const user = await requireAdmin();
 
     const body: CreatePostData = await request.json();
     const { title, content, excerpt, coverImage, published = false, featured = false, tagIds = [] } = body;
@@ -137,7 +132,7 @@ export async function POST(request: NextRequest) {
         featured,
         readTime,
         publishedAt: published ? new Date() : null,
-        authorId: session.user.id,
+        authorId: user.id,
         tags: {
           create: tagIds.map((tagId) => ({
             tag: {

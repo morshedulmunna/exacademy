@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
+import { requireAdmin } from "@/lib/auth-utils";
 
 /**
  * GET /api/tags
@@ -51,6 +52,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require admin role for creating tags
+    await requireAdmin();
+    
     const body = await request.json();
     const { name, color = "#3B82F6" } = body;
 
