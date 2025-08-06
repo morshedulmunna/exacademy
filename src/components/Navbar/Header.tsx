@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { Facebook, MessageSquare, User, LogOut, Settings, Menu, X, ChevronDown } from "lucide-react";
+import { Facebook, MessageSquare, User, LogOut, Settings, Menu, X, ChevronDown, Settings2 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Discord from "@/assets/svg/Discord";
 import Youtube from "@/assets/svg/Youtube";
@@ -91,10 +91,9 @@ export default function Header({}: Props) {
             ))}
           </nav>
 
-          <ThemeToggler />
-
           {/* Desktop Auth Section */}
           <div className="hidden lg:flex items-center space-x-4">
+            <ThemeToggler />
             {status === "loading" ? (
               <div className={`w-8 h-8 rounded-full animate-pulse ${theme === "dark" ? "bg-gray-600" : "bg-gray-300"}`}></div>
             ) : session ? (
@@ -121,6 +120,14 @@ export default function Header({}: Props) {
                       </div>
                       <div className="py-2">
                         <Link
+                          href="/dashboard/my-courses"
+                          className={`flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <Settings className="w-4 h-4" />
+                          <span>My Courses</span>
+                        </Link>
+                        <Link
                           href="/profile"
                           className={`flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}
                           onClick={() => setShowUserMenu(false)}
@@ -128,13 +135,14 @@ export default function Header({}: Props) {
                           <User className="w-4 h-4" />
                           <span>Profile</span>
                         </Link>
+
                         <Link
-                          href="/dashboard"
+                          href="/settings"
                           className={`flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}
                           onClick={() => setShowUserMenu(false)}
                         >
-                          <Settings className="w-4 h-4" />
-                          <span>Dashboard</span>
+                          <Settings2 className="w-4 h-4" />
+                          <span>Settings</span>
                         </Link>
                         <button
                           onClick={handleSignOut}
@@ -188,6 +196,10 @@ export default function Header({}: Props) {
 
             {/* Mobile Auth Section */}
             <div className={`pt-4 border-t ${theme === "dark" ? "border-white/10" : "border-gray-200/50"}`}>
+              <div className="flex items-center justify-between mb-4">
+                <span className={`text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>Theme</span>
+                <ThemeToggler />
+              </div>
               {status === "loading" ? (
                 <div className={`w-8 h-8 rounded-full animate-pulse ${theme === "dark" ? "bg-gray-600" : "bg-gray-300"}`}></div>
               ) : session ? (
