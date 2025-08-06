@@ -10,20 +10,39 @@ import { Loading } from "./loading";
 export function PageLoader() {
   const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const [loadingText, setLoadingText] = useState("Initializing...");
 
   useEffect(() => {
     // Hide loader after a minimum time to prevent flash
-    const minLoadTime = 800; // 800ms minimum loading time
+    const minLoadTime = 1000; // 1 second minimum loading time
     const startTime = Date.now();
+
+    // Loading text sequence
+    const loadingTexts = [
+      "Initializing...",
+      "Loading assets...",
+      "Preparing interface...",
+      "Almost ready...",
+    ];
+
+    let textIndex = 0;
+    const textInterval = setInterval(() => {
+      if (textIndex < loadingTexts.length - 1) {
+        textIndex++;
+        setLoadingText(loadingTexts[textIndex]);
+      }
+    }, 300);
 
     const handleLoad = () => {
       const elapsed = Date.now() - startTime;
       const remainingTime = Math.max(0, minLoadTime - elapsed);
 
       setTimeout(() => {
+        clearInterval(textInterval);
+        setLoadingText("Ready!");
         setIsLoading(false);
         // Add a small delay before hiding to ensure smooth transition
-        setTimeout(() => setIsVisible(false), 300);
+        setTimeout(() => setIsVisible(false), 400);
       }, remainingTime);
     };
 
@@ -32,7 +51,10 @@ export function PageLoader() {
       handleLoad();
     } else {
       window.addEventListener("load", handleLoad);
-      return () => window.removeEventListener("load", handleLoad);
+      return () => {
+        window.removeEventListener("load", handleLoad);
+        clearInterval(textInterval);
+      };
     }
   }, []);
 
@@ -40,36 +62,77 @@ export function PageLoader() {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] bg-white dark:bg-black transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[9999] bg-white dark:bg-black transition-opacity duration-700 ${
         isLoading ? "opacity-100" : "opacity-0"
       }`}
     >
       <div className="flex flex-col items-center justify-center h-full">
         {/* Logo or Brand */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="mb-12 animate-fade-in">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-pulse">
             Morshedul Islam Munna
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">
-            Software Engineer
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-3">
+            Software Engineer & Full-Stack Developer
           </p>
         </div>
 
         {/* Loading Spinner */}
-        <Loading size="lg" text="Loading..." />
+        <div className="mb-8">
+          <Loading size="lg" text={loadingText} />
+        </div>
 
-        {/* Progress Bar */}
-        <div className="w-64 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mt-6 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-pulse"></div>
+        {/* Animated Progress Bar */}
+        <div className="w-80 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-8">
+          <div 
+            className={`h-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full transition-all duration-1000 ${
+              isLoading ? "animate-pulse" : "w-full"
+            }`}
+            style={{
+              width: isLoading ? "60%" : "100%",
+              animation: isLoading ? "progress-pulse 2s ease-in-out infinite" : "none"
+            }}
+          />
+        </div>
+
+        {/* Animated Dots */}
+        <div className="flex space-x-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
+              style={{
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: "1s"
+              }}
+            />
+          ))}
         </div>
 
         {/* Loading Tips */}
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center max-w-md">
           <p className="text-xs text-gray-400 dark:text-gray-500 animate-pulse">
-            Preparing your experience...
+            Crafting digital experiences with precision and passion
           </p>
         </div>
       </div>
+
+      {/* Custom CSS for animations */}
+      <style jsx>{`
+        @keyframes progress-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out;
+        }
+      `}</style>
     </div>
   );
-} 
+}
