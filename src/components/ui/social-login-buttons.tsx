@@ -13,11 +13,11 @@ export default function SocialLoginButtons({ isLoading = false }: SocialLoginBut
   const { theme } = useTheme();
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/" });
+    signIn("google", { callbackUrl: "/dashboard" });
   };
 
   const handleGitHubSignIn = () => {
-    signIn("github", { callbackUrl: "/" });
+    signIn("github", { callbackUrl: "/dashboard" });
   };
 
   return (

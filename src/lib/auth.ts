@@ -7,24 +7,34 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { UserRole } from "@/lib/types";
 
-// Custom adapter to handle username generation
+// Custom adapter to handle username generation and fix getUserByAccount issues
 const customPrismaAdapter = (prisma: any) => {
   const adapter = PrismaAdapter(prisma);
 
   return {
     ...adapter,
     async createUser(data: any) {
-      // Generate username from email
+      // Check if user already exists by email
+      const existingUser = await prisma.user.findUnique({
+        where: { email: data.email },
+      });
+
+      // If user exists, return the existing user (preserves role)
+      if (existingUser) {
+        return existingUser;
+      }
+
+      // Generate username from email for new users
       const emailUsername = data.email?.split("@")[0] || "";
       let username = emailUsername;
       let counter = 1;
 
       // Check if username exists and generate unique one
       while (true) {
-        const existingUser = await prisma.user.findUnique({
+        const existingUserWithUsername = await prisma.user.findUnique({
           where: { username },
         });
-        if (!existingUser) break;
+        if (!existingUserWithUsername) break;
         username = `${emailUsername}${counter}`;
         counter++;
       }
@@ -32,7 +42,7 @@ const customPrismaAdapter = (prisma: any) => {
       // Map image to avatar and remove emailVerified if not needed
       const { image, emailVerified, ...userData } = data;
 
-      // Create user with generated username and mapped avatar
+      // Create new user with generated username and mapped avatar
       return prisma.user.create({
         data: {
           ...userData,
@@ -40,6 +50,58 @@ const customPrismaAdapter = (prisma: any) => {
           avatar: image || null,
         },
       });
+    },
+    async getUserByAccount(providerAccountId: any) {
+      try {
+        const account = await prisma.account.findUnique({
+          where: {
+            provider_providerAccountId: {
+              provider: providerAccountId.provider,
+              providerAccountId: providerAccountId.providerAccountId,
+            },
+          },
+          include: {
+            user: true,
+          },
+        });
+
+        // If account exists but user is null, clean up the orphaned account
+        if (account && !account.user) {
+          await prisma.account.delete({
+            where: {
+              id: account.id,
+            },
+          });
+          return null;
+        }
+
+        return account?.user || null;
+      } catch (error) {
+        console.error("Error in getUserByAccount:", error);
+        return null;
+      }
+    },
+    async linkAccount(data: any) {
+      try {
+        return await prisma.account.create({
+          data: {
+            userId: data.userId,
+            type: data.type,
+            provider: data.provider,
+            providerAccountId: data.providerAccountId,
+            refresh_token: data.refresh_token,
+            access_token: data.access_token,
+            expires_at: data.expires_at,
+            token_type: data.token_type,
+            scope: data.scope,
+            id_token: data.id_token,
+            session_state: data.session_state,
+          },
+        });
+      } catch (error) {
+        console.error("Error in linkAccount:", error);
+        throw error;
+      }
     },
   };
 };
@@ -106,7 +168,18 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Username is now handled by the custom adapter
+      // Ensure user role is preserved during sign-in
+      if (user?.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { role: true },
+        });
+
+        if (dbUser) {
+          // Update the user object with the role from database
+          user.role = dbUser.role;
+        }
+      }
       return true;
     },
     async jwt({ token, user }) {
