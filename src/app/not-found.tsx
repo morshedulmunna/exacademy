@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import MaxWidthWrapper from "@/common/MaxWidthWrapper";
+import HomeIcon from "@/assets/svg/HomeIcon";
+import BlogIcon from "@/assets/svg/BlogIcon";
 
 export default function NotFound() {
   return (
@@ -48,18 +50,15 @@ export default function NotFound() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-12 relative z-20">
-            <Link href="/" className="group relative px-6 py-3 gradient-bg text-white rounded-lg font-semibold  transition-all duration-300 shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1 hover:scale-105 cursor-pointer">
-              <span className="relative z-10">Go Home</span>
-              <div className="absolute inset-0 gradient-bg rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+          <div className="flex flex-col sm:flex-row gap-3 mb-12 relative z-20">
+            <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r gradient-bg text-white rounded-md font-medium transition-all duration-200 hover:shadow-lg hover:scale-105">
+              <HomeIcon className="w-4 h-4" />
+              Go Home
             </Link>
 
-            <Link
-              href="/blog"
-              className="group px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg font-semibold border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-white/10 transform hover:-translate-y-1 hover:scale-105 cursor-pointer"
-            >
-              <span className="relative z-10">Explore Blog</span>
-              <div className="absolute inset-0 bg-white/5 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <Link href="/blog" className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-md font-medium border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-105">
+              <BlogIcon className="w-4 h-4" />
+              Explore Blog
             </Link>
           </div>
 
