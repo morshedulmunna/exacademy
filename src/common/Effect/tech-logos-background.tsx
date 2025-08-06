@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Code2, Database, Cloud, Cpu, Globe, Smartphone, Server, GitBranch, Layers, Zap, Box, Terminal } from "lucide-react";
-import { FullScreenLoading } from "@/components/ui/loading";
 
 export default function TechLogosBackground() {
   const [mounted, setMounted] = useState(false);
@@ -12,7 +11,7 @@ export default function TechLogosBackground() {
   }, []);
 
   if (!mounted) {
-    return <FullScreenLoading text="Initializing..." />;
+    return null;
   }
 
   return (

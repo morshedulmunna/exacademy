@@ -8,8 +8,6 @@ import CursorGlow from "@/common/Effect/CursorGlow";
 import CursorLaser from "@/common/Effect/CursorLaser";
 import TechLogosBackground from "@/common/Effect/tech-logos-background";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { RouteLoader } from "@/components/ui/RouteLoader";
-import { GlobalLoader } from "@/components/ui/GlobalLoader";
 
 export const metadata: Metadata = {
   title: "Morshedul Islam Munna - Software Engineer",
@@ -23,16 +21,35 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased w-full min-h-screen bg-white dark:bg-black text-black dark:text-white relative`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'light' || (!theme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+                    document.documentElement.classList.remove('dark');
+                  } else {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {
+                  // Fallback to dark mode if localStorage is not available
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`antialiased w-full min-h-screen relative`} style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
         <PageLoader />
-        <RouteLoader />
         <SessionProvider>
           <LoadingProvider>
             <ThemeProvider>
               <AnimatedGridBackground gridSize={250} gridOpacity={0.3} waveFrequency={1000} waveIntensity={0.55} waveSpeed={0.5} />
               <CursorGlow />
               <TechLogosBackground />
-              <GlobalLoader />
               <main className="flex-1 relative z-10"> {children}</main>
             </ThemeProvider>
           </LoadingProvider>

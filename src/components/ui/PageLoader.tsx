@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Loading } from "./loading";
+import AnimatedGridBackground from "@/common/Effect/animated-grid-background";
+import CursorGlow from "@/common/Effect/CursorGlow";
+import TechLogosBackground from "@/common/Effect/tech-logos-background";
 
 /**
  * PageLoader component that shows a full-screen loading animation
  * during initial page load and fades out once the page is ready
+ * Uses CSS-only theme detection to prevent flash between light/dark modes
  */
 export function PageLoader() {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,12 +22,7 @@ export function PageLoader() {
     const startTime = Date.now();
 
     // Loading text sequence
-    const loadingTexts = [
-      "Initializing...",
-      "Loading assets...",
-      "Preparing interface...",
-      "Almost ready...",
-    ];
+    const loadingTexts = ["Initializing...", "Loading assets...", "Preparing interface...", "Almost ready..."];
 
     let textIndex = 0;
     const textInterval = setInterval(() => {
@@ -61,18 +60,15 @@ export function PageLoader() {
   if (!isVisible) return null;
 
   return (
-    <div
-      className={`fixed inset-0 z-[9999] bg-white dark:bg-black transition-opacity duration-700 ${
-        isLoading ? "opacity-100" : "opacity-0"
-      }`}
-    >
+    <div className={`fixed inset-0 z-[9999] transition-opacity duration-700 ${isLoading ? "opacity-100" : "opacity-0"}`} style={{ backgroundColor: "hsl(var(--background))" }}>
       <div className="flex flex-col items-center justify-center h-full">
+        <AnimatedGridBackground gridSize={250} gridOpacity={0.3} waveFrequency={1000} waveIntensity={0.55} waveSpeed={0.5} />
+        <CursorGlow />
+        <TechLogosBackground />
         {/* Logo or Brand */}
         <div className="mb-12 animate-fade-in">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-pulse">
-            Morshedul Islam Munna
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-3">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-pulse">Morshedul Islam Munna</h1>
+          <p className="text-sm text-center mt-3" style={{ color: "hsl(var(--muted-foreground))" }}>
             Software Engineer & Full-Stack Developer
           </p>
         </div>
@@ -83,14 +79,12 @@ export function PageLoader() {
         </div>
 
         {/* Animated Progress Bar */}
-        <div className="w-80 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-8">
-          <div 
-            className={`h-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full transition-all duration-1000 ${
-              isLoading ? "animate-pulse" : "w-full"
-            }`}
+        <div className="w-80 h-2 rounded-full overflow-hidden mb-8" style={{ backgroundColor: "hsl(var(--muted))" }}>
+          <div
+            className={`h-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full transition-all duration-1000 ${isLoading ? "animate-pulse" : "w-full"}`}
             style={{
               width: isLoading ? "60%" : "100%",
-              animation: isLoading ? "progress-pulse 2s ease-in-out infinite" : "none"
+              animation: isLoading ? "progress-pulse 2s ease-in-out infinite" : "none",
             }}
           />
         </div>
@@ -103,7 +97,7 @@ export function PageLoader() {
               className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
               style={{
                 animationDelay: `${i * 0.2}s`,
-                animationDuration: "1s"
+                animationDuration: "1s",
               }}
             />
           ))}
@@ -111,7 +105,7 @@ export function PageLoader() {
 
         {/* Loading Tips */}
         <div className="mt-8 text-center max-w-md">
-          <p className="text-xs text-gray-400 dark:text-gray-500 animate-pulse">
+          <p className="text-xs animate-pulse" style={{ color: "hsl(var(--muted-foreground))" }}>
             Crafting digital experiences with precision and passion
           </p>
         </div>
@@ -120,15 +114,26 @@ export function PageLoader() {
       {/* Custom CSS for animations */}
       <style jsx>{`
         @keyframes progress-pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.7;
+          }
         }
-        
+
         @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        
+
         .animate-fade-in {
           animation: fade-in 0.8s ease-out;
         }

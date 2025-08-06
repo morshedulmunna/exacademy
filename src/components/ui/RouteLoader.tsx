@@ -35,6 +35,7 @@ export function RouteLoader() {
 /**
  * FullScreenRouteLoader for major route transitions
  * Shows a more prominent loading screen for significant navigation
+ * Uses CSS-only theme detection to prevent flash between light/dark modes
  */
 export function FullScreenRouteLoader() {
   const [isLoading, setIsLoading] = useState(false);
@@ -53,10 +54,12 @@ export function FullScreenRouteLoader() {
   if (!isLoading) return null;
 
   return (
-    <div className="fixed inset-0 z-[9997] bg-white/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center">
+    <div className="fixed inset-0 z-[9997] backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: "hsl(var(--background) / 0.8)" }}>
       <div className="text-center">
         <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-sm text-gray-600 dark:text-gray-300">Loading...</p>
+        <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
+          Loading...
+        </p>
       </div>
     </div>
   );
