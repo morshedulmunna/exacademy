@@ -6,12 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   name      String
   username  String   @unique
@@ -23,32 +23,32 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  posts     Post[]
-  comments  Comment[]
-  likes     Like[]
+  posts    Post[]
+  comments Comment[]
+  likes    Like[]
 
   @@map("users")
 }
 
 model Post {
-  id          String   @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String
-  slug        String   @unique
-  content     String   @db.Text
+  slug        String    @unique
+  content     String
   excerpt     String?
   coverImage  String?
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  readTime    Int      @default(0)
-  viewCount   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  published   Boolean   @default(false)
+  featured    Boolean   @default(false)
+  readTime    Int       @default(0)
+  viewCount   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
 
   // Relations
-  authorId String
-  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  tags     Tag[]
+  authorId String    @db.ObjectId
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  tags     PostTag[]
   comments Comment[]
   likes    Like[]
 
@@ -56,42 +56,55 @@ model Post {
 }
 
 model Tag {
-  id    String @id @default(cuid())
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
   name  String @unique
   slug  String @unique
   color String @default("#3B82F6")
 
   // Relations
-  posts Post[]
+  posts PostTag[]
 
   @@map("tags")
 }
 
+model PostTag {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  postId String @db.ObjectId
+  tagId  String @db.ObjectId
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@map("post_tags")
+}
+
 model Comment {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  authorId String
+  authorId String @db.ObjectId
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  postId   String
+  postId   String @db.ObjectId
   post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("comments")
 }
 
 model Like {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt DateTime @default(now())
 
   // Relations
-  userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId String
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String @db.ObjectId
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
   @@map("likes")
-} 
+}
