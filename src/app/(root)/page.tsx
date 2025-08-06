@@ -4,6 +4,7 @@ import Blogs from "@/components/blogs/Blogs";
 import Course from "@/components/course/Course";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
+import Hero1 from "@/components/Hero/Hero1";
 import Header from "@/components/Navbar/Header";
 import NewsLatter from "@/components/NewsLatter/NewsLatter";
 import WorkExperiance from "@/components/work-experiance/WorkExperiance";
@@ -15,8 +16,9 @@ export default function Home() {
       <div className="flex flex-col h-full">
         <Header />
         <main className="flex-1 pt-12">
-          <Hero />
-          <WorkExperiance />
+          <Hero1 />
+          {/* <Hero /> */}
+          {/* <WorkExperiance /> */}
           <Course />
           <Blogs />
           <NewsLatter />
