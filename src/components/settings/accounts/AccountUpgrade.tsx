@@ -11,7 +11,7 @@ export default function AccountUpgrade({}: Props) {
         <p className="text-muted-foreground text-sm leading-relaxed">Pro membership unlocks projects, problems, AI, all courses, learning paths, and more.</p>
       </div>
       <div className="flex-shrink-0">
-        <ButtonPrimary icon={<UpgradeProSvg />} text="Upgrade Pro" className="w-full sm:w-auto" />
+        <ButtonPrimary icon={<UpgradeProSvg />} text="Upgrade Pro" className="w-full sm:w-auto " />
       </div>
     </div>
   );

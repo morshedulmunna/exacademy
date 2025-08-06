@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "@/themes/ThemeProvider";
 
 interface LightWave {
   x: number;
@@ -24,6 +25,7 @@ interface AnimatedGridBackgroundProps {
 
 export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.15, waveFrequency = 3000, waveIntensity = 0.25, waveSpeed = 1.5, className = "" }: AnimatedGridBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -64,7 +66,9 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
     const drawGrid = (currentTime: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = "#000000";
+      // Theme-aware background color
+      const backgroundColor = theme === "dark" ? "#000000" : "#ffffff";
+      ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       if (currentTime - lastWaveTime > waveFrequency + Math.random() * waveFrequency) {
@@ -82,6 +86,10 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
         }
       });
 
+      // Theme-aware grid colors
+      const gridColor = theme === "dark" ? "rgba(50, 50, 50" : "rgba(200, 200, 200";
+      const pointColor = theme === "dark" ? "rgba(80, 80, 80" : "rgba(150, 150, 150";
+
       // Vertical lines
       for (let x = 0; x <= canvas.width; x += gridSize) {
         let lineIntensity = gridOpacity;
@@ -97,7 +105,7 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
         });
 
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(50, 50, 50, ${lineIntensity})`;
+        ctx.strokeStyle = `${gridColor}, ${lineIntensity})`;
         ctx.lineWidth = lineIntensity > gridOpacity * 2 ? 1 : 0.5;
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
@@ -119,7 +127,7 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
         });
 
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(50, 50, 50, ${lineIntensity})`;
+        ctx.strokeStyle = `${gridColor}, ${lineIntensity})`;
         ctx.lineWidth = lineIntensity > gridOpacity * 2 ? 1 : 0.5;
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
@@ -146,7 +154,7 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
           });
 
           ctx.beginPath();
-          ctx.fillStyle = `rgba(80, 80, 80, ${pointIntensity})`;
+          ctx.fillStyle = `${pointColor}, ${pointIntensity})`;
           const pointSize = pointIntensity > gridOpacity * 2 ? 2 : 1;
           ctx.arc(x, y, pointSize, 0, Math.PI * 2);
           ctx.fill();
@@ -181,7 +189,7 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
     return () => {
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, [gridSize, gridOpacity, waveFrequency, waveIntensity, waveSpeed]);
+  }, [gridSize, gridOpacity, waveFrequency, waveIntensity, waveSpeed, theme]);
 
-  return <canvas ref={canvasRef} className={`fixed -z-10 inset-0 w-full h-full bg-black ${className}`} aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={`fixed -z-10 inset-0 w-full h-full ${theme === "dark" ? "bg-black" : "bg-white"} ${className}`} aria-hidden="true" />;
 }

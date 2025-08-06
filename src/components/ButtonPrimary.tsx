@@ -8,19 +8,9 @@ type Props = {
   type?: "button" | "submit" | "reset";
 };
 
-export default function ButtonPrimary({
-  className = "",
-  text = "Click Me",
-  onClick,
-  icon,
-  type = "button",
-}: Props) {
+export default function ButtonPrimary({ className = "", text = "Click Me", onClick, icon, type = "button" }: Props) {
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      className={`bg-primary hover:bg-primary/90 transition-all ease-in-out font-semibold flex items-center gap-1 text-white py-1 px-2 rounded ${className}`}
-    >
+    <button type={type} onClick={onClick} className={`bg-primary hover:bg-primary/90 transition-all ease-in-out font-semibold flex items-center gap-1 text-primary-foreground py-1 px-2 rounded ${className}`}>
       {icon && <span>{icon}</span>}
       <span>{text}</span>
     </button>
