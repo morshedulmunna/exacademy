@@ -38,9 +38,13 @@ export default function AccountSettingsSidebar({}: Props) {
             icon: <PurchaseSvgIcon />,
           },
         ].map((each, index) => (
-          <Link href={each.href} key={index} className={` ${path === each.href && "bg-gray-200/80 dark:bg-gray-700/50"}  text-sm rounded group cursor-pointer flex items-center mb-2 gap-4`}>
-            <div className={`w-1 h-9 rounded ${path === each.href && "bg-primary"}`}></div>
-            <div className={` ${path === each.href && "dark:text-white text-black"} flex py-1.5  font-semibold dark:text-gray-400 text-gray-900 dark:group-hover:text-gray-300 transition-all ease-in-out cursor-pointer items-center gap-2`}>
+          <Link
+            href={each.href}
+            key={index}
+            className={`${path === each.href ? "bg-primary/10 dark:bg-primary/20 border-l-2 border-primary" : "hover:bg-gray-50 dark:hover:bg-gray-800/40"} text-sm rounded-r group cursor-pointer flex items-center mb-2 gap-4 transition-all duration-200 ease-in-out`}
+          >
+            <div className={`w-1 h-9 rounded ${path === each.href ? "bg-primary" : "bg-transparent"}`}></div>
+            <div className={`${path === each.href ? "text-primary dark:text-primary font-semibold" : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"} flex py-1.5 font-medium transition-all ease-in-out cursor-pointer items-center gap-2`}>
               {each.icon}
               <span>{each.label}</span>
             </div>

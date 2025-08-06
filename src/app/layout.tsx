@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "../assets/styles/globals.css";
+import "@/assets/styles/globals.css";
 import { ThemeProvider } from "@/themes/ThemeProvider";
 import SessionProvider from "@/components/providers/SessionProvider";
 import AnimatedGridBackground from "@/common/Effect/animated-grid-background";
