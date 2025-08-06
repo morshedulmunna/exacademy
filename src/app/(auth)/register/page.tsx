@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
+import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -100,29 +101,25 @@ export default function RegisterPage() {
   return (
     <>
       {/* Background Elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-72 md:h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 md:w-96 md:h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 bg-pink-500/15 rounded-full blur-2xl animate-pulse delay-500"></div>
-      </div>
+      <LightBackgroundEffect />
 
       <div className="w-full mt-24 max-w-sm sm:max-w-md md:max-w-lg mx-auto">
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-2xl">
+        <div className="bg-white/80 dark:bg-black/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-gray-900 shadow-sm">
           {/* Header */}
           <div className="text-center mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Create Account</h1>
-            <p className="text-gray-300 text-xs sm:text-sm">Join our community today</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">Create Account</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">Join our community today</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            {error && <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-2 sm:p-3 text-red-300 text-xs sm:text-sm">{error}</div>}
+            {error && <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-300 text-xs sm:text-sm">{error}</div>}
 
-            {success && <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-2 sm:p-3 text-green-300 text-xs sm:text-sm">{success}</div>}
+            {success && <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-2 sm:p-3 text-green-600 dark:text-green-300 text-xs sm:text-sm">{success}</div>}
 
             <div className="flex justify-between items-center w-full gap-4">
               <div className="w-full">
-                <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Full Name
                 </label>
                 <input
@@ -131,13 +128,13 @@ export default function RegisterPage() {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm"
                   placeholder="Enter your full name"
                   required
                 />
               </div>
               <div className="w-full">
-                <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Username
                 </label>
                 <input
@@ -146,14 +143,14 @@ export default function RegisterPage() {
                   type="text"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm"
                   placeholder="Choose a username"
                   required
                 />
               </div>
             </div>
             <div>
-              <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email
               </label>
               <input
@@ -162,14 +159,14 @@ export default function RegisterPage() {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm"
+                className="w-full px-3 py-2 sm:py-2.5 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm"
                 placeholder="Enter your email"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -179,14 +176,14 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm pr-10"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm pr-10"
                   placeholder="Create a password"
                   required
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors duration-300 focus:outline-none"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-300 focus:outline-none"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -204,7 +201,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="confirmPassword" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm Password
               </label>
               <div className="relative">
@@ -214,14 +211,14 @@ export default function RegisterPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm pr-10"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm pr-10"
                   placeholder="Confirm your password"
                   required
                 />
                 <button
                   type="button"
                   onClick={toggleConfirmPasswordVisibility}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors duration-300 focus:outline-none"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-300 focus:outline-none"
                   aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                 >
                   {showConfirmPassword ? (
@@ -248,9 +245,9 @@ export default function RegisterPage() {
 
           {/* Footer */}
           <div className="mt-4 sm:mt-6 text-center">
-            <p className="text-gray-300 text-xs">
+            <p className="text-gray-600 dark:text-gray-300 text-xs">
               Already have an account?{" "}
-              <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors duration-300">
+              <Link href="/login" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors duration-300">
                 Sign in
               </Link>
             </p>
@@ -258,7 +255,7 @@ export default function RegisterPage() {
 
           {/* Back to Home */}
           <div className="mt-3 sm:mt-4 text-center">
-            <Link href="/" className="text-gray-400 hover:text-gray-300 text-xs transition-colors duration-300">
+            <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs transition-colors duration-300">
               ← Back to Home
             </Link>
           </div>

@@ -11,6 +11,7 @@ import Linkedin from "@/assets/svg/Linkedin";
 import Github from "@/assets/svg/Github";
 import ThemeToggler from "@/themes/ThemeToggler";
 import { useTheme } from "@/themes/ThemeProvider";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 type Props = {};
 
@@ -27,6 +28,9 @@ export default function Header({}: Props) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: session, status } = useSession();
   const { theme } = useTheme();
+
+  // Ref for user dropdown menu
+  const userMenuRef = useOutsideClick(() => setShowUserMenu(false));
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,7 +98,7 @@ export default function Header({}: Props) {
             {status === "loading" ? (
               <div className={`w-8 h-8 rounded-full animate-pulse ${theme === "dark" ? "bg-gray-600" : "bg-gray-300"}`}></div>
             ) : session ? (
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <button onClick={() => setShowUserMenu(!showUserMenu)} className={`flex items-center space-x-2 transition-colors duration-300 group ${theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"}`}>
                   {session.user?.avatar ? (
                     <Image src={session.user.avatar} alt={session.user.name || "User"} width={32} height={32} className="rounded-full ring-2 ring-transparent group-hover:ring-purple-500 transition-all duration-300" />

@@ -1,4 +1,5 @@
 import AnimatedGridBackground from "@/common/Effect/animated-grid-background";
+import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import MaxWidthWrapper from "@/common/MaxWidthWrapper";
 import Blogs from "@/components/blogs/Blogs";
 import Course from "@/components/course/Course";
@@ -14,6 +15,7 @@ export default function Home() {
   return (
     <MaxWidthWrapper className=" h-screen">
       <div className="flex flex-col h-full">
+        <LightBackgroundEffect />
         <Header />
         <main className="flex-1 pt-24">
           <Hero1 />

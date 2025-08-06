@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased w-full min-h-screen bg-black dark:bg-white text-white relative`}>
+      <body className={`antialiased w-full min-h-screen bg-white dark:bg-black text-black dark:text-white relative`}>
         <SessionProvider>
           <ThemeProvider>
             <AnimatedGridBackground gridSize={250} gridOpacity={0.3} waveFrequency={1000} waveIntensity={0.55} waveSpeed={0.5} />

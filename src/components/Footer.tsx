@@ -8,7 +8,7 @@ type Props = {};
 export default function Footer({}: Props) {
   return (
     <>
-      <footer className="py-10 border-t border-zinc-800">
+      <footer className="py-10 border-t border-zinc-200 dark:border-zinc-900">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-center md:justify-between">
             <div className="flex items-center gap-2 mb-4 md:mb-0">

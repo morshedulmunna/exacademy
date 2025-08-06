@@ -5,6 +5,7 @@ import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
+import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -46,26 +47,21 @@ export default function LoginPage() {
   return (
     <>
       {/* Background Elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-72 md:h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 md:w-96 md:h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 bg-pink-500/15 rounded-full blur-2xl animate-pulse delay-500"></div>
-      </div>
-
+      <LightBackgroundEffect />
       <div className="w-full mt-24 max-w-sm sm:max-w-md md:max-w-lg mx-auto">
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20 shadow-2xl">
+        <div className="bg-white/80 dark:bg-black/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-900 shadow-sm">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-gray-300 text-sm sm:text-base">Sign in to your account</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome Back</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">Sign in to your account</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            {error && <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 sm:p-4 text-red-300 text-sm">{error}</div>}
+            {error && <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 sm:p-4 text-red-600 dark:text-red-300 text-sm">{error}</div>}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email
               </label>
               <input
@@ -73,14 +69,14 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
                 placeholder="Enter your email"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -89,14 +85,14 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base pr-12"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base pr-12"
                   placeholder="Enter your password"
                   required
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors duration-300 focus:outline-none"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-300 focus:outline-none"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -127,9 +123,9 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-6 sm:mt-8 text-center">
-            <p className="text-gray-300 text-xs sm:text-sm">
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
               Don't have an account?{" "}
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors duration-300">
+              <Link href="/register" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors duration-300">
                 Sign up
               </Link>
             </p>
@@ -137,7 +133,7 @@ export default function LoginPage() {
 
           {/* Back to Home */}
           <div className="mt-4 sm:mt-6 text-center">
-            <Link href="/" className="text-gray-400 hover:text-gray-300 text-xs sm:text-sm transition-colors duration-300">
+            <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs sm:text-sm transition-colors duration-300">
               ← Back to Home
             </Link>
           </div>
