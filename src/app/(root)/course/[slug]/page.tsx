@@ -14,6 +14,10 @@ import React from "react";
 type Props = {};
 
 export default function CourseDetailsPage({}: Props) {
+  // Example video URL - you can replace this with actual course data
+  const videoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ";
+  const courseTitle = "Course Preview";
+
   return (
     <>
       <div className=" min-h-screen">
@@ -34,7 +38,7 @@ export default function CourseDetailsPage({}: Props) {
               </div>
               <div className="col-span-12 lg:col-span-4 order-1 lg:order-2">
                 <div className="sticky top-4">
-                  <CoursePurchaseSection />
+                  <CoursePurchaseSection videoUrl={videoUrl} title={courseTitle} />
                 </div>
               </div>
             </div>
