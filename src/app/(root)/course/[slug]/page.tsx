@@ -31,14 +31,14 @@ export default function CourseDetailsPage({}: Props) {
                 <CourseStructure />
                 <CourseDescription />
                 <FeaturesReview />
-                <FeedbackRating />
+                {/* <FeedbackRating /> */}
                 <StudentReviews />
                 <CourseInstructor />
                 <MoreCoursesByInstructor />
               </div>
               <div className="col-span-12 lg:col-span-4 order-1 lg:order-2">
                 <div className="sticky top-4">
-                  <CoursePurchaseSection videoUrl={videoUrl} title={courseTitle} />
+                  <CoursePurchaseSection videoUrl={videoUrl} title={courseTitle} slug={"docker-crush-course"} />
                 </div>
               </div>
             </div>

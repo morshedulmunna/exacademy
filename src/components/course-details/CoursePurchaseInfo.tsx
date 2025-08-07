@@ -1,9 +1,12 @@
 import { HeartHandshake, Timer, Video } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
-type Props = object;
+type Props = {
+  slug: string;
+};
 
-export default function CoursePurchaseInfo({}: Props) {
+export default function CoursePurchaseInfo({ slug }: Props) {
   return (
     <>
       <h1 className="mb-2 text-2xl sm:text-3xl md:text-4xl dark:text-white text-gray-900 font-bold">৳999</h1>
@@ -12,7 +15,9 @@ export default function CoursePurchaseInfo({}: Props) {
           Includes <strong className="dark:text-white text-gray-900">lifetime access</strong> to current and future updates to the course. Learn at your own pace, anytime.
         </p>
 
-        <button className="gradient-bg text-base sm:text-lg md:text-xl font-semibold text-white px-3 sm:px-4 py-2.5 sm:py-3 w-full rounded-lg mt-4 shadow-sm hover:shadow-md transition-shadow">Buy Now</button>
+        <Link href={`/course/checkout/${slug}`}>
+          <button className="gradient-bg text-base sm:text-lg md:text-xl font-semibold text-white px-3 sm:px-4 py-2.5 sm:py-3 w-full rounded-lg mt-4 shadow-sm hover:shadow-md transition-shadow">Buy Now</button>
+        </Link>
 
         {/* <button className="w-full mt-3 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-300 dark:border-gray-600 py-2 px-2 rounded-lg text-sm font-medium dark:text-gray-200 text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors">
           Apply coupon
