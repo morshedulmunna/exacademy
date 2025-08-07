@@ -56,7 +56,7 @@ export default function StatsCard({ title, value, icon: Icon, color, change, cha
     },
   };
 
-  const currentColor = colorClasses[color];
+  const currentColor = colorClasses[color] || colorClasses.gray;
 
   // Format value based on type
   const formattedValue = typeof value === "number" ? value.toLocaleString() : value;

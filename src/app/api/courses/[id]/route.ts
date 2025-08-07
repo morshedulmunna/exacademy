@@ -4,37 +4,50 @@ import { prisma } from "@/lib/db";
 
 /**
  * GET /api/courses/[id]
- * Fetch a specific course by ID
+ * Fetch a specific course
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getCurrentUser();
-    
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { id } = await params;
 
     const course = await prisma.course.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         instructor: {
           select: {
+            id: true,
             name: true,
             email: true,
-            avatar: true,
+            image: true,
           },
         },
-        tags: {
+        modules: {
+          orderBy: {
+            order: "asc",
+          },
           include: {
-            tag: true,
+            lessons: {
+              orderBy: {
+                order: "asc",
+              },
+              include: {
+                contents: true,
+              },
+            },
           },
         },
-        _count: {
-          select: {
-            enrollments: true,
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
           },
         },
       },
@@ -47,158 +60,110 @@ export async function GET(
     return NextResponse.json(course);
   } catch (error) {
     console.error("Error fetching course:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 /**
  * PUT /api/courses/[id]
- * Update a specific course
+ * Update a course
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
-    
+    const { id } = await params;
+
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const {
-      title,
-      slug,
-      description,
-      excerpt,
-      price,
-      originalPrice,
-      duration,
-      lessons,
-      thumbnail,
-      published,
-      featured,
-      tagIds = [],
-    } = body;
+    const { title, slug, description, excerpt, price, originalPrice, duration, lessons, thumbnail, published, featured } = body;
 
-    // Check if course exists
-    const existingCourse = await prisma.course.findUnique({
-      where: { id: params.id },
+    // Validate required fields
+    if (!title || !slug) {
+      return NextResponse.json({ error: "Title and slug are required" }, { status: 400 });
+    }
+
+    // Check if slug is already taken by another course
+    const existingCourse = await prisma.course.findFirst({
+      where: {
+        slug,
+        id: { not: id },
+      },
     });
 
-    if (!existingCourse) {
-      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    if (existingCourse) {
+      return NextResponse.json({ error: "A course with this slug already exists" }, { status: 400 });
     }
 
-    // Check if slug already exists (excluding current course)
-    if (slug && slug !== existingCourse.slug) {
-      const slugExists = await prisma.course.findUnique({
-        where: { slug },
-      });
-
-      if (slugExists) {
-        return NextResponse.json(
-          { error: "Course with this slug already exists" },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Update course
-    const updatedCourse = await prisma.course.update({
-      where: { id: params.id },
+    const course = await prisma.course.update({
+      where: { id },
       data: {
         title,
         slug,
         description,
         excerpt,
-        price: price !== undefined ? parseFloat(price) : undefined,
-        originalPrice: originalPrice !== undefined ? parseFloat(originalPrice) : null,
+        price: parseFloat(price) || 0,
+        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
         duration,
-        lessons: lessons !== undefined ? parseInt(lessons) : undefined,
+        lessons: parseInt(lessons) || 0,
         thumbnail,
-        published,
-        featured,
-        publishedAt: published && !existingCourse.published ? new Date() : existingCourse.publishedAt,
-        tags: {
-          deleteMany: {},
-          create: tagIds.map((tagId: string) => ({
-            tag: {
-              connect: { id: tagId },
-            },
-          })),
-        },
+        published: published || false,
+        featured: featured || false,
       },
       include: {
         instructor: {
           select: {
+            id: true,
             name: true,
             email: true,
-            avatar: true,
+            image: true,
           },
         },
-        tags: {
+        modules: {
+          orderBy: {
+            order: "asc",
+          },
           include: {
-            tag: true,
-          },
-        },
-        _count: {
-          select: {
-            enrollments: true,
+            lessons: {
+              orderBy: {
+                order: "asc",
+              },
+            },
           },
         },
       },
     });
 
-    return NextResponse.json(updatedCourse);
+    return NextResponse.json(course);
   } catch (error) {
     console.error("Error updating course:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 /**
  * DELETE /api/courses/[id]
- * Delete a specific course
+ * Delete a course
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
-    
+    const { id } = await params;
+
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if course exists
-    const existingCourse = await prisma.course.findUnique({
-      where: { id: params.id },
-    });
-
-    if (!existingCourse) {
-      return NextResponse.json({ error: "Course not found" }, { status: 404 });
-    }
-
-    // Delete course (cascade will handle related records)
+    // Delete course (modules and lessons will be deleted due to cascade)
     await prisma.course.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Course deleted successfully" });
   } catch (error) {
     console.error("Error deleting course:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

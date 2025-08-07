@@ -187,6 +187,7 @@ model Course {
   instructor   User               @relation(fields: [instructorId], references: [id], onDelete: Cascade)
   tags         CourseTag[]
   enrollments  CourseEnrollment[]
+  modules      CourseModule[]
 
   @@map("courses")
 }
@@ -218,4 +219,66 @@ model CourseEnrollment {
 
   @@unique([userId, courseId])
   @@map("course_enrollments")
+}
+
+model CourseModule {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  courseId String @db.ObjectId
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons  Lesson[]
+
+  @@map("course_modules")
+}
+
+model Lesson {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  content     String?
+  videoUrl    String?
+  duration    String   @default("0m")
+  order       Int      @default(0)
+  isFree      Boolean  @default(false)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  moduleId String      @db.ObjectId
+  module   CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  contents LessonContent[]
+
+  @@map("lessons")
+}
+
+model LessonContent {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  title    String
+  type     ContentType
+  url      String
+  size     Int?
+  filename String
+  createdAt DateTime @default(now())
+
+  // Relations
+  lessonId String @db.ObjectId
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_contents")
+}
+
+enum ContentType {
+  VIDEO
+  PDF
+  DOCUMENT
+  IMAGE
+  AUDIO
+  OTHER
 }
