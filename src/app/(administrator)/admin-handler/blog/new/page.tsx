@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { BlogSidebar, BlogEditorHeader, BlogEditorContent } from "../../../_@components";
+import { ImageUploadResult } from "@/lib/image-upload";
 
 export default function NewBlogPage() {
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
@@ -33,6 +34,7 @@ func createCounter() func() int {
 In this example, the \`count\` variable is captured by the closure and stored in a hidden struct.`);
   const [darkMode, setDarkMode] = useState(true);
   const [rawMarkdownEditor, setRawMarkdownEditor] = useState(false);
+  const [coverImage, setCoverImage] = useState<ImageUploadResult | null>(null);
 
   // Event handlers
   const handleDraftSelect = (draftId: string) => {
@@ -50,9 +52,13 @@ In this example, the \`count\` variable is captured by the closure and stored in
     // TODO: Implement search functionality
   };
 
-  const handleAddCover = () => {
-    console.log("Adding cover image");
-    // TODO: Implement cover image upload
+  const handleAddCover = (imageResult: ImageUploadResult) => {
+    console.log("Cover image uploaded:", imageResult);
+    setCoverImage(imageResult);
+  };
+
+  const handleRemoveCover = () => {
+    setCoverImage(null);
   };
 
   const handleAddSubtitle = () => {
@@ -103,6 +109,8 @@ In this example, the \`count\` variable is captured by the closure and stored in
         {/* Header with Controls */}
         <BlogEditorHeader
           onAddCover={handleAddCover}
+          onRemoveCover={handleRemoveCover}
+          coverImage={coverImage}
           onAddSubtitle={handleAddSubtitle}
           onPublish={handlePublish}
           onCopyMarkdown={handleCopyMarkdown}

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Image, Type, MoreVertical, Settings, Copy, Moon, HelpCircle } from "lucide-react";
+import { Image, Type, MoreVertical, Settings, Copy, Moon, HelpCircle, X } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
+import { ImageUploadResult } from "@/lib/image-upload";
 
 import { 
   AddCoverHandler, 
@@ -13,7 +15,9 @@ import {
 } from './types';
 
 interface BlogEditorHeaderProps {
-  onAddCover?: AddCoverHandler;
+  onAddCover?: (imageResult: ImageUploadResult) => void;
+  onRemoveCover?: () => void;
+  coverImage?: ImageUploadResult | null;
   onAddSubtitle?: AddSubtitleHandler;
   onPublish?: PublishHandler;
   onCopyMarkdown?: CopyMarkdownHandler;
@@ -25,6 +29,8 @@ interface BlogEditorHeaderProps {
 
 export default function BlogEditorHeader({
   onAddCover,
+  onRemoveCover,
+  coverImage,
   onAddSubtitle,
   onPublish,
   onCopyMarkdown,
@@ -34,6 +40,7 @@ export default function BlogEditorHeader({
   rawMarkdownEditor = false,
 }: BlogEditorHeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showImageUpload, setShowImageUpload] = useState(false);
 
   const handleCopyMarkdown = () => {
     onCopyMarkdown?.();
@@ -48,17 +55,45 @@ export default function BlogEditorHeader({
     onToggleRawEditor?.(!rawMarkdownEditor);
   };
 
+  const handleImageUploaded = (result: ImageUploadResult) => {
+    onAddCover?.(result);
+    setShowImageUpload(false);
+  };
+
+  const handleImageRemoved = () => {
+    onRemoveCover?.();
+  };
+
   return (
     <div className="p-6 border-b border-gray-700">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <button
-            onClick={onAddCover}
-            className="flex items-center space-x-2 px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700 transition-colors"
-          >
-            <Image className="w-4 h-4" />
-            <span className="text-sm">Add Cover</span>
-          </button>
+          {coverImage ? (
+            <div className="flex items-center space-x-2">
+              <div className="relative w-16 h-12 rounded-md overflow-hidden">
+                <img
+                  src={coverImage.webp || coverImage.original}
+                  alt="Cover"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <button
+                onClick={handleImageRemoved}
+                className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                title="Remove cover image"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowImageUpload(true)}
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700 transition-colors"
+            >
+              <Image className="w-4 h-4" />
+              <span className="text-sm">Add Cover</span>
+            </button>
+          )}
           <button
             onClick={onAddSubtitle}
             className="flex items-center space-x-2 px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700 transition-colors"
