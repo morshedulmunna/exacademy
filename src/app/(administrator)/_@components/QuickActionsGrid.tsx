@@ -1,68 +1,74 @@
 import React from "react";
+import { Plus, FileText, BookOpen, Tag, Users, Settings } from "lucide-react";
 import QuickActionCard from "./QuickActionCard";
 
 /**
  * Quick Actions Grid Component
- * Displays a grid of quick action cards for the admin dashboard
+ * Displays quick action buttons for common admin tasks
  */
 export default function QuickActionsGrid() {
-  const quickActions = [
+  const actions = [
     {
-      href: "/admin-handler/posts",
+      title: "Create Post",
+      description: "Add a new blog post",
+      icon: Plus,
+      href: "/admin-handler/blog/new",
+      color: "blue",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
+      borderColor: "border-blue-200 dark:border-blue-800",
+    },
+    {
       title: "Manage Posts",
-      description: "Create, edit, and publish blog posts",
-      icon: (
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-      ),
-      bgColor: "bg-blue-500",
-      hoverColor: "text-blue-600 dark:text-blue-400"
+      description: "Edit existing blog posts",
+      icon: FileText,
+      href: "/admin-handler/blog",
+      color: "green",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+      borderColor: "border-green-200 dark:border-green-800",
     },
     {
-      href: "/admin-handler/courses",
       title: "Manage Courses",
-      description: "Create and manage online courses",
-      icon: (
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-          />
-        </svg>
-      ),
-      bgColor: "bg-green-500",
-      hoverColor: "text-green-600 dark:text-green-400"
+      description: "Create and edit courses",
+      icon: BookOpen,
+      href: "/admin-handler/courses",
+      color: "purple",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20",
+      borderColor: "border-purple-200 dark:border-purple-800",
     },
     {
-      href: "/admin-handler/tags",
       title: "Manage Tags",
-      description: "Organize content with tags",
-      icon: (
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-        </svg>
-      ),
-      bgColor: "bg-purple-500",
-      hoverColor: "text-purple-600 dark:text-purple-400"
-    }
+      description: "Organize content tags",
+      icon: Tag,
+      href: "/admin-handler/tags",
+      color: "yellow",
+      bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
+      borderColor: "border-yellow-200 dark:border-yellow-800",
+    },
+    {
+      title: "User Management",
+      description: "Manage user accounts",
+      icon: Users,
+      href: "/admin-handler/users",
+      color: "indigo",
+      bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
+      borderColor: "border-indigo-200 dark:border-indigo-800",
+    },
+    {
+      title: "Settings",
+      description: "Configure system settings",
+      icon: Settings,
+      href: "/admin-handler/settings",
+      color: "gray",
+      bgColor: "bg-gray-50 dark:bg-gray-900/20",
+      borderColor: "border-gray-200 dark:border-gray-800",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {quickActions.map((action, index) => (
-        <QuickActionCard
-          key={index}
-          href={action.href}
-          title={action.title}
-          description={action.description}
-          icon={action.icon}
-          bgColor={action.bgColor}
-          hoverColor={action.hoverColor}
-        />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {actions.map((action, index) => (
+        <QuickActionCard key={index} {...action} />
       ))}
     </div>
   );
-} 
+}
