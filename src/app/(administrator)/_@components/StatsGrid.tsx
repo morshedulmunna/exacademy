@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, Users, Eye, TrendingUp } from "lucide-react";
+import { FileText, Users, Eye, TrendingUp, BookOpen } from "lucide-react";
 import StatsCard from "./StatsCard";
 
 interface StatsGridProps {
@@ -11,49 +11,57 @@ interface StatsGridProps {
 
 /**
  * Stats Grid Component
- * Displays key statistics in a responsive grid layout
+ * Displays key business statistics in a responsive grid layout
+ * Simplified design with minimal colors
  */
 export default function StatsGrid({ totalPosts, publishedPosts, draftPosts, totalUsers }: StatsGridProps) {
+  // Calculate additional metrics
+  const publishRate = totalPosts > 0 ? Math.round((publishedPosts / totalPosts) * 100) : 0;
+  const estimatedRevenue = totalUsers * 50; // Rough estimate based on user base
+
   const stats = [
     {
       title: "Total Posts",
       value: totalPosts,
       icon: FileText,
-      color: "blue",
+      color: "gray" as const,
       change: "+12%",
       changeType: "increase" as const,
+      description: "Blog content created",
     },
     {
       title: "Published Posts",
       value: publishedPosts,
       icon: Eye,
-      color: "green",
-      change: "+8%",
+      color: "gray" as const,
+      change: `+${publishRate}%`,
       changeType: "increase" as const,
-    },
-    {
-      title: "Draft Posts",
-      value: draftPosts,
-      icon: FileText,
-      color: "yellow",
-      change: "-3%",
-      changeType: "decrease" as const,
+      description: "Live content",
     },
     {
       title: "Total Users",
       value: totalUsers,
       icon: Users,
-      color: "purple",
+      color: "gray" as const,
       change: "+15%",
       changeType: "increase" as const,
+      description: "Registered users",
+    },
+    {
+      title: "Est. Revenue",
+      value: `৳${estimatedRevenue.toLocaleString()}`,
+      icon: TrendingUp,
+      color: "gray" as const,
+      change: "+8%",
+      changeType: "increase" as const,
+      description: "Based on user base",
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
-        // Explicitly cast color to the allowed type to satisfy StatsCardProps
-        <StatsCard key={index} {...stat} color={stat.color as "blue" | "green" | "yellow" | "purple" | "red"} />
+        <StatsCard key={index} {...stat} />
       ))}
     </div>
   );

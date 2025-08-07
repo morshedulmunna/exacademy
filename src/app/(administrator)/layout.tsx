@@ -1,7 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-utils";
-import { AdminSidebar, AdminTopBar } from "./_@components";
+import { AdminSidebar, AdminTopBar, SidebarProvider } from "./_@components";
 
 type Props = {
   children: React.ReactNode;
@@ -16,14 +16,23 @@ export default async function AdministratorLayout({ children }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <AdminTopBar userName={user.name || "Admin"} />
-      <div className="flex">
-        <AdminSidebar />
-        <main className="flex-1 p-6 transition-colors duration-200">
-          {children}
-        </main>
+    <SidebarProvider>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        {/* Fixed Top Bar */}
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <AdminTopBar userName={user.name || "Admin"} />
+        </div>
+
+        {/* Fixed Sidebar */}
+        <div className="fixed top-16 left-0 h-full z-40">
+          <AdminSidebar />
+        </div>
+
+        {/* Main Content Area */}
+        <div className="pt-16 pl-64 transition-all duration-300" id="main-content">
+          <main className="p-6 transition-colors duration-200">{children}</main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

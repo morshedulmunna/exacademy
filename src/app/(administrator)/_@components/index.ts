@@ -6,6 +6,11 @@ export { default as StatsGrid } from "./StatsGrid";
 export { default as StatsCard } from "./StatsCard";
 export { default as QuickActionsGrid } from "./QuickActionsGrid";
 export { default as QuickActionCard } from "./QuickActionCard";
+export { default as QuickActionsDropdown } from "./QuickActionsDropdown";
+export { default as SimpleChart } from "./SimpleChart";
+
+// Sidebar Context
+export { SidebarProvider, useSidebar } from "./SidebarContext";
 
 // Blog Editor Components
 export { default as BlogEditorHeader } from "./BlogEditorHeader";
