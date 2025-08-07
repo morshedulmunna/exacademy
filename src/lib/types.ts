@@ -71,6 +71,40 @@ export interface Post {
   };
 }
 
+export interface Course {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  excerpt?: string;
+  thumbnail?: string;
+  price: number;
+  originalPrice?: number;
+  duration: string;
+  lessons: number;
+  students: number;
+  published: boolean;
+  featured: boolean;
+  viewCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt?: Date;
+  instructor: User;
+  tags: Tag[];
+  _count?: {
+    enrollments: number;
+  };
+}
+
+export interface CourseEnrollment {
+  id: string;
+  enrolledAt: Date;
+  completed: boolean;
+  progress: number;
+  user: User;
+  course: Course;
+}
+
 export interface Tag {
   id: string;
   name: string;

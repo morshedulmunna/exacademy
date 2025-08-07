@@ -19,13 +19,17 @@ export default async function AdminDashboard() {
   }
 
   // Fetch comprehensive admin statistics
-  const [totalPosts, publishedPosts, draftPosts, totalUsers, totalTags, totalViews, recentPosts, recentUsers, topViewedPosts] = await Promise.all([
+  const [totalPosts, publishedPosts, draftPosts, totalUsers, totalTags, totalViews, totalCourses, publishedCourses, draftCourses, totalEnrollments, recentPosts, recentUsers, recentCourses, topViewedPosts] = await Promise.all([
     prisma.post.count(),
     prisma.post.count({ where: { published: true } }),
     prisma.post.count({ where: { published: false } }),
     prisma.user.count(),
     prisma.tag.count(),
     prisma.post.aggregate({ _sum: { viewCount: true } }),
+    prisma.course.count(),
+    prisma.course.count({ where: { published: true } }),
+    prisma.course.count({ where: { published: false } }),
+    prisma.courseEnrollment.count(),
     prisma.post.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
@@ -35,6 +39,11 @@ export default async function AdminDashboard() {
       take: 5,
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, email: true, createdAt: true, avatar: true },
+    }),
+    prisma.course.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      include: { instructor: true },
     }),
     prisma.post.findMany({
       take: 5,
@@ -83,7 +92,16 @@ export default async function AdminDashboard() {
             <span>+12.5% from last month</span>
           </div>
         </div>
-        <StatsGrid totalPosts={totalPosts} publishedPosts={publishedPosts} draftPosts={draftPosts} totalUsers={totalUsers} />
+        <StatsGrid 
+          totalPosts={totalPosts} 
+          publishedPosts={publishedPosts} 
+          draftPosts={draftPosts} 
+          totalUsers={totalUsers}
+          totalCourses={totalCourses}
+          publishedCourses={publishedCourses}
+          draftCourses={draftCourses}
+          totalEnrollments={totalEnrollments}
+        />
       </div>
 
       {/* Simple Metrics Grid */}
@@ -193,6 +211,38 @@ export default async function AdminDashboard() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
                 </div>
                 <div className="text-xs text-gray-400">{new Date(user.createdAt).toLocaleDateString()}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Courses */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Courses</h2>
+            <Link href="/admin-handler/courses" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm flex items-center">
+              View all <ArrowUpRight className="w-3 h-3 ml-1" />
+            </Link>
+          </div>
+          <div className="space-y-4">
+            {recentCourses.map((course) => (
+              <div key={course.id} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white text-sm font-medium">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{course.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">by {course.instructor.name}</p>
+                </div>
+                <div className="text-right">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    course.published 
+                      ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                      : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200'
+                  }`}>
+                    {course.published ? 'Published' : 'Draft'}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

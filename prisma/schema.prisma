@@ -30,11 +30,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  posts    Post[]
-  comments Comment[]
-  likes    Like[]
-  accounts Account[]
-  sessions Session[]
+  posts       Post[]
+  comments    Comment[]
+  likes       Like[]
+  accounts    Account[]
+  sessions    Session[]
+  courses     Course[]
+  enrollments CourseEnrollment[]
 
   @@map("users")
 }
@@ -113,7 +115,8 @@ model Tag {
   color String @default("#3B82F6")
 
   // Relations
-  posts PostTag[]
+  posts   PostTag[]
+  courses CourseTag[]
 
   @@map("tags")
 }
@@ -158,4 +161,61 @@ model Like {
 
   @@unique([userId, postId])
   @@map("likes")
+}
+
+model Course {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  slug          String    @unique
+  description   String
+  excerpt       String?
+  thumbnail     String?
+  price         Float     @default(0)
+  originalPrice Float?
+  duration      String    @default("0h 0m")
+  lessons       Int       @default(0)
+  students      Int       @default(0)
+  published     Boolean   @default(false)
+  featured      Boolean   @default(false)
+  viewCount     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  publishedAt   DateTime?
+
+  // Relations
+  instructorId String             @db.ObjectId
+  instructor   User               @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  tags         CourseTag[]
+  enrollments  CourseEnrollment[]
+
+  @@map("courses")
+}
+
+model CourseTag {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  courseId String @db.ObjectId
+  tagId    String @db.ObjectId
+
+  // Relations
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, tagId])
+  @@map("course_tags")
+}
+
+model CourseEnrollment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  enrolledAt DateTime @default(now())
+  completed  Boolean  @default(false)
+  progress   Float    @default(0)
+
+  // Relations
+  userId   String @db.ObjectId
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId String @db.ObjectId
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
 }
