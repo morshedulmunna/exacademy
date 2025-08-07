@@ -15,7 +15,7 @@ export default function CourseCard({}: Props) {
           </div>
 
           <div className="mt-3">
-            <p className="underline capitalize hover:text-blue-500 dark:hover:text-blue-400 dark:text-gray-300 text-gray-600 font-medium transition-colors">Habibur Rahman</p>
+            <p className="underline capitalize hover:text-blue-500 dark:hover:text-blue-400 dark:text-gray-300 text-gray-600 font-medium transition-colors cursor-pointer">Habibur Rahman</p>
             <div className="flex items-center gap-2 mt-2">
               <RatingView ratingPercentage={80} />
               <p className="text-orange-500 dark:text-orange-400 font-medium">8k+ ratings</p>

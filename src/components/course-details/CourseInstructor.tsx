@@ -7,7 +7,7 @@ type Props = object;
 export default function CourseInstructor({}: Props) {
   return (
     <>
-      <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800/30 rounded-lg">
+      <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700">
         <h3 className="dark:text-white text-gray-900 font-semibold text-xl mb-4">Course Instructor</h3>
 
         <div className="my-4">

@@ -15,7 +15,7 @@ export default function CourseDescription({}: Props) {
       This course will introduce you to JS and allow you to use it to add interactivity to your existing 
       HTML/CSS codebase. We will start with basics in this course which includes:
     </p>
-    <ul class="list-disc pl-6 mb-4 space-y-2">
+    <ul class="list-disc pl-6 mb-4 space-y-2 dark:text-gray-200 text-gray-700">
       <li>Introduction to JavaScript</li>
       <li>How to work with HTML + CSS + JavaScript together</li>
       <li>Building core concepts</li>
@@ -34,7 +34,7 @@ export default function CourseDescription({}: Props) {
       <div className="mt-12">
         <MaxWidthWrapper>
           <h3 className="font-bold mb-6 dark:text-white text-gray-900 text-xl">About This Course</h3>
-          <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: rawHTML }} />
+          <div className="prose dark:prose-invert max-w-none prose-headings:dark:text-white prose-headings:text-gray-900 prose-p:dark:text-gray-200 prose-p:text-gray-700 prose-ul:dark:text-gray-200 prose-ul:text-gray-700" dangerouslySetInnerHTML={{ __html: rawHTML }} />
         </MaxWidthWrapper>
       </div>
     </>

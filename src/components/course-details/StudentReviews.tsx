@@ -14,9 +14,7 @@ export default function StudentReviews({}: Props) {
         <ReviewCard />
       </div>
 
-      <button type="button" className="flex mt-8 h-12 font-semibold hover:bg-orange-500/80 dark:hover:bg-orange-400/80 transition-all ease-in-out items-center justify-center gap-2 w-full bg-orange-500 dark:bg-orange-400 text-white rounded-lg shadow-sm hover:shadow-md">
-        <span>See More Reviews</span>
-      </button>
+      <p className="text-sm text-center hover:underline transition-all ease-in-out hover:text-cyan-500 cursor-pointer text-gray-500">See More Reviews</p>
     </div>
   );
 }

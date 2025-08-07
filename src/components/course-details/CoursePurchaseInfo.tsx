@@ -12,11 +12,11 @@ export default function CoursePurchaseInfo({}: Props) {
           Includes <strong className="dark:text-white text-gray-900">lifetime access</strong> to current and future updates to the course. Learn at your own pace, anytime.
         </p>
 
-        <button className="bg-primary dark:bg-blue-600 text-xl font-semibold hover:bg-primary/90 dark:hover:bg-blue-700 transition-all ease-linear text-white px-4 py-3 w-full rounded-lg mt-4 shadow-sm hover:shadow-md">Buy Now</button>
+        <button className=" gradient-bg text-xl font-semibold  text-white px-4 py-3 w-full rounded-lg mt-4 shadow-sm hover:shadow-md">Buy Now</button>
 
-        <button className="w-full mt-3 hover:text-primary dark:hover:text-blue-400 border border-gray-300 dark:border-gray-600 py-2 px-2 rounded-lg text-sm font-medium dark:text-gray-200 text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors">
+        {/* <button className="w-full mt-3 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-300 dark:border-gray-600 py-2 px-2 rounded-lg text-sm font-medium dark:text-gray-200 text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors">
           Apply coupon
-        </button>
+        </button> */}
       </div>
 
       {/* certification */}

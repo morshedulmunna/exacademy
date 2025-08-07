@@ -23,7 +23,7 @@ export default function FeedbackRating({}: Props) {
                 </div>
                 <div className="flex items-center gap-2 min-w-[80px]">
                   <RatingView ratingPercentage={45} />
-                  <p className="text-primary dark:text-blue-400 font-medium text-sm">75%</p>
+                  <p className="text-blue-600 dark:text-blue-400 font-medium text-sm">75%</p>
                 </div>
               </div>
             ))}

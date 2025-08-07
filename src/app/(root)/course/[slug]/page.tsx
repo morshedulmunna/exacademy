@@ -33,7 +33,9 @@ export default function CourseDetailsPage({}: Props) {
                 <MoreCoursesByInstructor />
               </div>
               <div className="col-span-12 lg:col-span-4 order-1 lg:order-2">
-                <CoursePurchaseSection />
+                <div className="sticky top-4">
+                  <CoursePurchaseSection />
+                </div>
               </div>
             </div>
           </MaxWidthWrapper>

@@ -18,24 +18,24 @@ export default function CourseStructure({}: Props) {
           <div className="p-4 dark:text-gray-200 text-gray-700">
             <div className="flex items-center justify-between">
               <span className="font-medium">Course Content</span>
-              <span className="text-sm dark:text-gray-400 text-gray-500">Expand all</span>
+              <span className="text-sm dark:text-gray-400 text-gray-500 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Expand all</span>
             </div>
             <div className="mt-4 space-y-3">
-              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg border dark:border-gray-600">
+              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span className="dark:text-gray-200 text-gray-700">Introduction to JavaScript</span>
                 </div>
                 <span className="text-sm dark:text-gray-400 text-gray-500">15 min</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg border dark:border-gray-600">
+              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span className="dark:text-gray-200 text-gray-700">Variables and Data Types</span>
                 </div>
                 <span className="text-sm dark:text-gray-400 text-gray-500">25 min</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg border dark:border-gray-600">
+              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span className="dark:text-gray-200 text-gray-700">Control Flow</span>

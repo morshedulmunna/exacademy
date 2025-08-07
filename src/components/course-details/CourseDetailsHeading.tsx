@@ -20,13 +20,13 @@ export default function CourseDetailsHeading({}: Props) {
           <div className="flex items-start flex-col md:flex-row justify-start gap-2 md:gap-6">
             <RatingView />
             <p className="text-yellow-500 text-sm">(3k ratings)</p>
-            <div className={`px-2 text-sm rounded ${theme === "dark" ? "bg-white/10 text-white" : "bg-gray-100 text-gray-900"}`}>17.9k students enrolled</div>
+            <div className={`px-2 text-sm rounded ${theme === "dark" ? "bg-gray-700/50 text-gray-200" : "bg-gray-100 text-gray-700"}`}>17.9k students enrolled</div>
           </div>
           <button className={`cursor-default py-1 text-xs px-2 rounded-full ${theme === "dark" ? "bg-orange-500/20 text-orange-400" : "bg-orange-100 text-orange-600"}`}>Excellent Rating</button>
 
           <div className="flex items-center justify-start gap-2">
             <p className={theme === "dark" ? "text-gray-300" : "text-gray-600"}>Course Instructor:</p>
-            <p className={`underline transition-all ease-in-out cursor-pointer ${theme === "dark" ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"}`}>Habibur Rahman</p>
+            <p className={`underline transition-all ease-in-out cursor-pointer ${theme === "dark" ? "text-cyan-400 hover:text-cyan-500" : "text-cyan-600 hover:text-cyan-500"}`}>Habibur Rahman</p>
           </div>
         </div>
         <div className={`w-full lg:w-1/2 rounded-lg ${theme === "dark" ? "bg-gray-800" : "bg-gray-200"}`}></div>

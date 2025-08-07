@@ -12,7 +12,7 @@ const BoxWrapper: React.FC<BoxWrapperProps> = ({
 }) => {
   return (
     <div
-      className={`  shadow-sm border border-gray-200 dark:border-gray-900 rounded p-[2px] ${className} `}
+      className={`shadow-sm border border-gray-200 dark:border-gray-700 rounded p-[2px] ${className}`}
       {...props}
     >
       {children}
