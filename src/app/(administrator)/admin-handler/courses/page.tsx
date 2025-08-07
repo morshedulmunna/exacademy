@@ -3,8 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/db";
-import { Plus, Edit, Eye, Trash2, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
+import { Plus, Edit, Eye, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
 import Image from "next/image";
+import DeleteCourseButton from "@/components/course/DeleteCourseButton";
 
 /**
  * Course Management Page
@@ -225,9 +226,7 @@ export default async function CourseManagementPage() {
                       <Link href={`/admin-handler/courses/${course.id}/edit`} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" title="Edit Course">
                         <Edit className="w-4 h-4" />
                       </Link>
-                      <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete Course">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <DeleteCourseButton courseId={course.id} courseTitle={course.title} />
                       <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300" title="More Options">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
