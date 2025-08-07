@@ -18,7 +18,7 @@ export default function MobileMenuButton({ isOpen, onClick }: MobileMenuButtonPr
   return (
     <button 
       onClick={onClick} 
-      className={`lg:hidden p-2 transition-colors duration-300 mobile-menu-button ${
+      className={`md:hidden p-2 transition-colors duration-300 mobile-menu-button ${
         theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"
       }`}
     >

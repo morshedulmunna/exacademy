@@ -20,14 +20,9 @@ export default async function AdminDashboard() {
 
   return (
     <div className="py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" px-4 sm:px-6 lg:px-8">
         <DashboardHeader />
-        <StatsGrid 
-          totalPosts={totalPosts}
-          publishedPosts={publishedPosts}
-          draftPosts={draftPosts}
-          totalUsers={totalUsers}
-        />
+        <StatsGrid totalPosts={totalPosts} publishedPosts={publishedPosts} draftPosts={draftPosts} totalUsers={totalUsers} />
         <QuickActionsGrid />
       </div>
     </div>
