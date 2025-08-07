@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             id: true,
             name: true,
             email: true,
-            image: true,
+            avatar: true,
           },
         },
         modules: {
@@ -36,18 +36,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             },
           },
         },
-        reviews: {
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+        enrollments: {
           include: {
             user: {
               select: {
                 id: true,
                 name: true,
-                image: true,
+                avatar: true,
               },
             },
-          },
-          orderBy: {
-            createdAt: "desc",
           },
         },
       },
@@ -118,7 +120,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             id: true,
             name: true,
             email: true,
-            image: true,
+            avatar: true,
           },
         },
         modules: {
@@ -131,6 +133,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
                 order: "asc",
               },
             },
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
           },
         },
       },
