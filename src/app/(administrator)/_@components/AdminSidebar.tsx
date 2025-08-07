@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
+import { useThemeGradients } from "@/components/ui/ThemeGradients";
 import { Shield, FileText, BookOpen, Tag, Users, Settings, BarChart3, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
@@ -13,6 +14,7 @@ import { Shield, FileText, BookOpen, Tag, Users, Settings, BarChart3, MessageSqu
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { isCollapsed, setIsCollapsed } = useSidebar();
+  const gradients = useThemeGradients();
 
   const navItems = [
     {
@@ -77,7 +79,7 @@ export default function AdminSidebar() {
     <aside className={`bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 transition-all duration-300 h-full overflow-y-auto ${isCollapsed ? "w-16" : "w-64"}`}>
       {/* Toggle button */}
       <div className="flex justify-end p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-        <button onClick={() => setIsCollapsed(!isCollapsed)} className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-200">
+        <button onClick={() => setIsCollapsed(!isCollapsed)} className={`p-2 rounded-lg ${gradients.bgGradient} text-white transition-all duration-200 ${gradients.hoverBgGradient}`}>
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
@@ -93,17 +95,15 @@ export default function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
-                isActive
-                  ? "bg-gradient-to-r  dark:from-purple-900/20 dark:to-pink-900/20 text-purple-700 dark:text-purple-300 border-r-2 border-gradient-to-b from-purple-500 to-pink-500"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/10 dark:hover:to-pink-900/10"
+                isActive ? `${gradients.activeBgGradient} ${gradients.primaryText} border-r-2 ${gradients.borderColor}` : "text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-purple-900/10 dark:hover:to-pink-900/10"
               }`}
               title={isCollapsed ? item.label : undefined}
             >
-              <IconComponent className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-purple-600 dark:text-purple-400" : "text-gray-500 dark:text-gray-400 group-hover:text-purple-500 dark:group-hover:text-purple-400"}`} />
+              <IconComponent className={`w-5 h-5 flex-shrink-0 ${isActive ? gradients.iconColor : "text-gray-500 dark:text-gray-400 group-hover:text-blue-500 dark:group-hover:text-purple-400"}`} />
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${isActive ? "text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text dark:from-purple-300 dark:to-pink-300" : "text-gray-900 dark:text-white"}`}>{item.label}</p>
-                  <p className={`text-xs truncate ${isActive ? "text-transparent bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text dark:from-purple-400 dark:to-pink-400" : "text-gray-500 dark:text-gray-400"}`}>{item.description}</p>
+                  <p className={`text-sm font-medium truncate ${isActive ? gradients.textGradient : "text-gray-900 dark:text-white"}`}>{item.label}</p>
+                  <p className={`text-xs truncate ${isActive ? gradients.secondaryText : "text-gray-500 dark:text-gray-400"}`}>{item.description}</p>
                 </div>
               )}
             </Link>
@@ -114,7 +114,7 @@ export default function AdminSidebar() {
       {/* Quick stats when expanded */}
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-white shadow-lg">
+          <div className={`${gradients.bgGradient} rounded-lg p-4 text-white shadow-lg`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium opacity-90">Quick Stats</p>

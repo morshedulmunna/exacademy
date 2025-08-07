@@ -11,7 +11,11 @@ export default {
   	extend: {
   		backgroundImage: {
   			JobCardGradient: 'linear-gradient(160deg, rgba(0, 56, 240, 0.94) 5.04%, rgba(41, 157, 242, 0.75) 98.97%)',
-  			JobCardHove: ' linear-gradient(180deg, #554CA7 0%, #211E41 100%)'
+  			JobCardHove: ' linear-gradient(180deg, #554CA7 0%, #211E41 100%)',
+  			'admin-gradient-light': 'linear-gradient(to right, #3B82F6, #6366F1)',
+  			'admin-gradient-dark': 'linear-gradient(to right, #8B5CF6, #EC4899)',
+  			'admin-gradient-text-light': 'linear-gradient(to right, #1D4ED8, #4338CA)',
+  			'admin-gradient-text-dark': 'linear-gradient(to right, #7C3AED, #DB2777)'
   		},
   		colors: {
   			background: 'hsl(var(--background))',
