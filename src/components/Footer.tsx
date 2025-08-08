@@ -17,6 +17,15 @@ export default function Footer({}: Props) {
             </div>
 
             <div className="flex items-center gap-6">
+              <Link href="/contact" className="text-sm hover:text-gray-300 transition">
+                Contact
+              </Link>
+              <Link href="/privacy-policy" className="text-sm hover:text-gray-300 transition">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="text-sm hover:text-gray-300 transition">
+                Terms
+              </Link>
               <Link href="https://discord.gg/gkjQHgcD" className="text-sm hover:text-gray-300 transition">
                 Discord
               </Link>
