@@ -218,3 +218,28 @@
 .gradient-bg {
   @apply bg-gradient-to-r from-purple-500 to-pink-500;
 }
+
+/* TipTap editor placeholder */
+.ProseMirror p.is-editor-empty:first-child::before,
+.ProseMirror h1.is-editor-empty:first-child::before,
+.ProseMirror h2.is-editor-empty:first-child::before,
+.ProseMirror h3.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-gray-400 dark:text-gray-500;
+  float: left;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Ensure list markers are visible inside the editor */
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  list-style-position: outside; /* keep markers aligned with text even with block children */
+}
+.ProseMirror ul {
+  list-style-type: disc;
+}
+.ProseMirror ol {
+  list-style-type: decimal;
+}

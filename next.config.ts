@@ -16,15 +16,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Serve static files from uploads directory
-  async rewrites() {
-    return [
-      {
-        source: '/uploads/:path*',
-        destination: '/src/public/uploads/:path*',
-      },
-    ];
-  },
+  // No rewrite needed; files are emitted under public/uploads
 };
 
 export default nextConfig;

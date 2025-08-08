@@ -13,9 +13,10 @@ interface BlogEditorContentProps {
   onTabChange: TabChangeHandler;
   onTitleChange: TitleChangeHandler;
   onContentChange: ContentChangeHandler;
+  coverImageUrl?: string | null;
 }
 
-export default function BlogEditorContent({ activeTab, articleTitle, content, onTabChange, onTitleChange, onContentChange }: BlogEditorContentProps) {
+export default function BlogEditorContent({ activeTab, articleTitle, content, onTabChange, onTitleChange, onContentChange, coverImageUrl }: BlogEditorContentProps) {
   const [isMarkdownReady, setIsMarkdownReady] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -60,14 +61,11 @@ export default function BlogEditorContent({ activeTab, articleTitle, content, on
     return (
       <div className="prose prose-invert max-w-none">
         {/* Cover Image */}
-        <div className="relative w-full h-64 bg-gradient-to-br from-blue-900 to-blue-700 rounded-lg mb-8 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white">
-              <div className="text-6xl mb-4">🐹</div>
-              <h1 className="text-4xl font-bold">Golang Closure</h1>
-            </div>
+        {coverImageUrl && (
+          <div className="relative w-full h-64 rounded-lg mb-8 overflow-hidden border border-gray-700">
+            <img src={coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
           </div>
-        </div>
+        )}
 
         {/* Article Title */}
         <h1 className="text-4xl font-bold mb-6">{articleTitle}</h1>
