@@ -23,7 +23,7 @@ export interface Lesson {
   order: number;
   isFree: boolean;
   published: boolean;
-  contents: LessonContent[];
+  contents?: LessonContent[];
 }
 
 export interface LessonContent {
@@ -375,7 +375,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
             m.id === moduleId
               ? {
                   ...m,
-                  lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...l.contents, newContent] } : l)),
+                  lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
                 }
               : m
           )
@@ -385,7 +385,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
             m.id === moduleId
               ? {
                   ...m,
-                  lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...l.contents, newContent] } : l)),
+                  lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
                 }
               : m
           )
@@ -605,9 +605,9 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                         <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Content Files</h6>
 
                         {/* Existing Content */}
-                        {lesson.contents.length > 0 && (
+                        {(lesson.contents?.length ?? 0) > 0 && (
                           <div className="space-y-2">
-                            {lesson.contents.map((content) => (
+                            {(lesson.contents ?? []).map((content) => (
                               <div key={content.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded">
                                 <div className="flex items-center space-x-2">
                                   {getContentIcon(content.type)}

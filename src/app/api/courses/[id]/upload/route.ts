@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { FileUploader } from "@/lib/file-upload";
-import multer from "multer";
-import { promisify } from "util";
 
-// Configure multer for file uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 500 * 1024 * 1024, // 500MB limit
-  },
-});
-
-const uploadMiddleware = promisify(upload.single("file"));
+// Using the Web File API via request.formData() for handling multipart/form-data in App Router
 
 /**
  * POST /api/courses/[id]/upload
@@ -33,6 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // Parse the multipart form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const lessonId = formData.get("lessonId")?.toString();
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -60,9 +51,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Upload file
-    const result = await FileUploader.uploadCourseContent(multerFile, id);
+    const result = await FileUploader.uploadCourseContent(multerFile, id, lessonId);
 
-    return NextResponse.json(result);
+    // Return 201 Created to match client expectation
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -83,7 +75,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     const { searchParams } = new URL(request.url);
-    const fileUrl = searchParams.get("url");
+    // Align with client which sends ?fileUrl=
+    const fileUrl = searchParams.get("fileUrl");
 
     if (!fileUrl) {
       return NextResponse.json({ error: "File URL is required" }, { status: 400 });

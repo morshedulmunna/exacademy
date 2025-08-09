@@ -233,10 +233,17 @@ export default function EditCoursePage() {
             <X className="w-4 h-4" />
             <span>Delete</span>
           </button>
-          <button type="submit" form="course-form" disabled={isLoading} className="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-4 py-2 rounded-lg transition-colors">
-            <Save className="w-4 h-4" />
-            <span>{isLoading ? "Saving..." : "Save Changes"}</span>
-          </button>
+          {activeTab === "details" ? (
+            <button type="submit" form="course-form" disabled={isLoading} className="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-4 py-2 rounded-lg transition-colors">
+              <Save className="w-4 h-4" />
+              <span>{isLoading ? "Saving..." : "Save Changes"}</span>
+            </button>
+          ) : (
+            <button type="button" onClick={() => router.push("/admin-handler/courses")} disabled={isLoading} className="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-4 py-2 rounded-lg transition-colors">
+              <Save className="w-4 h-4" />
+              <span>{isLoading ? "Saving..." : "Save Changes"}</span>
+            </button>
+          )}
         </div>
       </div>
 
