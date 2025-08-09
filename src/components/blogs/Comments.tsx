@@ -30,7 +30,7 @@ interface CommentItem {
  * Comments renders the comment list and an input box to submit a new comment.
  */
 export default function Comments({ slug }: { slug: string }) {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -38,8 +38,12 @@ export default function Comments({ slug }: { slug: string }) {
   // Active inline reply editor and its content
   const [replyParentId, setReplyParentId] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState<string>("");
+  // Inline edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const replyTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  const editTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
   /**
    * Formats a timestamp into a short relative string like "2h ago".
@@ -124,7 +128,7 @@ export default function Comments({ slug }: { slug: string }) {
         return;
       }
       const created = (await res.json()) as CommentItem;
-      setComments((prev) => [created, ...prev]);
+      setComments((prev) => [...prev, created]);
       setContent("");
     } finally {
       setSubmitting(false);
@@ -161,7 +165,7 @@ export default function Comments({ slug }: { slug: string }) {
           c.id === replyParentId
             ? {
                 ...c,
-                replies: [{ id: created.id, content: created.content, createdAt: created.createdAt, author: created.author }, ...(c.replies || [])],
+                replies: [...(c.replies || []), { id: created.id, content: created.content, createdAt: created.createdAt, author: created.author }],
               }
             : c
         )
@@ -174,6 +178,9 @@ export default function Comments({ slug }: { slug: string }) {
   }
 
   function onClickReply(parent: CommentItem) {
+    // close edit if open
+    setEditingId(null);
+    setEditingContent("");
     setReplyParentId(parent.id);
     const mention = `@${parent.author.username}`;
     setReplyContent((prev) => {
@@ -182,6 +189,72 @@ export default function Comments({ slug }: { slug: string }) {
     });
     // focus inline textarea for this comment
     requestAnimationFrame(() => replyTextareaRefs.current[parent.id]?.focus());
+  }
+
+  function onClickEdit(targetId: string, currentContent: string) {
+    // close reply if open
+    setReplyParentId(null);
+    setReplyContent("");
+    setEditingId(targetId);
+    setEditingContent(currentContent);
+    requestAnimationFrame(() => editTextareaRefs.current[targetId]?.focus());
+  }
+
+  async function onSubmitEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingId || submitting) return;
+    const trimmed = editingContent.trim();
+    if (!trimmed) return;
+    if (status !== "authenticated") {
+      const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
+      await signIn(undefined, { callbackUrl });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/posts/${slug}/comments`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingId, content: trimmed }),
+      });
+      if (!res.ok) {
+        if (res.status === 401) {
+          const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
+          await signIn(undefined, { callbackUrl });
+        }
+        return;
+      }
+      const updated = (await res.json()) as CommentItem;
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === updated.id) return { ...c, content: updated.content };
+          const replies = c.replies?.map((r) => (r.id === updated.id ? { ...r, content: updated.content } : r));
+          return { ...c, replies } as CommentItem;
+        })
+      );
+      setEditingId(null);
+      setEditingContent("");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function onDelete(commentId: string, parentId?: string) {
+    if (status !== "authenticated") {
+      const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
+      await signIn(undefined, { callbackUrl });
+      return;
+    }
+    const confirmed = typeof window !== "undefined" ? window.confirm("Delete this comment?") : true;
+    if (!confirmed) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/posts/${slug}/comments?id=${encodeURIComponent(commentId)}`, { method: "DELETE" });
+      if (!res.ok) return;
+      setComments((prev) => (parentId ? prev.map((c) => (c.id === parentId ? { ...c, replies: (c.replies || []).filter((r) => r.id !== commentId) } : c)) : prev.filter((c) => c.id !== commentId)));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // inline reply editor is rendered directly beneath the comment; no separate banner needed
@@ -263,10 +336,54 @@ export default function Comments({ slug }: { slug: string }) {
                     {formatRelativeTime(c.createdAt)}
                   </time>
                 </div>
-                <div className="text-sm leading-6 whitespace-pre-wrap break-words">{renderWithMentions(c.content)}</div>
-                <button type="button" onClick={() => onClickReply(c)} className="mt-2 inline-flex items-center rounded px-2 py-1 text-xs text-primary hover:bg-primary/10" aria-label={`Reply to ${c.author?.username}`}>
-                  Reply
-                </button>
+                {editingId === c.id ? (
+                  <form onSubmit={onSubmitEdit} className="mt-2">
+                    <textarea
+                      ref={(el) => {
+                        editTextareaRefs.current[c.id] = el;
+                      }}
+                      value={editingContent}
+                      onChange={(e) => setEditingContent(e.target.value)}
+                      className="w-full resize-y rounded-lg border border-gray-800 bg-black/30 p-2 text-sm outline-none"
+                      rows={3}
+                      disabled={submitting}
+                    />
+                    <div className="mt-2 flex items-center gap-2">
+                      <button type="submit" className="rounded-md bg-primary px-3 py-1.5 text-xs text-white disabled:opacity-50" disabled={submitting || !editingContent.trim()}>
+                        {submitting ? "Saving…" : "Save"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(null);
+                          setEditingContent("");
+                        }}
+                        className="rounded-md border border-gray-700 px-2 py-1 text-[11px]"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div className="text-sm leading-6 whitespace-pre-wrap break-words">{renderWithMentions(c.content)}</div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <button type="button" onClick={() => onClickReply(c)} className="inline-flex items-center rounded px-2 py-1 text-xs text-primary hover:bg-primary/10" aria-label={`Reply to ${c.author?.username}`}>
+                        Reply
+                      </button>
+                      {session?.user?.id === c.author?.id && (
+                        <>
+                          <button type="button" onClick={() => onClickEdit(c.id, c.content)} className="inline-flex items-center rounded px-2 py-1 text-xs text-gray-300 hover:bg-gray-800/70">
+                            Edit
+                          </button>
+                          <button type="button" onClick={() => onDelete(c.id)} className="inline-flex items-center rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/20">
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 {c.replies && c.replies.length > 0 && (
                   <ul className="mt-3 space-y-3 border-l border-gray-800 pl-4 sm:pl-6">
@@ -286,12 +403,54 @@ export default function Comments({ slug }: { slug: string }) {
                               {formatRelativeTime(r.createdAt)}
                             </time>
                           </div>
-                          <div className="text-sm leading-6 whitespace-pre-wrap break-words">{renderWithMentions(r.content)}</div>
-                          <div className="mt-2">
-                            <button type="button" onClick={() => onClickReply(c)} className="inline-flex items-center rounded px-2 py-1 text-xs text-primary hover:bg-primary/10" aria-label={`Reply to ${c.author?.username}`}>
-                              Reply
-                            </button>
-                          </div>
+                          {editingId === r.id ? (
+                            <form onSubmit={onSubmitEdit} className="mt-2">
+                              <textarea
+                                ref={(el) => {
+                                  editTextareaRefs.current[r.id] = el;
+                                }}
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                                className="w-full resize-y rounded-lg border border-gray-800 bg-black/30 p-2 text-sm outline-none"
+                                rows={3}
+                                disabled={submitting}
+                              />
+                              <div className="mt-2 flex items-center gap-2">
+                                <button type="submit" className="rounded-md bg-primary px-3 py-1.5 text-xs text-white disabled:opacity-50" disabled={submitting || !editingContent.trim()}>
+                                  {submitting ? "Saving…" : "Save"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingId(null);
+                                    setEditingContent("");
+                                  }}
+                                  className="rounded-md border border-gray-700 px-2 py-1 text-[11px]"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </form>
+                          ) : (
+                            <>
+                              <div className="text-sm leading-6 whitespace-pre-wrap break-words">{renderWithMentions(r.content)}</div>
+                              <div className="mt-2 flex items-center gap-2">
+                                <button type="button" onClick={() => onClickReply(c)} className="inline-flex items-center rounded px-2 py-1 text-xs text-primary hover:bg-primary/10" aria-label={`Reply to ${c.author?.username}`}>
+                                  Reply
+                                </button>
+                                {session?.user?.id === r.author?.id && (
+                                  <>
+                                    <button type="button" onClick={() => onClickEdit(r.id, r.content)} className="inline-flex items-center rounded px-2 py-1 text-xs text-gray-300 hover:bg-gray-800/70">
+                                      Edit
+                                    </button>
+                                    <button type="button" onClick={() => onDelete(r.id, c.id)} className="inline-flex items-center rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/20">
+                                      Delete
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </li>
                     ))}
