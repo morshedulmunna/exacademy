@@ -30,13 +30,14 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  posts       Post[]
-  comments    Comment[]
-  likes       Like[]
-  accounts    Account[]
-  sessions    Session[]
-  courses     Course[]
-  enrollments CourseEnrollment[]
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  accounts      Account[]
+  sessions      Session[]
+  courses       Course[]
+  enrollments   CourseEnrollment[]
+  courseReviews CourseReview[]
 
   @@map("users")
 }
@@ -186,6 +187,7 @@ model Course {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   publishedAt   DateTime?
+  outcomes      String[]
 
   // Relations
   instructorId String             @db.ObjectId
@@ -193,6 +195,7 @@ model Course {
   tags         CourseTag[]
   enrollments  CourseEnrollment[]
   modules      CourseModule[]
+  reviews      CourseReview[]
 
   @@map("courses")
 }
@@ -286,4 +289,22 @@ enum ContentType {
   IMAGE
   AUDIO
   OTHER
+}
+
+model CourseReview {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId   String @db.ObjectId
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId String @db.ObjectId
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([userId])
+  @@map("course_reviews")
 }

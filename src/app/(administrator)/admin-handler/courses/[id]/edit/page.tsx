@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Loader2, BookOpen } from "luci
 import Link from "next/link";
 import Image from "next/image";
 import CourseBuilder from "@/components/course/CourseBuilder";
+import BlockEditor from "@/components/ui/BlockEditor";
 
 /**
  * Course Edit Page
@@ -120,6 +121,12 @@ export default function EditCoursePage() {
     setError(null);
 
     try {
+      // Simple client-side validation for required rich text description
+      if (!formData.title.trim() || !formData.slug.trim() || !formData.description.trim()) {
+        setError("Please fill in all required fields, including the full description.");
+        setIsLoading(false);
+        return;
+      }
       const response = await fetch(`/api/courses/${courseId}`, {
         method: "PUT",
         headers: {
@@ -319,15 +326,15 @@ export default function EditCoursePage() {
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Full Description *
                     </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      required
-                      rows={6}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      placeholder="Detailed description of what students will learn"
+                    <BlockEditor
+                      initialContent={formData.description}
+                      onChange={(html) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: html,
+                        }))
+                      }
+                      placeholder="Detailed description of what students will learn. Type '/' for commands"
                     />
                   </div>
                 </div>

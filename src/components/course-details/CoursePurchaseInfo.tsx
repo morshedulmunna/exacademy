@@ -4,12 +4,21 @@ import React from "react";
 
 type Props = {
   slug: string;
+  price: number;
+  duration: string;
+  lessons: number;
+  originalPrice?: number;
 };
 
-export default function CoursePurchaseInfo({ slug }: Props) {
+export default function CoursePurchaseInfo({ slug, price, duration, lessons, originalPrice }: Props) {
   return (
     <>
-      <h1 className="mb-2 text-2xl sm:text-3xl md:text-4xl dark:text-white text-gray-900 font-bold">৳999</h1>
+      <div className="mb-2">
+        <div className="flex items-baseline gap-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl dark:text-white text-gray-900 font-bold">৳{price}</h1>
+          {originalPrice && originalPrice > price ? <span className="text-sm md:text-base text-gray-500 dark:text-gray-400 line-through">৳{originalPrice}</span> : null}
+        </div>
+      </div>
       <div>
         <p className="text-sm sm:text-base font-normal leading-6 dark:text-gray-200 text-gray-700">
           Includes <strong className="dark:text-white text-gray-900">lifetime access</strong> to current and future updates to the course. Learn at your own pace, anytime.
@@ -36,11 +45,11 @@ export default function CoursePurchaseInfo({ slug }: Props) {
 
         <div className="flex items-center text-xs sm:text-sm font-medium gap-2 sm:gap-3 mt-3 dark:text-gray-200 text-gray-700">
           <Video size={18} className="sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400" />
-          <p>33 video lectures</p>
+          <p>{lessons} video lectures</p>
         </div>
         <div className="flex items-center text-xs sm:text-sm font-medium gap-2 sm:gap-3 mt-3 dark:text-gray-200 text-gray-700">
           <Timer size={18} className="sm:w-5 sm:h-5 text-green-500 dark:text-green-400" />
-          <p>11h 45m total duration</p>
+          <p>{duration} total duration</p>
         </div>
         <div className="flex items-center text-xs sm:text-sm font-medium gap-2 sm:gap-3 mt-3 dark:text-gray-200 text-gray-700">
           <HeartHandshake size={18} className="sm:w-5 sm:h-5 text-red-500 dark:text-red-400" />

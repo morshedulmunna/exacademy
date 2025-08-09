@@ -9,7 +9,7 @@ import { prisma } from "@/lib/db";
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {};
-    
+
     if (status === "published") {
       where.published = true;
     } else if (status === "draft") {
@@ -33,11 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { excerpt: { contains: search, mode: "insensitive" } },
-      ];
+      where.OR = [{ title: { contains: search, mode: "insensitive" } }, { description: { contains: search, mode: "insensitive" } }, { excerpt: { contains: search, mode: "insensitive" } }];
     }
 
     // Fetch courses with pagination
@@ -83,10 +79,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching courses:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -97,33 +90,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const {
-      title,
-      slug,
-      description,
-      excerpt,
-      price,
-      originalPrice,
-      duration,
-      lessons,
-      thumbnail,
-      published,
-      featured,
-      tagIds = [],
-    } = body;
+    const { title, slug, description, excerpt, price, originalPrice, duration, lessons, thumbnail, published, featured, outcomes = [], tagIds = [] } = body;
 
     // Validate required fields
     if (!title || !slug || !description || price === undefined) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Check if slug already exists
@@ -132,10 +109,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingCourse) {
-      return NextResponse.json(
-        { error: "Course with this slug already exists" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Course with this slug already exists" }, { status: 400 });
     }
 
     // Create course with tags
@@ -152,6 +126,7 @@ export async function POST(request: NextRequest) {
         thumbnail,
         published: published || false,
         featured: featured || false,
+        outcomes: Array.isArray(outcomes) ? outcomes.filter((o: unknown) => typeof o === "string" && o.trim().length > 0) : [],
         instructorId: user.id,
         publishedAt: published ? new Date() : null,
         tags: {
@@ -186,9 +161,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(course, { status: 201 });
   } catch (error) {
     console.error("Error creating course:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

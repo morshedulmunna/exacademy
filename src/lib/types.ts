@@ -91,9 +91,53 @@ export interface Course {
   publishedAt?: Date;
   instructor: User;
   tags: Tag[];
+  outcomes?: string[];
   _count?: {
     enrollments: number;
   };
+  // Optional nested relations when fully loading a course
+  modules?: CourseModule[];
+  enrollments?: Array<{
+    id: string;
+    user: Pick<User, "id" | "name" | "avatar">;
+  }>;
+  reviews?: CourseReview[];
+  relatedCourses?: Course[];
+}
+
+export interface LessonContent {
+  id: string;
+  title: string;
+  type: "VIDEO" | "PDF" | "DOCUMENT" | "IMAGE" | "AUDIO" | "OTHER";
+  url: string;
+  size?: number;
+  filename: string;
+  createdAt: Date;
+}
+
+export interface Lesson {
+  id: string;
+  title: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  duration: string; // e.g., "15 min" or "10m"
+  order: number;
+  isFree: boolean;
+  published: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  contents: LessonContent[];
+}
+
+export interface CourseModule {
+  id: string;
+  title: string;
+  description?: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+  lessons: Lesson[];
 }
 
 export interface CourseEnrollment {
@@ -103,6 +147,15 @@ export interface CourseEnrollment {
   progress: number;
   user: User;
   course: Course;
+}
+
+export interface CourseReview {
+  id: string;
+  rating: number; // 1-5
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: Pick<User, "id" | "name" | "avatar">;
 }
 
 export interface Tag {

@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye, EyeOff, Upload, X } from "lucide-react";
+import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import type { Tag } from "@/lib/types";
+import BlockEditor from "@/components/ui/BlockEditor";
 
 /**
  * Course Creation Page
@@ -17,6 +19,8 @@ export default function CreateCoursePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -31,6 +35,8 @@ export default function CreateCoursePage() {
     thumbnail: "",
     published: false,
     featured: false,
+    outcomes: [] as string[],
+    tagIds: [] as string[],
   });
 
   // Redirect if not authenticated or not admin
@@ -73,6 +79,36 @@ export default function CreateCoursePage() {
     }
   };
 
+  // Load tags for selection
+  useEffect(() => {
+    let mounted = true;
+    const loadTags = async () => {
+      try {
+        setIsLoadingTags(true);
+        const res = await fetch("/api/tags");
+        if (!res.ok) return;
+        const tags: Tag[] = await res.json();
+        if (mounted) setAvailableTags(tags);
+      } catch (e) {
+        console.error("Failed to load tags", e);
+      } finally {
+        setIsLoadingTags(false);
+      }
+    };
+    loadTags();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const toggleTag = (tagId: string) => {
+    setFormData((prev) => {
+      const exists = prev.tagIds.includes(tagId);
+      const next = exists ? prev.tagIds.filter((id) => id !== tagId) : [...prev.tagIds, tagId];
+      return { ...prev, tagIds: next };
+    });
+  };
+
   const removeThumbnail = () => {
     setThumbnailPreview(null);
     setFormData((prev) => ({ ...prev, thumbnail: "" }));
@@ -83,6 +119,11 @@ export default function CreateCoursePage() {
     setIsLoading(true);
 
     try {
+      // Basic client-side validation for required fields
+      if (!formData.title.trim() || !formData.slug.trim() || !formData.description.trim()) {
+        setIsLoading(false);
+        return;
+      }
       const response = await fetch("/api/courses", {
         method: "POST",
         headers: {
@@ -192,15 +233,15 @@ export default function CreateCoursePage() {
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Full Description *
                   </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    required
-                    rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="Detailed description of what students will learn"
+                  <BlockEditor
+                    initialContent={formData.description}
+                    onChange={(html) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: html,
+                      }))
+                    }
+                    placeholder="Detailed description of what students will learn. Type '/' for commands"
                   />
                 </div>
               </div>
@@ -275,6 +316,39 @@ export default function CreateCoursePage() {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="0.00"
                   />
+                </div>
+              </div>
+
+              {/* Outcomes */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Learning Outcomes</label>
+                <OutcomeEditor outcomes={formData.outcomes} onChange={(list) => setFormData((prev) => ({ ...prev, outcomes: list }))} />
+              </div>
+
+              {/* Tags */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                <div className="flex flex-wrap gap-2">
+                  {isLoadingTags ? (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Loading tags...</span>
+                  ) : availableTags.length > 0 ? (
+                    availableTags.map((tag) => {
+                      const active = formData.tagIds.includes(tag.id);
+                      return (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => toggleTag(tag.id)}
+                          className={`px-3 py-1 rounded-full border text-xs ${active ? "bg-purple-600 text-white border-purple-600" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600"}`}
+                          title={`#${tag.slug}`}
+                        >
+                          #{tag.name}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">No tags found.</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -370,6 +444,45 @@ export default function CreateCoursePage() {
           </div>
         </div>
       </form>
+    </div>
+  );
+}
+
+/**
+ * Small inline editor for managing an array of outcomes strings
+ */
+function OutcomeEditor({ outcomes, onChange }: { outcomes: string[]; onChange: (list: string[]) => void }) {
+  const addOutcome = () => onChange([...(outcomes || []), ""]);
+  const updateOutcome = (index: number, value: string) => {
+    const next = [...outcomes];
+    next[index] = value;
+    onChange(next);
+  };
+  const removeOutcome = (index: number) => {
+    const next = outcomes.filter((_, i) => i !== index);
+    onChange(next);
+  };
+
+  return (
+    <div className="space-y-3">
+      {(outcomes || []).map((item, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => updateOutcome(idx, e.target.value)}
+            placeholder={`Outcome #${idx + 1}`}
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          />
+          <button type="button" onClick={() => removeOutcome(idx)} className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ))}
+      <button type="button" onClick={addOutcome} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+        <Plus className="w-4 h-4" />
+        Add Outcome
+      </button>
     </div>
   );
 }

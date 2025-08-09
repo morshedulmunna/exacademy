@@ -1,17 +1,27 @@
 import { BookOpen, Facebook, Gem, Github, Star, Twitter, UsersRound, Youtube } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import type { User } from "@/lib/types";
 
-type Props = object;
+type Props = {
+  name?: string;
+  instructor?: Pick<User, "name" | "avatar" | "id">;
+  stats?: {
+    averageRating?: number;
+    ratingsCount?: number;
+    studentsCount?: number;
+    totalCourses?: number;
+  };
+};
 
-export default function CourseInstructor({}: Props) {
+export default function CourseInstructor({ name, instructor, stats }: Props) {
   return (
     <>
       <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700">
         <h3 className="dark:text-white text-gray-900 font-semibold text-xl mb-4">Course Instructor</h3>
 
         <div className="my-4">
-          <h5 className="text-blue-600 dark:text-blue-400 underline font-medium text-lg">Habibur Rahman</h5>
+          <h5 className="text-blue-600 dark:text-blue-400 underline font-medium text-lg">{name || instructor?.name}</h5>
           <p className="text-sm dark:text-gray-300 text-gray-600 mt-1">Building coding courses on codedamn</p>
         </div>
 
@@ -20,26 +30,26 @@ export default function CourseInstructor({}: Props) {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <Star size={16} className="text-yellow-500 dark:text-yellow-400" />
-              <span className="text-sm dark:text-gray-200 text-gray-700">4.6 Instructor rating</span>
+              <span className="text-sm dark:text-gray-200 text-gray-700">{stats?.averageRating?.toFixed(1) || "4.6"} Instructor rating</span>
             </div>
             <div className="flex items-center gap-3">
               <Gem size={16} className="text-purple-500 dark:text-purple-400" />
-              <span className="text-sm dark:text-gray-200 text-gray-700">23.4k Ratings</span>
+              <span className="text-sm dark:text-gray-200 text-gray-700">{stats?.ratingsCount ? `${stats.ratingsCount.toLocaleString()} Ratings` : "23.4k Ratings"}</span>
             </div>
             <div className="flex items-center gap-3">
               <UsersRound size={16} className="text-green-500 dark:text-green-400" />
-              <span className="text-sm dark:text-gray-200 text-gray-700">228.5k Students</span>
+              <span className="text-sm dark:text-gray-200 text-gray-700">{stats?.studentsCount ? `${stats.studentsCount.toLocaleString()} Students` : "228.5k Students"}</span>
             </div>
             <div className="flex items-center gap-3">
               <BookOpen size={16} className="text-blue-500 dark:text-blue-400" />
-              <span className="text-sm dark:text-gray-200 text-gray-700">45 Courses</span>
+              <span className="text-sm dark:text-gray-200 text-gray-700">{stats?.totalCourses ?? 45} Courses</span>
             </div>
           </div>
         </div>
 
         <p className="mt-4 dark:text-gray-300 text-gray-600 leading-relaxed">
           Me alongside a team of developers, creators, designers are building the best interactive programming courses here.
-          <Link href="/instructor/habibur_rahman">
+          <Link href={`/instructor/${instructor?.id ?? "habibur_rahman"}`}>
             <span className="pl-2 text-sm underline text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">View Profile</span>
           </Link>
         </p>
