@@ -7,6 +7,36 @@ import { authOptions } from "@/lib/auth";
 import { requireAdmin } from "@/lib/auth-utils";
 
 /**
+ * Ensure exactly the two most recent published posts are featured.
+ * All other posts (including drafts) have featured=false.
+ */
+async function recalculateFeaturedPosts() {
+  // Find top 2 most recently published posts
+  const latestTwo = await prisma.post.findMany({
+    where: { published: true },
+    orderBy: { publishedAt: "desc" },
+    select: { id: true },
+    take: 2,
+  });
+
+  const topIds = latestTwo.map((p) => p.id);
+
+  // Set featured=false for all posts not in topIds
+  await prisma.post.updateMany({
+    where: { id: { notIn: topIds } },
+    data: { featured: false },
+  });
+
+  // Set featured=true for the two most recent published posts
+  if (topIds.length > 0) {
+    await prisma.post.updateMany({
+      where: { id: { in: topIds } },
+      data: { featured: true },
+    });
+  }
+}
+
+/**
  * GET /api/posts
  * Get all published posts with pagination
  */
@@ -106,7 +136,7 @@ export async function POST(request: NextRequest) {
     const user = await requireAdmin();
 
     const body: CreatePostData = await request.json();
-    const { title, content, excerpt, coverImage, published = true, featured = false, tagIds = [] } = body;
+    const { title, content, excerpt, coverImage, published = true, tagIds = [] } = body;
 
     // Generate slug from title
     const slug = generateSlug(title);
@@ -125,7 +155,8 @@ export async function POST(request: NextRequest) {
         excerpt: postExcerpt,
         coverImage,
         published,
-        featured,
+        // featured is fully controlled by recalculation below
+        featured: false,
         readTime,
         publishedAt: published ? new Date() : null,
         authorId: user.id,
@@ -154,10 +185,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Transform post to flatten tags
+    // Enforce: only the two most recent published posts are featured
+    await recalculateFeaturedPosts();
+
+    // Re-fetch to return accurate featured flag
+    const refreshed = await prisma.post.findUnique({
+      where: { id: post.id },
+      include: {
+        author: {
+          select: { id: true, name: true, username: true, avatar: true },
+        },
+        tags: { include: { tag: true } },
+      },
+    });
+
     const transformedPost = {
-      ...post,
-      tags: post.tags.map((postTag: any) => postTag.tag),
+      ...refreshed!,
+      tags: refreshed!.tags.map((postTag: any) => postTag.tag),
     };
 
     return NextResponse.json(transformedPost, { status: 201 });

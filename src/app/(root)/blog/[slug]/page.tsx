@@ -4,6 +4,8 @@ import React from "react";
 import MarkdownRenderer from "@/components/ui/markdown-renderer";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 import { notFound } from "next/navigation";
+import LikeButton from "@/components/blogs/LikeButton";
+import Comments from "@/components/blogs/Comments";
 
 interface Props {
   params: Promise<{
@@ -52,6 +54,8 @@ export default async function BlogDetailsPage({ params }: Props) {
           <span>{post.readTime} min read</span>
           <span>•</span>
           <span>{post.viewCount} views</span>
+          <span>•</span>
+          <LikeButton slug={post.slug} />
         </div>
 
         <h1 className="text-4xl font-bold">{post.title}</h1>
@@ -71,6 +75,8 @@ export default async function BlogDetailsPage({ params }: Props) {
         <div className="mt-8">
           <MarkdownRenderer content={post.content} />
         </div>
+
+        <Comments slug={post.slug} />
       </div>
     </MaxWidthWrapper>
   );

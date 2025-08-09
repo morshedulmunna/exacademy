@@ -146,6 +146,11 @@ model Comment {
   postId   String @db.ObjectId
   post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
+  // Self-relation for replies
+  parentId String?   @db.ObjectId
+  parent   Comment?  @relation("CommentToReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies  Comment[] @relation("CommentToReplies")
+
   @@map("comments")
 }
 
@@ -230,8 +235,8 @@ model CourseModule {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  courseId String @db.ObjectId
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String   @db.ObjectId
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons  Lesson[]
 
   @@map("course_modules")
@@ -251,21 +256,21 @@ model Lesson {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  moduleId String      @db.ObjectId
-  module   CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId String          @db.ObjectId
+  module   CourseModule    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   contents LessonContent[]
 
   @@map("lessons")
 }
 
 model LessonContent {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  title    String
-  type     ContentType
-  url      String
-  size     Int?
-  filename String
-  createdAt DateTime @default(now())
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  type      ContentType
+  url       String
+  size      Int?
+  filename  String
+  createdAt DateTime    @default(now())
 
   // Relations
   lessonId String @db.ObjectId
