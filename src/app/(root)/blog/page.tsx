@@ -1,6 +1,6 @@
 import React from "react";
 import MaxWidthWrapper from "@/common/MaxWidthWrapper";
-import { formatDate, formatRelativeTime } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { headers } from "next/headers";
 
@@ -53,11 +53,45 @@ async function getPosts(params: { page?: string; tag?: string; search?: string }
 
 export default async function BlogListPage({ searchParams }: Props) {
   const { posts, pagination } = await getPosts(searchParams);
+  const currentSearch = searchParams.search || "";
+  const currentTag = searchParams.tag || "";
+  const startIndex = posts.length > 0 ? (pagination.page - 1) * pagination.limit + 1 : 0;
+  const endIndex = posts.length > 0 ? Math.min(pagination.page * pagination.limit, pagination.total) : 0;
 
   return (
     <MaxWidthWrapper className="max-w-screen-lg">
       <div className="py-8">
-        <h1 className="text-4xl font-bold mb-8">Blog</h1>
+        <h1 className="text-4xl font-bold mb-6">Blog</h1>
+
+        {/* Search */}
+        <form action="/blog" method="get" className="mb-6">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              name="search"
+              defaultValue={currentSearch}
+              placeholder="Search articles..."
+              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-white placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {currentTag && <input type="hidden" name="tag" value={currentTag} />}
+            <button type="submit" className="rounded-lg bg-blue-600 px-5 py-2.5 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Search
+            </button>
+          </div>
+        </form>
+
+        {/* Result summary */}
+        {pagination.total > 0 && (
+          <div className="mb-6 text-sm text-gray-600">
+            Showing {startIndex}-{endIndex} of {pagination.total}
+            {currentSearch && (
+              <>
+                {" "}
+                results for <span className="font-medium text-gray-800">“{currentSearch}”</span>
+              </>
+            )}
+          </div>
+        )}
 
         {posts.length === 0 ? (
           <div className="text-center py-12">
@@ -67,7 +101,7 @@ export default async function BlogListPage({ searchParams }: Props) {
         ) : (
           <div className="grid gap-8">
             {posts.map((post: any) => (
-              <article key={post.id} className="border-b border-gray-200 pb-8">
+              <article key={post.id} className="border-b border-gray-900 pb-8">
                 <div className="flex items-start gap-6">
                   {post.coverImage && (
                     <div className="flex-shrink-0">
@@ -116,18 +150,37 @@ export default async function BlogListPage({ searchParams }: Props) {
         )}
 
         {pagination.pages > 1 && (
-          <div className="flex justify-center mt-8">
+          <div className="flex items-center justify-between mt-10">
+            {/* Prev */}
+            {pagination.page > 1 ? (
+              <Link href={`/blog?page=${pagination.page - 1}${currentTag ? `&tag=${currentTag}` : ""}${currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : ""}`} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50">
+                Previous
+              </Link>
+            ) : (
+              <span className="rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-gray-400">Previous</span>
+            )}
+
+            {/* Page numbers */}
             <div className="flex gap-2">
               {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
                 <Link
                   key={page}
-                  href={`/blog?page=${page}${searchParams.tag ? `&tag=${searchParams.tag}` : ""}${searchParams.search ? `&search=${searchParams.search}` : ""}`}
-                  className={`px-4 py-2 rounded-lg ${page === pagination.page ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+                  href={`/blog?page=${page}${currentTag ? `&tag=${currentTag}` : ""}${currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : ""}`}
+                  className={`px-3 py-2 rounded-lg ${page === pagination.page ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
                 >
                   {page}
                 </Link>
               ))}
             </div>
+
+            {/* Next */}
+            {pagination.page < pagination.pages ? (
+              <Link href={`/blog?page=${pagination.page + 1}${currentTag ? `&tag=${currentTag}` : ""}${currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : ""}`} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50">
+                Next
+              </Link>
+            ) : (
+              <span className="rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-gray-400">Next</span>
+            )}
           </div>
         )}
       </div>

@@ -7,16 +7,10 @@ export default withAuth(
     const path = req.nextUrl.pathname;
 
     // Admin-only routes
-    const adminRoutes = [
-      "/admin-handler",
-      "/api/posts",
-      "/api/tags",
-    ];
+    const adminRoutes = ["/admin-handler", "/api/posts", "/api/tags"];
 
     // Check if the current path requires admin access
-    const isAdminRoute = adminRoutes.some(route => 
-      path.startsWith(route) && req.method !== "GET"
-    );
+    const isAdminRoute = adminRoutes.some((route) => path.startsWith(route) && req.method !== "GET");
 
     if (isAdminRoute && token?.role !== "ADMIN") {
       // Redirect non-admin users to dashboard
@@ -28,8 +22,8 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow public access to GET requests on /api/posts
-        if (req.nextUrl.pathname === "/api/posts" && req.method === "GET") {
+        // Allow public access to GET requests on /api/posts and nested routes
+        if (req.nextUrl.pathname.startsWith("/api/posts") && req.method === "GET") {
           return true;
         }
 
@@ -46,12 +40,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    "/profile", 
-    "/dashboard", 
-    "/admin-handler",
-    "/api/posts", 
-    "/api/users/profile",
-    "/api/tags"
-  ],
+  matcher: ["/profile", "/dashboard", "/admin-handler", "/api/posts/:path*", "/api/users/profile", "/api/tags"],
 };

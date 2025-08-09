@@ -6,18 +6,22 @@ import { formatDate, formatRelativeTime } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import LikeButton from "@/components/blogs/LikeButton";
 import Comments from "@/components/blogs/Comments";
+import { headers } from "next/headers";
 
 interface Props {
-  params: Promise<{
+  params: {
     slug: string;
-  }>;
+  };
 }
 
 async function getPost(slug: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/${slug}`, {
-      cache: "no-store",
-    });
+    const hdrs = await headers();
+    const host = hdrs.get("host") || "localhost:3000";
+    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+    const apiUrl = `${protocol}://${host}/api/posts/${slug}`;
+
+    const response = await fetch(apiUrl, { cache: "no-store" });
 
     if (!response.ok) {
       return null;
@@ -30,8 +34,7 @@ async function getPost(slug: string) {
   }
 }
 
-export default async function BlogDetailsPage({ params }: Props) {
-  const { slug } = await params;
+export default async function BlogDetailsPage({ params: { slug } }: Props) {
   const post = await getPost(slug);
 
   if (!post) {

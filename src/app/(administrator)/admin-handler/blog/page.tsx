@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/db";
 import { Plus, Edit, Eye, Trash2, Calendar, User, FileText } from "lucide-react";
+import DeletePostButton from "@/components/blogs/DeletePostButton";
 
 /**
  * Blog Management Page
@@ -112,12 +113,10 @@ export default async function BlogManagementPage() {
                       <Link href={`/blog/${post.slug}`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="View">
                         <Eye className="w-4 h-4" />
                       </Link>
-                      <Link href={`/admin-handler/blog/${post.id}/edit`} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" title="Edit">
+                      <Link href={`/admin-handler/blog/${post.slug}/edit`} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" title="Edit">
                         <Edit className="w-4 h-4" />
                       </Link>
-                      <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <DeletePostButton slug={post.slug} title={post.title} />
                     </div>
                   </td>
                 </tr>

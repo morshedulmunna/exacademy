@@ -43,14 +43,14 @@ export default function Hero1({
           <div className="space-y-8 mb-16">
             {/* Title with Interactive Keyword */}
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">{title}</h1>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-black dark:text-white leading-tight">{title}</h1>
               <div className="text-3xl md:text-5xl lg:text-6xl font-bold">
                 <span className="bg-gradient-to-r from-pink-400 via-purple-500 to-magenta-500 bg-clip-text text-transparent animate-pulse">{interactiveKeyword}</span>
               </div>
             </div>
 
             {/* Description */}
-            <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">{description}</p>
+            <p className="text-lg md:text-xl text-gray-900 dark:text-white/80 max-w-3xl mx-auto leading-relaxed">{description}</p>
           </div>
 
           {/* Responsive CTA Buttons */}
