@@ -6,12 +6,22 @@ import { v4 as uuidv4 } from 'uuid';
  * File upload utility for course content
  * Supports videos, documents, PDFs, images, and other file types
  */
+type FileTypeConfig = {
+  extensions: string[];
+  mimeTypes: string[];
+  maxSize: number;
+  category: string;
+};
+
 export class FileUploader {
   private static readonly UPLOAD_DIR = path.join(process.cwd(), 'src', 'public', 'uploads');
   private static readonly COURSE_CONTENT_DIR = path.join(process.cwd(), 'src', 'public', 'uploads', 'course-content');
   
   // File type configurations
-  private static readonly FILE_TYPES = {
+  private static readonly FILE_TYPES: Record<
+    'VIDEO' | 'PDF' | 'DOCUMENT' | 'IMAGE' | 'AUDIO' | 'OTHER',
+    FileTypeConfig
+  > = {
     VIDEO: {
       extensions: ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv'],
       mimeTypes: ['video/mp4', 'video/avi', 'video/quicktime', 'video/x-ms-wmv', 'video/x-flv', 'video/webm', 'video/x-matroska'],
@@ -77,7 +87,7 @@ export class FileUploader {
   /**
    * Validate uploaded file
    */
-  static validateFile(file: Express.Multer.File): { valid: boolean; error?: string; fileType?: string } {
+  static validateFile(file: Express.Multer.File): { valid: boolean; error?: string; fileType?: keyof typeof FileUploader.FILE_TYPES } {
     if (!file) {
       return { valid: false, error: 'No file uploaded' };
     }

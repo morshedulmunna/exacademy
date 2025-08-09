@@ -129,7 +129,7 @@ export default function BlogEditorHeader({ onAddCover, onRemoveCover, coverImage
               )}
             </div>
 
-            <button onClick={onPublish} disabled={publishDisabled} className={`px-6 py-2 rounded-md font-medium transition-colors text-white ${publishDisabled ? "bg-blue-500/50 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}>
+            <button onClick={onPublish} disabled={publishDisabled} className={`px-6 py-2 rounded-md font-medium gradient-bg transition-colors text-white ${publishDisabled ? "bg-blue-500/50 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}>
               Publish
             </button>
           </div>

@@ -2,15 +2,20 @@ import React from "react";
 import MaxWidthWrapper from "@/common/MaxWidthWrapper";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 import Link from "next/link";
+import { headers } from "next/headers";
 
 interface Props {
-  searchParams: Promise<{
+  searchParams: {
     page?: string;
     tag?: string;
     search?: string;
-  }>;
+  };
 }
 
+/**
+ * Fetch paginated published blog posts from our internal API.
+ * Uses absolute URL derived from the current request headers to work in server components.
+ */
 async function getPosts(params: { page?: string; tag?: string; search?: string }) {
   try {
     const searchParams = new URLSearchParams();
@@ -18,8 +23,11 @@ async function getPosts(params: { page?: string; tag?: string; search?: string }
     if (params.tag) searchParams.set("tag", params.tag);
     if (params.search) searchParams.set("search", params.search);
 
-    // Use relative URL to avoid environment variable issues
-    const apiUrl = `/api/posts?${searchParams}`;
+    // Build absolute URL for server-side fetch
+    const hdrs = await headers();
+    const host = hdrs.get("host") || "localhost:3000";
+    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+    const apiUrl = `${protocol}://${host}/api/posts${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
     const response = await fetch(apiUrl, {
       cache: "no-store",
@@ -44,8 +52,7 @@ async function getPosts(params: { page?: string; tag?: string; search?: string }
 }
 
 export default async function BlogListPage({ searchParams }: Props) {
-  const resolvedSearchParams = await searchParams;
-  const { posts, pagination } = await getPosts(resolvedSearchParams);
+  const { posts, pagination } = await getPosts(searchParams);
 
   return (
     <MaxWidthWrapper className="max-w-screen-lg">
@@ -114,7 +121,7 @@ export default async function BlogListPage({ searchParams }: Props) {
               {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
                 <Link
                   key={page}
-                  href={`/blog?page=${page}${resolvedSearchParams.tag ? `&tag=${resolvedSearchParams.tag}` : ""}${resolvedSearchParams.search ? `&search=${resolvedSearchParams.search}` : ""}`}
+                  href={`/blog?page=${page}${searchParams.tag ? `&tag=${searchParams.tag}` : ""}${searchParams.search ? `&search=${searchParams.search}` : ""}`}
                   className={`px-4 py-2 rounded-lg ${page === pagination.page ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
                 >
                   {page}

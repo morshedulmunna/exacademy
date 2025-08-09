@@ -22,7 +22,13 @@ export function generateSlug(text: string): string {
  */
 export function calculateReadTime(content: string): number {
   const wordsPerMinute = 200
-  const wordCount = content.split(/\s+/).length
+  // Strip HTML tags and markdown-like syntax before counting
+  const plainText = content
+    .replace(/<[^>]+>/g, '') // Remove HTML tags
+    .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images (markdown)
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links (markdown)
+    .replace(/[*_`~]/g, '') // Remove markdown formatting
+  const wordCount = plainText.trim().split(/\s+/).filter(Boolean).length
   return Math.ceil(wordCount / wordsPerMinute)
 }
 
@@ -32,6 +38,7 @@ export function calculateReadTime(content: string): number {
 export function extractExcerpt(content: string, maxLength: number = 160): string {
   // Remove markdown formatting
   const plainText = content
+    .replace(/<[^>]+>/g, '') // Remove HTML tags
     .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
     .replace(/[*_`~]/g, '') // Remove markdown formatting

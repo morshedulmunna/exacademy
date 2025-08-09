@@ -95,9 +95,12 @@
     @apply bg-gray-800 text-white p-4 rounded-md overflow-x-auto;
   }
 
-  /* Default styles for inline code */
-  code {
+  /* Default styles for inline code only (avoid affecting <pre><code> blocks) */
+  :not(pre) > code {
     @apply font-mono text-sm bg-gray-200 px-1 py-0.5 rounded-sm;
+  }
+  .dark :not(pre) > code {
+    @apply bg-gray-800 text-gray-100;
   }
   :root {
 

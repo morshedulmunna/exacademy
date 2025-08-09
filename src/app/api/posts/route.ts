@@ -37,11 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { content: { contains: search, mode: "insensitive" } },
-        { excerpt: { contains: search, mode: "insensitive" } },
-      ];
+      where.OR = [{ title: { contains: search, mode: "insensitive" } }, { content: { contains: search, mode: "insensitive" } }, { excerpt: { contains: search, mode: "insensitive" } }];
     }
 
     if (featured) {
@@ -110,7 +106,7 @@ export async function POST(request: NextRequest) {
     const user = await requireAdmin();
 
     const body: CreatePostData = await request.json();
-    const { title, content, excerpt, coverImage, published = false, featured = false, tagIds = [] } = body;
+    const { title, content, excerpt, coverImage, published = true, featured = false, tagIds = [] } = body;
 
     // Generate slug from title
     const slug = generateSlug(title);
