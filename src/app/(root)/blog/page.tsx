@@ -5,11 +5,11 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 interface Props {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     tag?: string;
     search?: string;
-  };
+  }>;
 }
 
 /**
@@ -52,9 +52,10 @@ async function getPosts(params: { page?: string; tag?: string; search?: string }
 }
 
 export default async function BlogListPage({ searchParams }: Props) {
-  const { posts, pagination } = await getPosts(searchParams);
-  const currentSearch = searchParams.search || "";
-  const currentTag = searchParams.tag || "";
+  const sp = await searchParams;
+  const { posts, pagination } = await getPosts(sp);
+  const currentSearch = sp.search || "";
+  const currentTag = sp.tag || "";
   const startIndex = posts.length > 0 ? (pagination.page - 1) * pagination.limit + 1 : 0;
   const endIndex = posts.length > 0 ? Math.min(pagination.page * pagination.limit, pagination.total) : 0;
 

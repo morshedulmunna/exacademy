@@ -9,9 +9,9 @@ import Comments from "@/components/blogs/Comments";
 import { headers } from "next/headers";
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 async function getPost(slug: string) {
@@ -34,7 +34,8 @@ async function getPost(slug: string) {
   }
 }
 
-export default async function BlogDetailsPage({ params: { slug } }: Props) {
+export default async function BlogDetailsPage({ params }: Props) {
+  const { slug } = await params;
   const post = await getPost(slug);
 
   if (!post) {

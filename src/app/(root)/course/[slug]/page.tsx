@@ -15,7 +15,7 @@ import { notFound } from "next/navigation";
 import type { Course } from "@/lib/types";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 async function getCourse(slug: string): Promise<(Course & { modules?: any[] }) | null> {
@@ -34,7 +34,8 @@ async function getCourse(slug: string): Promise<(Course & { modules?: any[] }) |
   }
 }
 
-export default async function CourseDetailsPage({ params: { slug } }: Props) {
+export default async function CourseDetailsPage({ params }: Props) {
+  const { slug } = await params;
   const course = await getCourse(slug);
   if (!course) return notFound();
 
@@ -58,15 +59,15 @@ export default async function CourseDetailsPage({ params: { slug } }: Props) {
                 <CourseOutcomes outcomes={course.outcomes} />
                 <CourseStructure lessons={course.lessons} duration={course.duration} modules={course.modules as any} />
                 <CourseDescription description={course.description} />
-                <FeaturesReview review={course.reviews?.[0]} />
+                {course.reviews?.[0] && <FeaturesReview review={course.reviews?.[0]} />}
                 {/* <FeedbackRating /> */}
-                <StudentReviews reviews={course.reviews} />
+                {course.reviews && course.reviews.length > 0 && <StudentReviews reviews={course.reviews} />}
                 <CourseInstructor name={course.instructor?.name} instructor={course.instructor as any} stats={{ averageRating, ratingsCount: ratingCount, studentsCount: course.students }} />
                 <MoreCoursesByInstructor instructorName={course.instructor?.name} courses={(course as any).relatedCourses || []} />
               </div>
               <div className="col-span-12 lg:col-span-4 order-1 lg:order-2">
                 <div className="sticky top-4">
-                  <CoursePurchaseSection videoUrl={videoUrl} title={course.title} slug={course.slug} price={course.price} duration={course.duration} lessons={course.lessons} originalPrice={course.originalPrice || undefined} />
+                  <CoursePurchaseSection videoUrl={videoUrl} title={course.title} slug={course.slug} price={course.price} duration={course.duration} lessons={course.lessons} originalPrice={course.originalPrice || undefined} thumbnail={course.thumbnail} />
                 </div>
               </div>
             </div>

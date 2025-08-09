@@ -6,7 +6,7 @@ type MaxWidthWrapperProps = {
 };
 
 const MaxWidthWrapper: React.FC<MaxWidthWrapperProps> = ({ children, className }) => {
-  return <div className={`mx-auto px-4 2xl:px-12 max-w-screen-xl ${className}`}>{children}</div>;
+  return <div className={`mx-auto px-4 2xl:px-4 max-w-screen-xl ${className}`}>{children}</div>;
 };
 
 export default MaxWidthWrapper;

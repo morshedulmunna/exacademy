@@ -8,7 +8,7 @@ import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Plus, Trash2 } from "lucide-re
 import Link from "next/link";
 import Image from "next/image";
 import type { Tag } from "@/lib/types";
-import BlockEditor from "@/components/ui/BlockEditor";
+import RichTextEditor from "@/components/rich-text-editor";
 
 /**
  * Course Creation Page
@@ -38,6 +38,29 @@ export default function CreateCoursePage() {
     outcomes: [] as string[],
     tagIds: [] as string[],
   });
+
+  // Load tags for selection (declare before any early returns; gate inside effect)
+  useEffect(() => {
+    if (status !== "authenticated" || !session || session.user.role !== "ADMIN") return;
+    let mounted = true;
+    const loadTags = async () => {
+      try {
+        setIsLoadingTags(true);
+        const res = await fetch("/api/tags");
+        if (!res.ok) return;
+        const tags: Tag[] = await res.json();
+        if (mounted) setAvailableTags(tags);
+      } catch (e) {
+        console.error("Failed to load tags", e);
+      } finally {
+        if (mounted) setIsLoadingTags(false);
+      }
+    };
+    loadTags();
+    return () => {
+      mounted = false;
+    };
+  }, [status, session]);
 
   // Redirect if not authenticated or not admin
   if (status === "loading") {
@@ -78,28 +101,6 @@ export default function CreateCoursePage() {
       reader.readAsDataURL(file);
     }
   };
-
-  // Load tags for selection
-  useEffect(() => {
-    let mounted = true;
-    const loadTags = async () => {
-      try {
-        setIsLoadingTags(true);
-        const res = await fetch("/api/tags");
-        if (!res.ok) return;
-        const tags: Tag[] = await res.json();
-        if (mounted) setAvailableTags(tags);
-      } catch (e) {
-        console.error("Failed to load tags", e);
-      } finally {
-        setIsLoadingTags(false);
-      }
-    };
-    loadTags();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const toggleTag = (tagId: string) => {
     setFormData((prev) => {
@@ -233,15 +234,14 @@ export default function CreateCoursePage() {
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Full Description *
                   </label>
-                  <BlockEditor
-                    initialContent={formData.description}
+                  <RichTextEditor
+                    content={formData.description}
                     onChange={(html) =>
                       setFormData((prev) => ({
                         ...prev,
                         description: html,
                       }))
                     }
-                    placeholder="Detailed description of what students will learn. Type '/' for commands"
                   />
                 </div>
               </div>

@@ -14,7 +14,7 @@ export default function CourseOutcomes({ outcomes = [] }: Props) {
         {outcomes.length > 0 ? (
           <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
             {outcomes.map((text, index) => (
-              <li key={index} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+              <li key={index} className="flex items-start gap-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <div className="flex-shrink-0 mt-1">
                   <RightMarkSvgIcon />
                 </div>

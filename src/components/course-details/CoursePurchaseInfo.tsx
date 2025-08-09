@@ -1,5 +1,7 @@
+import { certificate_image } from "@/assets";
 import { HeartHandshake, Timer, Video } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import React from "react";
 
 type Props = {
@@ -35,7 +37,9 @@ export default function CoursePurchaseInfo({ slug, price, duration, lessons, ori
 
       {/* certification */}
       <h6 className="mt-6 mb-2 text-sm sm:text-base dark:text-white text-gray-900 font-semibold">Includes Certificate of Completion</h6>
-      <div className="w-full h-[200px] sm:h-[250px] bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
+      <div className="w-full h-[200px] sm:h-[250px] bg-gray-200 dark:bg-gray-600 rounded-lg">
+        <Image src={certificate_image} alt="Certificate" className="w-full h-full" />
+      </div>
       <p className="text-xs sm:text-sm leading-[18px] mt-2 dark:text-gray-300 text-gray-600">
         Add this credential to your <strong className="dark:text-white text-gray-900">LinkedIn profile</strong>, resume, or CV. You can share it on social media and in your performance review.
       </p>

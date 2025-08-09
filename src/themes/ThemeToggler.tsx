@@ -1,10 +1,16 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTheme } from "./ThemeProvider";
 
 const ThemeToggler: React.FC = () => {
   const { theme, setTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const getButtonClasses = () => {
     const baseClasses = "p-2 rounded-lg transition-all duration-300 hover:scale-110 focus:outline-none ";
@@ -14,6 +20,11 @@ const ThemeToggler: React.FC = () => {
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
+
+  // Avoid hydration mismatch by rendering only after mount when theme is known
+  if (!isMounted) {
+    return <button aria-hidden className="p-2 rounded-lg opacity-0 pointer-events-none h-10 w-10" />;
+  }
 
   return (
     <button onClick={toggleTheme} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`} className={getButtonClasses()}>
