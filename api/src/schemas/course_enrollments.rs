@@ -1,0 +1,31 @@
+use anyhow::Result;
+use mongodb::bson::doc;
+use mongodb::{Database, IndexModel};
+use mongodb::options::IndexOptions;
+
+use crate::schemas::validators::validators::*;
+use super::common::{create_indexes, ensure_collection};
+
+pub(super) async fn create_course_enrollments(db: &Database) -> Result<()> {
+    let coll = ensure_collection(
+        db,
+        "course_enrollments",
+        Some(course_enrollments_validator()),
+    )
+    .await?;
+    let unique_opts = IndexOptions::builder().unique(true).build();
+    create_indexes(
+        &coll,
+        vec![
+            IndexModel::builder()
+                .keys(doc! {"userId":1, "courseId":1})
+                .options(unique_opts)
+                .build(),
+            IndexModel::builder().keys(doc! {"courseId":1}).build(),
+            IndexModel::builder().keys(doc! {"userId":1}).build(),
+        ],
+    )
+    .await
+}
+
+

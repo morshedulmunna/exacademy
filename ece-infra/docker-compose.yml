@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: eca-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:-change_me}
+    command: ["--bind_ip_all"]
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - eca-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: eca-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    # Enforce password auth and enable AOF persistence
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-change_me}"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - eca-net
+
+volumes:
+  mongo_data:
+  redis_data:
+
+networks:
+  eca-net:
+    driver: bridge

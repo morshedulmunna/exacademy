@@ -1,0 +1,61 @@
+use std::env;
+
+pub struct RootCommand {
+    args: Vec<String>,
+}
+
+impl RootCommand {
+    pub fn new() -> Self {
+        let args: Vec<String> = env::args().collect();
+        RootCommand { args }
+    }
+
+    pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
+        if self.args.len() < 2 {
+            self.print_help();
+            return Ok(());
+        }
+
+        match self.args[1].as_str() {
+            "cli" => {
+                crate::cmd::cli::cli_command()?;
+            }
+            "apis" => {
+                // Handle async function with tokio runtime
+                let rt = tokio::runtime::Runtime::new()?;
+                rt.block_on(crate::cmd::apis::apis_command())?;
+            }
+            "grpc" => {
+                crate::cmd::grpc::grpc_command()?;
+            }
+            "migrate" => {
+                let rt = tokio::runtime::Runtime::new()?;
+                rt.block_on(crate::cmd::migrate::migrate_command())?;
+            }
+            "--help" | "-h" | "help" => {
+                self.print_help();
+            }
+            _ => {
+                eprintln!("Unknown command: {}", self.args[1]);
+                self.print_help();
+            }
+        }
+
+        Ok(())
+    }
+
+    fn print_help(&self) {
+        println!("execute_academy - A query processing tool");
+        println!();
+        println!("Usage: execute_academy <command> [options]");
+        println!();
+        println!("Commands:");
+        println!("  cli     - Run CLI interface");
+        println!("  apis    - Run API server");
+        println!("  grpc    - Run gRPC server");
+        println!("  migrate - Run MongoDB schema/index migrations");
+        println!();
+        println!("Options:");
+        println!("  --help, -h, help  - Show this help message");
+    }
+}

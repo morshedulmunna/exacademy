@@ -1,0 +1,21 @@
+[watch]
+# Watch these directories for changes
+watch = ["src", "Cargo.toml", "Cargo.lock"]
+
+# Ignore these patterns
+ignore = ["target", ".git", "*.swp", "*.swo", "*~"]
+
+# Commands to run when files change
+run = ["run"]
+
+# Clear screen before each run
+clear = true
+
+# Delay before running commands (in seconds)
+delay = 0.5
+
+# Show notifications (macOS)
+notify = true
+
+# Verbose output
+verbose = true
