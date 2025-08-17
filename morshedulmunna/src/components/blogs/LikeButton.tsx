@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSession, signIn } from "next-auth/react";
+// Auth removed; keep UI only
 
 interface LikeStateResponse {
   liked: boolean;
@@ -13,7 +13,7 @@ interface LikeStateResponse {
  * It fetches initial state and toggles like on click. Requires authentication to like.
  */
 export default function LikeButton({ slug }: { slug: string }) {
-  const { status } = useSession();
+  const status: "authenticated" | "unauthenticated" | "loading" = "unauthenticated";
   const [liked, setLiked] = useState<boolean>(false);
   const [likes, setLikes] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -42,24 +42,12 @@ export default function LikeButton({ slug }: { slug: string }) {
   const ariaLabel = useMemo(() => (liked ? "Unlike this post" : "Like this post"), [liked]);
 
   async function onToggle() {
-    if (!isAuthenticated) {
-      // Redirect to sign in with callback back to current page
-      const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-      await signIn(undefined, { callbackUrl });
-      return;
-    }
+    if (!isAuthenticated) return;
     if (loading) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/posts/${slug}/like`, { method: "POST" });
-      if (!res.ok) {
-        if (res.status === 401) {
-          const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-          await signIn(undefined, { callbackUrl });
-          return;
-        }
-        return;
-      }
+      if (!res.ok) return;
       const data: LikeStateResponse = await res.json();
       setLiked(Boolean(data.liked));
       setLikes(Number(data.likes) || 0);

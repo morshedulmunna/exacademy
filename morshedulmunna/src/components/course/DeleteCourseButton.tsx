@@ -25,17 +25,7 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
     setError(null);
 
     try {
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete course");
-      }
+      // Static UI: pretend delete succeeded
 
       // Close confirmation dialog
       setShowConfirmation(false);

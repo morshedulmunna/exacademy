@@ -1,8 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth-utils";
-import { prisma } from "@/lib/db";
+// Backend removed; keep static admin UI only
 import { Plus, Edit, Eye, Trash2, Calendar, User, FileText } from "lucide-react";
 import DeletePostButton from "@/components/blogs/DeletePostButton";
 
@@ -11,42 +9,18 @@ import DeletePostButton from "@/components/blogs/DeletePostButton";
  * Displays all blog posts with management options
  */
 export default async function BlogManagementPage() {
-  const user = await getCurrentUser();
-
-  // Redirect if not authenticated or not admin
-  if (!user || user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
-
-  // Keep featured flags consistent before rendering:
-  // Only the two most recent published posts should be featured.
-  const latestTwo = await prisma.post.findMany({
-    where: { published: true },
-    orderBy: { publishedAt: "desc" },
-    select: { id: true },
-    take: 2,
-  });
-  const topIds = latestTwo.map((p) => p.id);
-  await prisma.post.updateMany({ where: { id: { notIn: topIds } }, data: { featured: false } });
-  if (topIds.length > 0) {
-    await prisma.post.updateMany({ where: { id: { in: topIds } }, data: { featured: true } });
-  }
-
-  // Fetch all posts with author information
-  const posts = await prisma.post.findMany({
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-      tags: true,
+  const posts = [
+    {
+      id: "p1",
+      title: "Sample Post",
+      slug: "sample-post",
+      excerpt: "This is a sample post",
+      published: true,
+      createdAt: new Date().toISOString(),
+      author: { name: "Author", email: "author@example.com" },
+      tags: [],
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  ];
 
   return (
     <div className="space-y-6">

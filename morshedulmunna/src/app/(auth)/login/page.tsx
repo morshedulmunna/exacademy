@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { signIn, getSession } from "next-auth/react";
+// Auth removed; keep UI only
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
@@ -21,20 +21,6 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else if (result?.ok) {
-        // Successful login
-        router.push("/");
-        router.refresh();
-      }
-    } catch (error) {
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);

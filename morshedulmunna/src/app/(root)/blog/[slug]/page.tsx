@@ -6,7 +6,6 @@ import { formatDate, formatRelativeTime } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import LikeButton from "@/components/blogs/LikeButton";
 import Comments from "@/components/blogs/Comments";
-import { headers } from "next/headers";
 
 interface Props {
   params: Promise<{
@@ -15,23 +14,21 @@ interface Props {
 }
 
 async function getPost(slug: string) {
-  try {
-    const hdrs = await headers();
-    const host = hdrs.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-    const apiUrl = `${protocol}://${host}/api/posts/${slug}`;
-
-    const response = await fetch(apiUrl, { cache: "no-store" });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error("Error fetching post:", error);
-    return null;
-  }
+  // Static placeholder for UI-only build
+  return {
+    id: "1",
+    title: "Static Blog Post",
+    slug,
+    excerpt: "Example excerpt",
+    content: "# Hello World\n\nThis is a static post.",
+    coverImage: undefined,
+    viewCount: 0,
+    publishedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    readTime: 4,
+    author: { name: "Author", avatar: undefined },
+    tags: [{ id: "t1", name: "Tag", color: "#888888" }],
+  };
 }
 
 export default async function BlogDetailsPage({ params }: Props) {

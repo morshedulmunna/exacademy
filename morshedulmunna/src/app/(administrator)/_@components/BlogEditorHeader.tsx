@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Image, Type, MoreVertical, Settings, Copy, Moon, HelpCircle, X, ArrowLeft, ArrowUpDown } from "lucide-react";
-import { ImageUploadResult } from "@/lib/image-upload";
+import type { ImageUploadResult } from "@/lib/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
 import { AddCoverHandler, AddSubtitleHandler, PublishHandler, CopyMarkdownHandler, ToggleDarkModeHandler, ToggleRawEditorHandler } from "./types";

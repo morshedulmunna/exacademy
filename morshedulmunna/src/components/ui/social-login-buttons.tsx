@@ -1,6 +1,4 @@
 "use client";
-
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Github, Chrome } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
@@ -12,13 +10,9 @@ interface SocialLoginButtonsProps {
 export default function SocialLoginButtons({ isLoading = false }: SocialLoginButtonsProps) {
   const { theme } = useTheme();
 
-  const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/" });
-  };
+  const handleGoogleSignIn = () => {};
 
-  const handleGitHubSignIn = () => {
-    signIn("github", { callbackUrl: "/" });
-  };
+  const handleGitHubSignIn = () => {};
 
   return (
     <div className="space-y-3 mt-12">

@@ -1,6 +1,4 @@
 import React from "react";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth-utils";
 import { AdminSidebar, AdminTopBar, SidebarProvider } from "./_@components";
 
 type Props = {
@@ -8,19 +6,12 @@ type Props = {
 };
 
 export default async function AdministratorLayout({ children }: Props) {
-  const user = await getCurrentUser();
-
-  // Redirect if not authenticated or not admin
-  if (!user || user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
-
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
         {/* Fixed Top Bar */}
         <div className="fixed top-0 left-0 right-0 z-50">
-          <AdminTopBar userName={user.name || "Admin"} />
+          <AdminTopBar userName={"Admin"} />
         </div>
 
         {/* Fixed Sidebar */}

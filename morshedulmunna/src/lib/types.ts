@@ -2,7 +2,7 @@
  * TypeScript types for the content management system
  */
 
-import { DefaultSession } from "next-auth";
+// Auth types removed for static UI build
 
 export type UserRole = "USER" | "ADMIN";
 
@@ -22,32 +22,7 @@ export interface User {
 }
 
 // Extend NextAuth session
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      username: string;
-      role: UserRole;
-      avatar?: string;
-    } & DefaultSession["user"];
-  }
-
-  interface User {
-    id: string;
-    username: string;
-    role: UserRole;
-    avatar?: string;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    username: string;
-    role: UserRole;
-    avatar?: string;
-  }
-}
+// Session/User/JWT augmentations removed
 
 export interface Post {
   id: string;

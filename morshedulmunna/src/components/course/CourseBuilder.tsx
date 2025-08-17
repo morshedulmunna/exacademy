@@ -61,12 +61,10 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
   const loadModules = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/courses/${courseId}/modules`);
-      if (response.ok) {
-        const data = await response.json();
-        setModules(data);
-        onModulesChange?.(data);
-      }
+      // Static UI: start with an empty list
+      const data: Module[] = [];
+      setModules(data);
+      onModulesChange?.(data);
     } catch (error) {
       console.error("Error loading modules:", error);
     } finally {
@@ -132,15 +130,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
     // Update orders in database
     try {
-      await Promise.all(
-        updatedModules.map((module) =>
-          fetch(`/api/courses/${courseId}/modules/${module.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ order: module.order }),
-          })
-        )
-      );
+      // Static UI: no-op
     } catch (error) {
       console.error("Error updating module orders:", error);
     }
@@ -211,14 +201,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
     // Update lesson in database
     try {
-      await fetch(`/api/courses/${courseId}/modules/${targetModuleId}/lessons/${sourceLessonId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          moduleId: targetModuleId,
-          order: targetLessonIndex + 1,
-        }),
-      });
+      // Static UI: no-op
     } catch (error) {
       console.error("Error updating lesson order:", error);
     }
@@ -226,22 +209,16 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const createModule = async () => {
     try {
-      const response = await fetch(`/api/courses/${courseId}/modules`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "New Module",
-          description: "",
-          order: modules.length + 1,
-        }),
-      });
-
-      if (response.ok) {
-        const newModule = await response.json();
-        setModules((prev) => [...prev, newModule]);
-        setExpandedModules((prev) => new Set([...prev, newModule.id]));
-        onModulesChange?.([...modules, newModule]);
-      }
+      const newModule: Module = {
+        id: crypto.randomUUID(),
+        title: "New Module",
+        description: "",
+        order: modules.length + 1,
+        lessons: [],
+      };
+      setModules((prev) => [...prev, newModule]);
+      setExpandedModules((prev) => new Set([...prev, newModule.id]));
+      onModulesChange?.([...modules, newModule]);
     } catch (error) {
       console.error("Error creating module:", error);
     }
@@ -249,18 +226,9 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const updateModule = async (moduleId: string, data: Partial<Module>) => {
     try {
-      const response = await fetch(`/api/courses/${courseId}/modules/${moduleId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const updatedModule = await response.json();
-        setModules((prev) => prev.map((m) => (m.id === moduleId ? updatedModule : m)));
-        onModulesChange?.(modules.map((m) => (m.id === moduleId ? updatedModule : m)));
-        setEditingModule(null);
-      }
+      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, ...data } : m)));
+      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, ...data } : m)));
+      setEditingModule(null);
     } catch (error) {
       console.error("Error updating module:", error);
     }
@@ -272,14 +240,8 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     }
 
     try {
-      const response = await fetch(`/api/courses/${courseId}/modules/${moduleId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setModules((prev) => prev.filter((m) => m.id !== moduleId));
-        onModulesChange?.(modules.filter((m) => m.id !== moduleId));
-      }
+      setModules((prev) => prev.filter((m) => m.id !== moduleId));
+      onModulesChange?.(modules.filter((m) => m.id !== moduleId));
     } catch (error) {
       console.error("Error deleting module:", error);
     }
@@ -289,28 +251,21 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     try {
       const module = modules.find((m) => m.id === moduleId);
       const lessonOrder = module ? module.lessons.length + 1 : 1;
-
-      const response = await fetch(`/api/courses/${courseId}/modules/${moduleId}/lessons`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "New Lesson",
-          description: "",
-          content: "",
-          videoUrl: "",
-          duration: "0m",
-          order: lessonOrder,
-          isFree: false,
-          published: false,
-        }),
-      });
-
-      if (response.ok) {
-        const newLesson = await response.json();
-        setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m)));
-        onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m)));
-        setEditingLesson(newLesson.id);
-      }
+      const newLesson: Lesson = {
+        id: crypto.randomUUID(),
+        title: "New Lesson",
+        description: "",
+        content: "",
+        videoUrl: "",
+        duration: "0m",
+        order: lessonOrder,
+        isFree: false,
+        published: false,
+        contents: [],
+      };
+      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m)));
+      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m)));
+      setEditingLesson(newLesson.id);
     } catch (error) {
       console.error("Error creating lesson:", error);
     }
@@ -318,18 +273,9 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const updateLesson = async (moduleId: string, lessonId: string, data: Partial<Lesson>) => {
     try {
-      const response = await fetch(`/api/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const updatedLesson = await response.json();
-        setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? updatedLesson : l)) } : m)));
-        onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? updatedLesson : l)) } : m)));
-        setEditingLesson(null);
-      }
+      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m)));
+      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m)));
+      setEditingLesson(null);
     } catch (error) {
       console.error("Error updating lesson:", error);
     }
@@ -341,14 +287,8 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     }
 
     try {
-      const response = await fetch(`/api/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m)));
-        onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m)));
-      }
+      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m)));
+      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m)));
     } catch (error) {
       console.error("Error deleting lesson:", error);
     }
@@ -356,41 +296,34 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const addContentToLesson = async (moduleId: string, lessonId: string, fileResult: FileUploadResult) => {
     try {
-      const response = await fetch(`/api/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/content`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: fileResult.originalName,
-          type: fileResult.type,
-          url: fileResult.url,
-          size: fileResult.size,
-          filename: fileResult.filename,
-        }),
-      });
-
-      if (response.ok) {
-        const newContent = await response.json();
-        setModules((prev) =>
-          prev.map((m) =>
-            m.id === moduleId
-              ? {
-                  ...m,
-                  lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
-                }
-              : m
-          )
-        );
-        onModulesChange?.(
-          modules.map((m) =>
-            m.id === moduleId
-              ? {
-                  ...m,
-                  lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
-                }
-              : m
-          )
-        );
-      }
+      const newContent = {
+        id: crypto.randomUUID(),
+        title: fileResult.originalName,
+        type: fileResult.type,
+        url: fileResult.url,
+        size: fileResult.size,
+        filename: fileResult.filename,
+      } as LessonContent;
+      setModules((prev) =>
+        prev.map((m) =>
+          m.id === moduleId
+            ? {
+                ...m,
+                lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
+              }
+            : m
+        )
+      );
+      onModulesChange?.(
+        modules.map((m) =>
+          m.id === moduleId
+            ? {
+                ...m,
+                lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
+              }
+            : m
+        )
+      );
     } catch (error) {
       console.error("Error adding content to lesson:", error);
     }

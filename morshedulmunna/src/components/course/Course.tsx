@@ -1,21 +1,26 @@
 import React from "react";
 import CourseCard from "./CourseCard";
-import { prisma } from "@/lib/db";
+// Static placeholder list for UI-only build
 
 type Props = {};
 
 export default async function Course({}: Props) {
-  const courses = await prisma.course.findMany({
-    where: { published: true },
-    include: {
-      instructor: {
-        select: { name: true, avatar: true },
-      },
-      tags: { include: { tag: true } },
+  const courses = [
+    {
+      id: "1",
+      title: "Sample Course",
+      slug: "sample-course",
+      description: "This is a static sample course.",
+      excerpt: "A brief excerpt",
+      thumbnail: undefined,
+      duration: "5h",
+      lessons: 20,
+      instructor: { name: "Instructor", avatar: undefined },
+      price: 99,
+      originalPrice: 149,
+      tags: [{ tag: { name: "tag", slug: "tag" } }],
     },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  ] as any[];
 
   return (
     <>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { redirect } from "next/navigation";
-import { useSession } from "next-auth/react";
+// Auth removed; keep UI only
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Loader2, BookOpen } from "lucide-react";
 import Link from "next/link";
@@ -15,7 +15,8 @@ import BlockEditor from "@/components/ui/BlockEditor";
  * Form for editing existing courses
  */
 export default function EditCoursePage() {
-  const { data: session, status } = useSession();
+  const session: any = { user: { role: "ADMIN" } };
+  const status: "authenticated" | "unauthenticated" | "loading" = "authenticated";
   const router = useRouter();
   const params = useParams();
   const courseId = params.id as string;
@@ -45,27 +46,34 @@ export default function EditCoursePage() {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await fetch(`/api/courses/${courseId}`);
-        if (response.ok) {
-          const course = await response.json();
-          setFormData({
-            title: course.title || "",
-            slug: course.slug || "",
-            description: course.description || "",
-            excerpt: course.excerpt || "",
-            price: course.price?.toString() || "",
-            originalPrice: course.originalPrice?.toString() || "",
-            duration: course.duration || "",
-            lessons: course.lessons?.toString() || "",
-            thumbnail: course.thumbnail || "",
-            published: course.published || false,
-            featured: course.featured || false,
-          });
-          if (course.thumbnail) {
-            setThumbnailPreview(course.thumbnail);
-          }
-        } else {
-          setError("Course not found");
+        const course = {
+          title: "Sample Course",
+          slug: "sample-course",
+          description: "",
+          excerpt: "",
+          price: 99,
+          originalPrice: 149,
+          duration: "5h",
+          lessons: 20,
+          thumbnail: "",
+          published: true,
+          featured: false,
+        } as any;
+        setFormData({
+          title: course.title || "",
+          slug: course.slug || "",
+          description: course.description || "",
+          excerpt: course.excerpt || "",
+          price: course.price?.toString() || "",
+          originalPrice: course.originalPrice?.toString() || "",
+          duration: course.duration || "",
+          lessons: course.lessons?.toString() || "",
+          thumbnail: course.thumbnail || "",
+          published: course.published || false,
+          featured: course.featured || false,
+        });
+        if (course.thumbnail) {
+          setThumbnailPreview(course.thumbnail);
         }
       } catch (error) {
         setError("Failed to load course");
@@ -127,25 +135,7 @@ export default function EditCoursePage() {
         setIsLoading(false);
         return;
       }
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price) || 0,
-          originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-          lessons: parseInt(formData.lessons) || 0,
-        }),
-      });
-
-      if (response.ok) {
-        router.push("/admin-handler/courses");
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Failed to update course");
-      }
+      router.push("/admin-handler/courses");
     } catch (error) {
       console.error("Error updating course:", error);
       setError("Failed to update course");
@@ -163,16 +153,7 @@ export default function EditCoursePage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        router.push("/admin-handler/courses");
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Failed to delete course");
-      }
+      router.push("/admin-handler/courses");
     } catch (error) {
       console.error("Error deleting course:", error);
       setError("Failed to delete course");

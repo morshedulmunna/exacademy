@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth-utils";
-import { prisma } from "@/lib/db";
+// Backend removed; keep static admin UI only
 import { DashboardHeader, StatsGrid, SimpleChart } from "../_@components";
 import { TrendingUp, Users, Eye, BookOpen, Calendar, Clock, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
@@ -11,47 +9,20 @@ import Link from "next/link";
  * Enhanced for course selling and blog publishing business
  */
 export default async function AdminDashboard() {
-  const user = await getCurrentUser();
-
-  // Redirect if not authenticated or not admin
-  if (!user || user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
-
-  // Fetch comprehensive admin statistics
-  const [totalPosts, publishedPosts, draftPosts, totalUsers, totalTags, totalViews, totalCourses, publishedCourses, draftCourses, totalEnrollments, recentPosts, recentUsers, recentCourses, topViewedPosts] = await Promise.all([
-    prisma.post.count(),
-    prisma.post.count({ where: { published: true } }),
-    prisma.post.count({ where: { published: false } }),
-    prisma.user.count(),
-    prisma.tag.count(),
-    prisma.post.aggregate({ _sum: { viewCount: true } }),
-    prisma.course.count(),
-    prisma.course.count({ where: { published: true } }),
-    prisma.course.count({ where: { published: false } }),
-    prisma.courseEnrollment.count(),
-    prisma.post.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      include: { author: true, tags: true },
-    }),
-    prisma.user.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, email: true, createdAt: true, avatar: true },
-    }),
-    prisma.course.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      include: { instructor: true },
-    }),
-    prisma.post.findMany({
-      take: 5,
-      where: { published: true },
-      orderBy: { viewCount: "desc" },
-      include: { author: true },
-    }),
-  ]);
+  // Static placeholder metrics
+  const [totalPosts, publishedPosts, draftPosts, totalUsers, totalTags, totalViews, totalCourses, publishedCourses, draftCourses, totalEnrollments] = [10, 7, 3, 120, 8, { _sum: { viewCount: 5320 } }, 4, 3, 1, 56] as any;
+  const recentPosts = [
+    { id: "p1", title: "Sample Post", published: true, author: { name: "Author" }, viewCount: 120, tags: [1, 2], createdAt: new Date().toISOString() },
+  ] as any[];
+  const recentUsers = [
+    { id: "u1", name: "Jane Doe", email: "jane@example.com", createdAt: new Date().toISOString(), avatar: undefined },
+  ] as any[];
+  const recentCourses = [
+    { id: "c1", title: "Sample Course", instructor: { name: "Instructor" }, published: true },
+  ] as any[];
+  const topViewedPosts = [
+    { id: "p1", title: "Popular Post", author: { name: "Author" }, viewCount: 420 },
+  ] as any[];
 
   const totalViewsCount = totalViews._sum.viewCount || 0;
 

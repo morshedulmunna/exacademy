@@ -142,6 +142,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
             reject(new Error(errorMessage));
           });
 
+          // No backend in UI-only build; this will fail unless endpoint exists
           xhr.open("POST", "/api/upload");
           xhr.send(formData);
         });
@@ -219,9 +220,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
   const deleteImage = useCallback(
     async (imagePath: string): Promise<void> => {
       try {
-        const response = await fetch(`/api/upload?path=${encodeURIComponent(imagePath)}`, {
-          method: "DELETE",
-        });
+        const response = await fetch(`/api/upload?path=${encodeURIComponent(imagePath)}`, { method: "DELETE" });
 
         if (!response.ok) {
           throw new Error("Failed to delete image");

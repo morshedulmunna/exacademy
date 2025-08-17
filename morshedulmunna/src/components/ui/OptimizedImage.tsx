@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { ImageUploader } from '@/lib/image-upload';
+// Static helper removed
 
 interface OptimizedImageProps {
   src: string;
@@ -37,10 +37,10 @@ export default function OptimizedImage({
   onLoad
 }: OptimizedImageProps) {
   // Get optimized URL (WebP if available and preferred)
-  const optimizedSrc = ImageUploader.getOptimizedUrl(src, preferWebP);
+  const optimizedSrc = src;
   
   // Get thumbnail URL for smaller images
-  const thumbnailSrc = ImageUploader.getThumbnailUrl(src, preferWebP);
+  const thumbnailSrc = src;
 
   const handleError = () => {
     // If WebP failed and we have a fallback, try the original format

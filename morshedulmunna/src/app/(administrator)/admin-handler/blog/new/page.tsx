@@ -20,24 +20,7 @@ export default function NewBlogPostPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          content: content, // TipTap provides HTML; renderer handles HTML or Markdown
-          coverImage: coverImage?.webp || coverImage?.original,
-          published: true,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.error || "Failed to publish post");
-      }
-
-      const post = await response.json();
-      router.push(`/blog/${post.slug}`);
+      router.push(`/blog/static-blog-post`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to publish post";
       setError(message);

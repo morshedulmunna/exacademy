@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useSession, signIn } from "next-auth/react";
+// Auth removed; keep UI only
 
 interface CommentItem {
   id: string;
@@ -30,7 +30,8 @@ interface CommentItem {
  * Comments renders the comment list and an input box to submit a new comment.
  */
 export default function Comments({ slug }: { slug: string }) {
-  const { status, data: session } = useSession();
+  const status: "authenticated" | "unauthenticated" | "loading" = "unauthenticated";
+  const session: any = null;
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -108,11 +109,7 @@ export default function Comments({ slug }: { slug: string }) {
     if (submitting) return;
     const trimmed = content.trim();
     if (!trimmed) return;
-    if (status !== "authenticated") {
-      const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-      await signIn(undefined, { callbackUrl });
-      return;
-    }
+    if (status !== "authenticated") return;
     setSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${slug}/comments`, {
@@ -140,11 +137,7 @@ export default function Comments({ slug }: { slug: string }) {
     if (!replyParentId || submitting) return;
     const trimmed = replyContent.trim();
     if (!trimmed) return;
-    if (status !== "authenticated") {
-      const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-      await signIn(undefined, { callbackUrl });
-      return;
-    }
+    if (status !== "authenticated") return;
     setSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${slug}/comments`, {
@@ -205,11 +198,7 @@ export default function Comments({ slug }: { slug: string }) {
     if (!editingId || submitting) return;
     const trimmed = editingContent.trim();
     if (!trimmed) return;
-    if (status !== "authenticated") {
-      const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-      await signIn(undefined, { callbackUrl });
-      return;
-    }
+    if (status !== "authenticated") return;
     setSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${slug}/comments`, {

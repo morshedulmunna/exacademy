@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { signIn } from "next-auth/react";
+// Auth removed; keep UI only
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
@@ -69,19 +69,8 @@ export default function RegisterPage() {
       } else {
         setSuccess("Registration successful! Signing you in...");
 
-        // Auto sign in after successful registration
-        const result = await signIn("credentials", {
-          email: formData.email,
-          password: formData.password,
-          redirect: false,
-        });
-
-        if (result?.error) {
-          setError("Registration successful but sign-in failed. Please try logging in.");
-        } else {
-          router.push("/");
-          router.refresh();
-        }
+        router.push("/");
+        router.refresh();
       }
     } catch (error) {
       setError("An error occurred. Please try again.");

@@ -1,8 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth-utils";
-import { prisma } from "@/lib/db";
+// Backend removed; keep static admin UI only
 import { Plus, Edit, Eye, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
 import Image from "next/image";
 import DeleteCourseButton from "@/components/course/DeleteCourseButton";
@@ -12,38 +10,26 @@ import DeleteCourseButton from "@/components/course/DeleteCourseButton";
  * Displays all courses with management options
  */
 export default async function CourseManagementPage() {
-  const user = await getCurrentUser();
-
-  // Redirect if not authenticated or not admin
-  if (!user || user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
-
-  // Fetch all courses with instructor information
-  const courses = (await prisma.course.findMany({
-    include: {
-      instructor: {
-        select: {
-          name: true,
-          email: true,
-          avatar: true,
-        },
-      },
-      tags: {
-        include: {
-          tag: true,
-        },
-      },
-      _count: {
-        select: {
-          enrollments: true,
-        },
-      },
+  const courses = [
+    {
+      id: "c1",
+      title: "Sample Course",
+      slug: "sample-course",
+      excerpt: "This is a sample course",
+      description: "Details...",
+      thumbnail: undefined,
+      duration: "5h",
+      lessons: 20,
+      featured: true,
+      price: 99,
+      originalPrice: 149,
+      viewCount: 123,
+      createdAt: new Date().toISOString(),
+      instructor: { name: "Instructor", email: "inst@example.com", avatar: undefined },
+      _count: { enrollments: 12 },
+      published: true,
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })) as any[];
+  ] as any[];
 
   return (
     <div className="space-y-6">

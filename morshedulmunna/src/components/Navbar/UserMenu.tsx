@@ -3,8 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-import { User, LogOut, Settings, ChevronDown, Settings2, Shield, FileText } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { User, Settings, ChevronDown, Settings2, Shield, FileText } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 
@@ -13,14 +12,14 @@ import { useOutsideClick } from "@/hooks/useOutsideClick";
  */
 export default function UserMenu() {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { data: session, status } = useSession();
+  const status = "unauthenticated";
+  const session: any = null;
   const { theme } = useTheme();
 
   // Ref for user dropdown menu
   const userMenuRef = useOutsideClick(() => setShowUserMenu(false));
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
     setShowUserMenu(false);
   };
 

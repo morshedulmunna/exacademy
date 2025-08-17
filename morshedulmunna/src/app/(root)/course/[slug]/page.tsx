@@ -10,28 +10,30 @@ import FeedbackRating from "@/components/course-details/FeedbackRating";
 import MoreCoursesByInstructor from "@/components/course-details/MoreCoursesByInstructor";
 import StudentReviews from "@/components/course-details/StudentReviews";
 import React from "react";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import type { Course } from "@/lib/types";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-async function getCourse(slug: string): Promise<(Course & { modules?: any[] }) | null> {
-  try {
-    const hdrs = await headers();
-    const host = hdrs.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-    const apiUrl = `${protocol}://${host}/api/courses/by-slug/${slug}`;
-
-    const response = await fetch(apiUrl, { cache: "no-store" });
-    if (!response.ok) return null;
-    return response.json();
-  } catch (error) {
-    console.error("Error fetching course:", error);
-    return null;
-  }
+async function getCourse(slug: string): Promise<any | null> {
+  // Static placeholder for UI-only build
+  return {
+    id: "1",
+    title: "Sample Course",
+    slug,
+    description: "Static description",
+    excerpt: "Static excerpt",
+    duration: "5h",
+    lessons: 20,
+    price: 99,
+    originalPrice: 149,
+    thumbnail: undefined,
+    reviews: [],
+    modules: [
+      { id: "m1", lessons: [{ id: "l1", videoUrl: "" }] },
+    ],
+  };
 }
 
 export default async function CourseDetailsPage({ params }: Props) {

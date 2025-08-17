@@ -3,8 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-import { User, LogOut, Settings, ChevronDown, BookOpen, Code, Palette, Database, Globe } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { User, Settings, ChevronDown, BookOpen, Code, Palette, Database, Globe } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
 import ThemeToggler from "@/themes/ThemeToggler";
 import { NAV_ITEMS } from "./constants";
@@ -31,12 +30,12 @@ interface MobileMenuProps {
  * Mobile menu component with navigation and authentication options
  */
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
-  const { data: session, status } = useSession();
+  const status = "unauthenticated";
+  const session: any = null;
   const { theme } = useTheme();
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
     onClose();
   };
 

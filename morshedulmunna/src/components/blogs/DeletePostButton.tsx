@@ -25,15 +25,7 @@ export default function DeletePostButton({ slug, title, onDelete }: DeletePostBu
     setError(null);
 
     try {
-      const response = await fetch(`/api/posts/${encodeURIComponent(slug)}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.error || "Failed to delete post");
-      }
+      // Static UI: pretend delete succeeded
 
       setShowConfirmation(false);
       onDelete?.();

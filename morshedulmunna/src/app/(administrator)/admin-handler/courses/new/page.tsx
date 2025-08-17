@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
-import { useSession } from "next-auth/react";
+// Auth removed; keep UI only
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -15,7 +15,8 @@ import RichTextEditor from "@/components/rich-text-editor";
  * Form for creating new courses with comprehensive fields
  */
 export default function CreateCoursePage() {
-  const { data: session, status } = useSession();
+  const session: any = { user: { role: "ADMIN" } };
+  const status: "authenticated" | "unauthenticated" | "loading" = "authenticated";
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -46,9 +47,7 @@ export default function CreateCoursePage() {
     const loadTags = async () => {
       try {
         setIsLoadingTags(true);
-        const res = await fetch("/api/tags");
-        if (!res.ok) return;
-        const tags: Tag[] = await res.json();
+        const tags: Tag[] = [];
         if (mounted) setAvailableTags(tags);
       } catch (e) {
         console.error("Failed to load tags", e);
@@ -67,9 +66,7 @@ export default function CreateCoursePage() {
     return <div>Loading...</div>;
   }
 
-  if (!session || session.user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
+  // allow access in static build
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -125,25 +122,7 @@ export default function CreateCoursePage() {
         setIsLoading(false);
         return;
       }
-      const response = await fetch("/api/courses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price) || 0,
-          originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-          lessons: parseInt(formData.lessons) || 0,
-        }),
-      });
-
-      if (response.ok) {
-        const course = await response.json();
-        router.push(`/admin-handler/courses/${course.id}/edit`);
-      } else {
-        throw new Error("Failed to create course");
-      }
+      router.push(`/admin-handler/courses`);
     } catch (error) {
       console.error("Error creating course:", error);
       // Handle error (show toast notification)

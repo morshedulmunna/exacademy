@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useImageUpload } from "@/hooks/useImageUpload";
-import { ImageUploadResult } from "@/lib/image-upload";
+import type { ImageUploadResult } from "@/lib/image-upload";
 import Image from "next/image";
 import { Upload, X, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 

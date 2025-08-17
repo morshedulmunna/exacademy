@@ -2,7 +2,6 @@ import React from "react";
 import MaxWidthWrapper from "@/common/MaxWidthWrapper";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { headers } from "next/headers";
 
 interface Props {
   searchParams: Promise<{
@@ -17,38 +16,24 @@ interface Props {
  * Uses absolute URL derived from the current request headers to work in server components.
  */
 async function getPosts(params: { page?: string; tag?: string; search?: string }) {
-  try {
-    const searchParams = new URLSearchParams();
-    if (params.page) searchParams.set("page", params.page);
-    if (params.tag) searchParams.set("tag", params.tag);
-    if (params.search) searchParams.set("search", params.search);
-
-    // Build absolute URL for server-side fetch
-    const hdrs = await headers();
-    const host = hdrs.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-    const apiUrl = `${protocol}://${host}/api/posts${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-
-    const response = await fetch(apiUrl, {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      console.error("API response not ok:", response.status, response.statusText);
-      return { posts: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
-    }
-
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      console.error("Response is not JSON:", contentType);
-      return { posts: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    return { posts: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
-  }
+  // Static placeholder for UI-only build
+  const posts = [
+    {
+      id: "1",
+      title: "Static Blog Post",
+      slug: "static-blog-post",
+      excerpt: "Example excerpt",
+      content: "",
+      coverImage: undefined,
+      publishedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      readTime: 4,
+      author: { name: "Author", avatar: undefined },
+      _count: { likes: 0 },
+      tags: [{ id: "t1", name: "Tag", color: "#888888" }],
+    },
+  ];
+  return { posts, pagination: { page: 1, limit: 10, total: posts.length, pages: 1 } };
 }
 
 export default async function BlogListPage({ searchParams }: Props) {

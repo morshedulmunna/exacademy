@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { PaymentFormData, PaymentMethod } from "@/components/checkout/types";
 
 /**
  * Custom hook for managing checkout state and logic
  */
 export function useCheckout() {
-  const { data: session } = useSession();
+  const session: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>("stripe");
   const [paymentForm, setPaymentForm] = useState<PaymentFormData>({
@@ -14,16 +13,14 @@ export function useCheckout() {
     cardHolder: "",
     expiryDate: "",
     cvv: "",
-    email: session?.user?.email || "",
+    email: "",
     agreeToTerms: false,
   });
 
   useEffect(() => {
     // Update email if user is logged in
-    if (session?.user?.email) {
-      setPaymentForm((prev) => ({ ...prev, email: session.user.email || "" }));
-    }
-  }, [session?.user?.email]);
+    // no-op in static build
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -74,7 +71,7 @@ export function useCheckout() {
       cardHolder: "",
       expiryDate: "",
       cvv: "",
-      email: session?.user?.email || "",
+      email: "",
       agreeToTerms: false,
     });
   };
@@ -85,7 +82,7 @@ export function useCheckout() {
       cardHolder: "",
       expiryDate: "",
       cvv: "",
-      email: session?.user?.email || "",
+      email: "",
       agreeToTerms: false,
     });
   };
