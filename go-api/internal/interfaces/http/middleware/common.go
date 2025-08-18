@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"mime"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -256,7 +257,21 @@ func ContentTypeMiddleware(contentType string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == "POST" || r.Method == "PUT" || r.Method == "PATCH" {
-				if r.Header.Get("Content-Type") != contentType {
+				// If there's no request body, skip strict content-type enforcement
+				if r.ContentLength == 0 && (r.Body == nil || r.Body == http.NoBody) {
+					next.ServeHTTP(w, r)
+					return
+				}
+
+				ct := r.Header.Get("Content-Type")
+				if ct == "" {
+					AppError.UnsupportedMediaType("Unsupported Media Type").WriteToResponse(w)
+					return
+				}
+
+				// Accept values like "application/json; charset=utf-8"
+				mediaType, _, err := mime.ParseMediaType(ct)
+				if err != nil || !strings.EqualFold(mediaType, contentType) {
 					AppError.UnsupportedMediaType("Unsupported Media Type").WriteToResponse(w)
 					return
 				}
