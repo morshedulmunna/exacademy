@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: skoolz-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: skoolz
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - skoolz-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: skoolz-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: password
+      REDIS_DB: 0
+      REDIS_POOL_SIZE: 10
+      REDIS_MIN_IDLE: 5
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - skoolz-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+networks:
+  skoolz-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
