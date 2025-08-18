@@ -3,13 +3,12 @@
 import React, { useState } from "react";
 import BlockEditor from "@/components/ui/BlockEditor";
 import { BlogEditorHeader } from "@/app/(administrator)/_@components";
-import type { ImageUploadResult } from "@/lib/image-upload";
 import { useRouter } from "next/navigation";
 
 export default function NewBlogPostPage() {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [coverImage, setCoverImage] = useState<ImageUploadResult | null>(null);
+  const [coverImage, setCoverImage] = useState<null>(null);
   const [isPublishing, setIsPublishing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
