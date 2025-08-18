@@ -27,6 +27,15 @@
             "url": "/"
         }
     ],
+    "components": {
+        "securitySchemes": {
+            "apiAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
     "paths": {
         "/api": {
             "get": {
@@ -155,9 +164,17 @@
                 "tags": [
                     "Auth"
                 ],
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 }
             }
@@ -167,6 +184,11 @@
                 "summary": "Current user (session)",
                 "tags": [
                     "Auth"
+                ],
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
                 ],
                 "responses": {
                     "200": {

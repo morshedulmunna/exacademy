@@ -13,7 +13,16 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 	claims, ok := utils.GetUserFromRequest(r)
 	if !ok || claims == nil {
 		AppError.Unauthorized("Unauthorized").WriteToResponse(w)
-		return
 	}
-	response.WriteOK(w, map[string]any{"user": claims})
+	userID, err := utils.ParseHexObjectID(claims.UserID)
+	if err != nil {
+		AppError.BadRequest("Invalid user ID").WriteToResponse(w)
+	}
+
+	user, err := h.repo.GetByID(r.Context(), userID)
+	if err != nil {
+		AppError.NotFound("User not found").WriteToResponse(w)
+	}
+
+	response.WriteOK(w, map[string]any{"user": user})
 }
