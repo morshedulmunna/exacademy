@@ -5,12 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"execute_academy/config"
 	"execute_academy/internal/domain/mongo/user"
-
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
+	"execute_academy/pkg/shared/utils"
 )
 
 // Service provides authentication-related operations.
@@ -46,11 +42,8 @@ type TokenPair struct {
 
 // Register creates a new user with a hashed password.
 func (s *Service) Register(ctx context.Context, in RegisterInput) (*user.User, error) {
-	if in.Email == "" || in.Username == "" || in.Password == "" {
-		return nil, errors.New("missing required fields")
-	}
 
-	passwordHash, err := hashPassword(in.Password)
+	passwordHash, err := utils.HashPassword(in.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -83,53 +76,26 @@ func (s *Service) Login(ctx context.Context, in LoginInput) (*user.User, *TokenP
 		return nil, nil, err
 	}
 
-	if err := verifyPassword(u.PasswordHash, in.Password); err != nil {
+	if err := utils.VerifyPassword(u.PasswordHash, in.Password); err != nil {
 		return nil, nil, errors.New("invalid credentials")
 	}
 
-	token, err := generateAccessToken(u)
+	claims := map[string]any{
+		"sub":        u.ID.Hex(),
+		"email":      u.Email,
+		"username":   u.Username,
+		"roles":      u.Roles,
+		"name":       u.FullName,
+		"is_active":  u.IsActive,
+		"has_access": u.HasAccess,
+	}
+
+	token, err := utils.GenerateTokenWithClaims(claims, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return u, &TokenPair{AccessToken: token}, nil
-}
-
-func hashPassword(password string) (string, error) {
-	b, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
-}
-
-func verifyPassword(hash, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-}
-
-func generateAccessToken(u *user.User) (string, error) {
-	claims := jwt.MapClaims{
-		"iss":       config.GetConfig().ServiceName,
-		"sub":       u.ID.Hex(),
-		"email":     u.Email,
-		"name":      u.FullName,
-		"role":      firstRole(u.Roles),
-		"is_active": u.IsActive,
-		"jti":       uuid.NewString(),
-		"iat":       time.Now().Unix(),
-		"nbf":       time.Now().Unix(),
-		"exp":       time.Now().Add(24 * time.Hour).Unix(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.GetConfig().JwtSecret))
-}
-
-func firstRole(roles []string) string {
-	if len(roles) == 0 {
-		return "user"
-	}
-	return roles[0]
 }
 
 func buildFullName(first, last string) string {

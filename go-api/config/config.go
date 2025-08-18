@@ -141,7 +141,10 @@ type Config struct {
 	HealthCheckRoute string `envconfig:"HEALTH_CHECK_ROUTE" default:"/health"`
 	ApiVersion       string `envconfig:"API_VERSION" default:"v1"`
 	JwtSecret        string `envconfig:"JWT_SECRET" default:"secret"`
-	ServiceBasePath  string `envconfig:"SERVICE_BASE_PATH" default:"/api/v1"`
+	// JwtAccessTTLMinutes controls the lifetime of access tokens in minutes
+	// Defaults to 1440 minutes (24 hours) when not provided
+	JwtAccessTTLMinutes int    `envconfig:"JWT_ACCESS_TTL_MINUTES" default:"1440"`
+	ServiceBasePath     string `envconfig:"SERVICE_BASE_PATH" default:"/api/v1"`
 
 	// Database configuration
 	Database PostgresDatabase

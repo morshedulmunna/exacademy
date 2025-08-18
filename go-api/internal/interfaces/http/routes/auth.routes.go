@@ -20,8 +20,7 @@ func RegisterAuthRoutes(mux *http.ServeMux, db *mongo.Database) {
 	userRepo := domainUser.NewRepository(db)
 	sessMgr := session.NewManager("sid", 24*time.Hour, true)
 	authSvc := appAuth.NewService(userRepo)
-	authHandler := handlerAuth.NewHandler(authSvc, sessMgr)
-	userHandler := handlerAuth.NewUserHandler(userRepo)
+	authHandler := handlerAuth.NewHandler(authSvc, sessMgr, userRepo)
 
 	// Public auth routes
 	mux.Handle("POST /api/v1/auth/register", manager.With(http.HandlerFunc(authHandler.Register)))
@@ -32,6 +31,6 @@ func RegisterAuthRoutes(mux *http.ServeMux, db *mongo.Database) {
 	mux.Handle("GET /api/v1/auth/me", manager.With(http.HandlerFunc(authHandler.Me), sessAuth.AuthenticateSession))
 	mux.Handle("POST /api/v1/auth/logout", manager.With(http.HandlerFunc(authHandler.Logout), sessAuth.AuthenticateSession))
 
-	mux.Handle("PATCH /api/v1/users/profile", manager.With(http.HandlerFunc(userHandler.UpdateProfile), sessAuth.AuthenticateSession))
-	mux.Handle("DELETE /api/v1/users", manager.With(http.HandlerFunc(userHandler.SoftDelete), sessAuth.AuthenticateSession, sessAuth.RequireSessionRoles("admin")))
+	mux.Handle("PATCH /api/v1/users/profile", manager.With(http.HandlerFunc(authHandler.UpdateProfile), sessAuth.AuthenticateSession))
+	mux.Handle("DELETE /api/v1/users", manager.With(http.HandlerFunc(authHandler.SoftDelete), sessAuth.AuthenticateSession, sessAuth.RequireSessionRoles("admin")))
 }
