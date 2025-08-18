@@ -1,12 +1,12 @@
 package grpc
 
 import (
+	"execute_academy/config"
+	"execute_academy/internal/interfaces/grpc/middleware"
+	"execute_academy/internal/interfaces/grpc/routes"
 	"fmt"
 	"log/slog"
 	"net"
-	"skoolz/config"
-	"skoolz/internal/interfaces/grpc/middleware"
-	"skoolz/internal/interfaces/grpc/routes"
 	"strconv"
 
 	"google.golang.org/grpc"

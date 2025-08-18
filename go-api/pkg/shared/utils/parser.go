@@ -2,8 +2,8 @@ package utils
 
 import (
 	"encoding/json"
+	"execute_academy/pkg/shared/response"
 	"net/http"
-	"skoolz/pkg/shared/response"
 
 	"github.com/go-playground/validator"
 )

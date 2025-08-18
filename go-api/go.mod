@@ -1,4 +1,4 @@
-module skoolz
+module execute_academy
 
 go 1.24.2
 

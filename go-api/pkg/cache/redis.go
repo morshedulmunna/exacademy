@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"skoolz/config"
-	AppError "skoolz/pkg/shared/error"
+	"execute_academy/config"
+	AppError "execute_academy/pkg/shared/error"
 
 	"github.com/redis/go-redis/v9"
 )

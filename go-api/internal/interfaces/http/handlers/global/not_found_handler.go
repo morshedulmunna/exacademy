@@ -1,8 +1,8 @@
 package global
 
 import (
+	"execute_academy/pkg/shared/response"
 	"net/http"
-	"skoolz/pkg/shared/response"
 )
 
 // NotFoundHandler handles 404 Not Found requests

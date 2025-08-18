@@ -2,13 +2,14 @@ package http
 
 import (
 	"context"
+	"execute_academy/config"
+	"execute_academy/internal/interfaces/http/routes"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
-	"skoolz/config"
-	"skoolz/internal/interfaces/http/routes"
+
 	"strconv"
 	"syscall"
 	"time"

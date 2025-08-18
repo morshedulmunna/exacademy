@@ -1,7 +1,7 @@
 package email
 
 import (
-	"skoolz/config"
+	"execute_academy/config"
 )
 
 // EmailConfigFromAppConfig creates EmailConfig from the main application config

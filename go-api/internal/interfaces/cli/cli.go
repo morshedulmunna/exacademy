@@ -1,10 +1,10 @@
 package cli
 
 import (
+	"execute_academy/config"
+	"execute_academy/pkg/logger"
 	"fmt"
 	"os"
-	"skoolz/config"
-	"skoolz/pkg/logger"
 
 	"github.com/spf13/cobra"
 )

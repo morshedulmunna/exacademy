@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"skoolz/config"
+	"execute_academy/config"
 
 	"github.com/segmentio/kafka-go"
 )

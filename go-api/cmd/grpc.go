@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"skoolz/internal/interfaces/grpc"
+	"execute_academy/internal/interfaces/grpc"
 
 	"github.com/spf13/cobra"
 )

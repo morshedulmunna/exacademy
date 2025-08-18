@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"skoolz/config"
-	"skoolz/pkg/shared/response"
+	"execute_academy/config"
+	"execute_academy/pkg/shared/response"
 )
 
 // HealthResponse represents the health check response

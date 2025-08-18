@@ -1,6 +1,6 @@
 package main
 
-import "skoolz/cmd"
+import "execute_academy/cmd"
 
 func main() {
 	cmd.Execute()

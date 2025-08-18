@@ -1,9 +1,9 @@
 package global
 
 import (
+	"execute_academy/config"
+	"execute_academy/pkg/shared/response"
 	"net/http"
-	"skoolz/config"
-	"skoolz/pkg/shared/response"
 	"time"
 )
 

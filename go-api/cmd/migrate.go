@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"execute_academy/config"
+	"execute_academy/pkg/logger"
 	"fmt"
 	"os"
 	"path/filepath"
-	"skoolz/config"
-	"skoolz/pkg/logger"
+
 	"sort"
 	"strings"
 

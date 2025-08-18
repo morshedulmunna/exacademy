@@ -53,9 +53,9 @@ import (
     "context"
     "log/slog"
 
-    "skoolz/config"
-    "skoolz/internal/infrastructure/messaging"
-    "skoolz/pkg/email"
+    "execute_academy/config"
+    "execute_academy/internal/infrastructure/messaging"
+    "execute_academy/pkg/email"
 )
 
 func main() {

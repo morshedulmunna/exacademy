@@ -2,12 +2,12 @@ package logger
 
 import (
 	"context"
+	"execute_academy/config"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path"
-	"skoolz/config"
 	"time"
 
 	"gopkg.in/natefinch/lumberjack.v2"

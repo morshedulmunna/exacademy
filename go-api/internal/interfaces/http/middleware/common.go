@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"skoolz/config"
-	"skoolz/pkg/logger"
-	AppError "skoolz/pkg/shared/error"
+	"execute_academy/config"
+	"execute_academy/pkg/logger"
+	AppError "execute_academy/pkg/shared/error"
 )
 
 // LoggingMiddleware logs HTTP requests with structured logging

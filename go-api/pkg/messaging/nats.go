@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"time"
 
-	"skoolz/config"
-	"skoolz/pkg/logger"
+	"execute_academy/config"
+	"execute_academy/pkg/logger"
 
 	"github.com/nats-io/nats.go"
 )

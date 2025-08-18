@@ -1,9 +1,9 @@
 package routes
 
 import (
+	community "execute_academy/internal/interfaces/http/handlers"
+	"execute_academy/internal/interfaces/http/middleware"
 	"net/http"
-	community "skoolz/internal/interfaces/http/handlers"
-	"skoolz/internal/interfaces/http/middleware"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )

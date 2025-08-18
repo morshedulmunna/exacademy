@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"skoolz/config"
+	"execute_academy/config"
 )
 
 func TestEmailConfigFromAppConfig(t *testing.T) {

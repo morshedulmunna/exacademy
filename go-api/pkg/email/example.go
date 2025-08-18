@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"skoolz/config"
-	"skoolz/pkg/messaging"
+	"execute_academy/config"
+	"execute_academy/pkg/messaging"
 )
 
 // ExampleUsage demonstrates how to use the email service
