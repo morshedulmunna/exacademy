@@ -16,10 +16,6 @@
         {
             "name": "Auth",
             "description": "Authentication and session endpoints"
-        },
-        {
-            "name": "Users",
-            "description": "User profile and management"
         }
     ],
     "servers": [
@@ -193,38 +189,6 @@
                 "responses": {
                     "200": {
                         "description": "OK"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            }
-        },
-        "/api/v1/users/profile": {
-            "patch": {
-                "summary": "Update profile",
-                "tags": [
-                    "Users"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                }
-            }
-        },
-        "/api/v1/users": {
-            "delete": {
-                "summary": "Soft delete user (admin)",
-                "tags": [
-                    "Users"
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
                     },
                     "401": {
                         "description": "Unauthorized"

@@ -35,7 +35,7 @@ func (s *Service) Register(ctx context.Context, in Authtypes.RegisterInput) (*us
 		PasswordHash: passwordHash,
 		FirstName:    in.FirstName,
 		LastName:     in.LastName,
-		FullName:     buildFullName(in.FirstName, in.LastName),
+		FullName:     in.FirstName + " " + in.LastName,
 		IsActive:     true,
 		HasAccess:    true,
 		Roles:        []string{"user"},
@@ -68,17 +68,4 @@ func (s *Service) Login(ctx context.Context, in Authtypes.LoginInput) (*user.Use
 	}
 
 	return u, &Authtypes.TokenPair{AccessToken: token}, nil
-}
-
-func buildFullName(first, last string) string {
-	if first == "" && last == "" {
-		return ""
-	}
-	if first == "" {
-		return last
-	}
-	if last == "" {
-		return first
-	}
-	return first + " " + last
 }
