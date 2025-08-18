@@ -16,7 +16,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	u, err := h.svc.Register(r.Context(), in)
 	if err != nil {
-		AppError.UnprocessableEntity("Registration failed", map[string]interface{}{"error": err.Error()}).WriteToResponse(w)
+		AppError.UnprocessableEntity("Registration Not Complete!")
 	}
 	response.WriteCreated(w, "User registered", map[string]any{"user": u})
 }

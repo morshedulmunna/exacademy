@@ -114,9 +114,14 @@ func Conflict(message string) *APIError {
 	return NewAPIError(http.StatusConflict, "CONFLICT", message)
 }
 
-// UnprocessableEntity creates a 422 Unprocessable Entity error
-func UnprocessableEntity(message string, details map[string]interface{}) *APIError {
-	return NewAPIErrorWithDetails(http.StatusUnprocessableEntity, "UNPROCESSABLE_ENTITY", message, details)
+// UnprocessableEntity creates a 422 Unprocessable Entity error.
+// The 'details' parameter is optional and can be nil.
+func UnprocessableEntity(message string, details ...map[string]interface{}) *APIError {
+	var det map[string]interface{}
+	if len(details) > 0 {
+		det = details[0]
+	}
+	return NewAPIErrorWithDetails(http.StatusUnprocessableEntity, "UNPROCESSABLE_ENTITY", message, det)
 }
 
 // InternalServerError creates a 500 Internal Server Error
