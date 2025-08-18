@@ -2,6 +2,7 @@ package cli
 
 import (
 	"execute_academy/config"
+	Conncet_db "execute_academy/pkg/db"
 	"execute_academy/pkg/logger"
 	"fmt"
 	"os"
@@ -83,7 +84,7 @@ func (c *CLI) createHealthCmd() *cobra.Command {
 			fmt.Println("🔍 Checking service health...")
 
 			// Check database connection
-			db, err := config.NewPostgresDB()
+			db, err := Conncet_db.NewPostgresDB()
 			if err != nil {
 				fmt.Println("❌ Database: Connection failed")
 				return fmt.Errorf("database health check failed: %v", err)
@@ -268,7 +269,7 @@ func (c *CLI) createSetupCmd() *cobra.Command {
 			fmt.Println("✅ Configuration validated")
 
 			// Test database connection
-			db, err := config.NewPostgresDB()
+			db, err := Conncet_db.NewPostgresDB()
 			if err != nil {
 				return fmt.Errorf("database connection test failed: %v", err)
 			}

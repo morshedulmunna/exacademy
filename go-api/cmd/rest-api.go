@@ -4,6 +4,7 @@ import (
 	"execute_academy/config"
 	"execute_academy/internal/interfaces/http"
 	"execute_academy/pkg/cache"
+	Conncet_db "execute_academy/pkg/db"
 	"execute_academy/pkg/logger"
 	"os"
 
@@ -21,7 +22,7 @@ func serveRest(cmd *cobra.Command, args []string) error {
 	logger := logger.NewLogger()
 
 	// Connect MongoDB (kept alive for the server lifecycle)
-	mongoConn, err := config.NewMongoFromConfig()
+	mongoConn, err := Conncet_db.NewMongoFromConfig()
 	if err != nil {
 		logger.Error("Failed to connect to MongoDB", "error", err)
 		os.Exit(1)

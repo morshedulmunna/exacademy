@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"execute_academy/config"
+	Conncet_db "execute_academy/pkg/db"
 	"execute_academy/pkg/logger"
 	"fmt"
 	"os"
@@ -21,7 +21,7 @@ var migrateCmd = &cobra.Command{
 
 func migrate(cmd *cobra.Command, args []string) error {
 
-	db, err := config.NewPostgresDB()
+	db, err := Conncet_db.NewPostgresDB()
 	if err != nil {
 		return fmt.Errorf("failed to create database connection: %v", err)
 	}

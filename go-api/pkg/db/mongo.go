@@ -1,8 +1,9 @@
-package config
+package Conncet_db
 
 import (
 	"context"
 	"errors"
+	"execute_academy/config"
 	"fmt"
 	"time"
 
@@ -16,18 +17,18 @@ import (
 type MongoConnection struct {
 	client   *mongo.Client
 	database *mongo.Database
-	cfg      *MongoDatabase
+	cfg      *config.MongoDatabase
 }
 
 // NewMongo creates a new managed Mongo connection from the provided Mongo configuration.
 // It validates configuration, applies pool/timeouts, establishes the connection and pings.
-func NewMongo(cfg *MongoDatabase) (*MongoConnection, error) {
+func NewMongo(cfg *config.MongoDatabase) (*MongoConnection, error) {
 	if cfg == nil {
 		return nil, errors.New("nil Mongo config provided")
 	}
 
 	// Build a URI using the existing helper on Config
-	tmp := &Config{Mongo: *cfg}
+	tmp := &config.Config{Mongo: *cfg}
 	uri := tmp.GetMongoURI()
 	if uri == "" {
 		return nil, errors.New("mongo configuration not found: set MONGO_URI or MONGO_HOST/PORT and related vars")
@@ -74,7 +75,7 @@ func NewMongo(cfg *MongoDatabase) (*MongoConnection, error) {
 
 // NewMongoFromConfig creates a new managed Mongo connection using the global application config.
 func NewMongoFromConfig() (*MongoConnection, error) {
-	cfg := GetConfig()
+	cfg := config.GetConfig()
 	return NewMongo(&cfg.Mongo)
 }
 
