@@ -25,7 +25,7 @@ func SetupRoutes(mux *http.ServeMux, db *mongo.Database) http.Handler {
 	mux.Handle("GET /health", manager.With(http.HandlerFunc(healthHandler.HealthCheck)))
 
 	// community routes conncet
-	RegisterCommunityRoutes(mux, db)
+	// RegisterCommunityRoutes(mux, db)
 
 	// Catch-all route for 404 Not Found
 	mux.HandleFunc("/", notFoundHandler.NotFound)

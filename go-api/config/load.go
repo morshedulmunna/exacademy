@@ -124,6 +124,7 @@ func LoadConfig() error {
 			User:             viper.GetString("MONGO_USER"),
 			Password:         viper.GetString("MONGO_PASSWORD"),
 			Database:         viper.GetString("MONGO_DATABASE"),
+			AuthSource:       viper.GetString("MONGO_AUTH_SOURCE"),
 			ReplicaSet:       viper.GetString("MONGO_REPLICA_SET"),
 			TLS:              viper.GetBool("MONGO_TLS"),
 			MaxPoolSize:      viper.GetUint64("MONGO_MAX_POOL_SIZE"),

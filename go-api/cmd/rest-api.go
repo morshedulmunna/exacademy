@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"execute_academy/config"
+	mongoindexes "execute_academy/internal/domain/mongo"
 	"execute_academy/internal/interfaces/http"
 	"execute_academy/pkg/cache"
 	Conncet_db "execute_academy/pkg/db"
@@ -28,6 +29,19 @@ func serveRest(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 	defer mongoConn.Close()
+
+	// Ensure MongoDB indexes on startup
+	if db := mongoConn.Database(); db != nil {
+		if err := mongoindexes.EnsureMongoIndexes(db); err != nil {
+			// In development, log and continue to avoid blocking local runs without auth
+			if conf.IsDevelopment() {
+				logger.Warn("Failed to ensure MongoDB indexes (dev mode, continuing)", "error", err)
+			} else {
+				logger.Error("Failed to ensure MongoDB indexes", "error", err)
+				os.Exit(1)
+			}
+		}
+	}
 
 	cache, err := cache.NewRedisCache(&conf.Redis)
 	if err != nil {

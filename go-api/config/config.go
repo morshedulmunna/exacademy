@@ -43,6 +43,7 @@ type MongoDatabase struct {
 	User       string `envconfig:"MONGO_USER"`
 	Password   string `envconfig:"MONGO_PASSWORD"`
 	Database   string `envconfig:"MONGO_DATABASE"`
+	AuthSource string `envconfig:"MONGO_AUTH_SOURCE"`
 	ReplicaSet string `envconfig:"MONGO_REPLICA_SET"`
 	TLS        bool   `envconfig:"MONGO_TLS" default:"false"`
 
@@ -251,6 +252,13 @@ func (c *Config) GetMongoURI() string {
 	}
 	if c.Mongo.TLS {
 		params = append(params, "tls=true")
+	}
+	if c.Mongo.AuthSource != "" {
+		params = append(params, "authSource="+url.QueryEscape(c.Mongo.AuthSource))
+	}
+	// Sensible default: when a username is provided but no authSource, default to admin
+	if c.Mongo.User != "" && c.Mongo.AuthSource == "" {
+		params = append(params, "authSource=admin")
 	}
 
 	query := ""
