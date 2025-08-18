@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"execute_academy/pkg/shared/response"
 	"net/http"
+	"reflect"
 
 	"github.com/go-playground/validator"
 )
@@ -35,12 +36,18 @@ func ParseRequestBodyWithValidation(w http.ResponseWriter, r *http.Request, v an
 		return false
 	}
 
-	// Use go-playground/validator to validate the struct after decoding.
-	validate := validator.New()
-	if err := validate.Struct(v); err != nil {
-		// Return validation errors as a bad request.
-		response.WriteBadRequest(w, err.Error())
-		return false
+	// Only validate if v is a struct or pointer-to-struct
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	if rv.IsValid() && rv.Kind() == reflect.Struct {
+		validate := validator.New()
+		if err := validate.Struct(v); err != nil {
+			// Return validation errors as a bad request.
+			response.WriteBadRequest(w, err.Error())
+			return false
+		}
 	}
 
 	return true

@@ -7,6 +7,7 @@ import (
 
 	"execute_academy/internal/applications/auth"
 	AppError "execute_academy/pkg/shared/error"
+	"execute_academy/pkg/shared/exceptions"
 	"execute_academy/pkg/shared/response"
 	"execute_academy/pkg/shared/session"
 	"execute_academy/pkg/shared/utils"
@@ -67,7 +68,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		Password: in.Password,
 	})
 	if err != nil {
-		AppError.Unauthorized("Invalid credentials").WriteToResponse(w)
+		AppError.Forbidden(exceptions.ErrInvalidCredentials.Error()).WriteToResponse(w)
 		return
 	}
 	// Create session cookie

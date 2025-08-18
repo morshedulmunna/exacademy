@@ -13,6 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // EmailConfig represents email service configuration
@@ -345,7 +347,7 @@ func (e *EmailService) sendViaSMTP(req *EmailRequest, htmlContent, textContent s
 
 // generateEmailID generates a unique email ID
 func generateEmailID() string {
-	return fmt.Sprintf("email_%d", time.Now().UnixNano())
+	return fmt.Sprintf("email_%s", uuid.NewString())
 }
 
 // GetTemplateNames returns all available template names

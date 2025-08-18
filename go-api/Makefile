@@ -60,7 +60,7 @@ jwt: prepare
 	air gen-jwt
 
 test:
-	go test ./... -v
+	go test ./tests/... -v
 
 test-watch:
 	@echo "Starting test watch mode..."
@@ -94,6 +94,9 @@ test-unit:
 
 test-integration:
 	go test ./tests/integration/... -v
+
+test-all:
+	go test ./... -v
 
 test-coverage:
 	go test ./... -v -coverprofile=coverage.out
