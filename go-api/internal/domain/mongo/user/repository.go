@@ -22,21 +22,7 @@ func NewRepository(db *mongo.Database) *Repository {
 }
 
 func (r *Repository) collection() *mongo.Collection {
-	return r.db.Collection(CollectionName())
-}
-
-// EnsureUserIndexes declares required unique and supporting indexes for users collection.
-func EnsureUserIndexes(ctx context.Context, db *mongo.Database) error {
-	coll := db.Collection(CollectionName())
-	models := []mongo.IndexModel{
-		{Keys: bson.D{{Key: "email", Value: 1}}, Options: options.Index().SetUnique(true).SetName("uniq_email")},
-		{Keys: bson.D{{Key: "username", Value: 1}}, Options: options.Index().SetUnique(true).SetName("uniq_username")},
-		{Keys: bson.D{{Key: "user_uuid", Value: 1}}, Options: options.Index().SetUnique(true).SetName("uniq_user_uuid")},
-		{Keys: bson.D{{Key: "is_active", Value: 1}}, Options: options.Index().SetName("idx_active")},
-		{Keys: bson.D{{Key: "created_at", Value: -1}}, Options: options.Index().SetName("idx_created_at_desc")},
-	}
-	_, err := coll.Indexes().CreateMany(ctx, models)
-	return err
+	return r.db.Collection(useCollection())
 }
 
 // Create inserts a new user document.
@@ -86,6 +72,15 @@ func (r *Repository) GetByEmail(ctx context.Context, email string) (*User, error
 	return &out, nil
 }
 
+// GetByUsername returns a user by username.
+func (r *Repository) GetByUsername(ctx context.Context, username string) (*User, error) {
+	var out User
+	if err := r.collection().FindOne(ctx, bson.M{"username": username}).Decode(&out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Update applies partial updates and sets updated_at.
 func (r *Repository) Update(ctx context.Context, id primitive.ObjectID, update bson.M) (*User, error) {
 	if update == nil {
@@ -112,8 +107,22 @@ func (r *Repository) List(ctx context.Context, filter bson.M, limit, offset int6
 	if filter == nil {
 		filter = bson.M{}
 	}
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}}).SetLimit(limit).SetSkip(offset)
-	curs, err := r.collection().Find(ctx, filter, opts)
+	// By default exclude soft-deleted users unless caller specified a deleted_at filter
+	if _, hasDeletedFilter := filter["deleted_at"]; !hasDeletedFilter {
+		filter["$or"] = []bson.M{
+			{"deleted_at": bson.M{"$exists": false}},
+			{"deleted_at": nil},
+		}
+	}
+
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$match", Value: filter}},
+		bson.D{{Key: "$sort", Value: bson.D{{Key: "created_at", Value: -1}}}},
+		bson.D{{Key: "$skip", Value: offset}},
+		bson.D{{Key: "$limit", Value: limit}},
+	}
+
+	curs, err := r.collection().Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}

@@ -25,3 +25,8 @@ func GetUserFromContext(ctx context.Context) (*UserClaims, bool) {
 func GetUserFromRequest(r *http.Request) (*UserClaims, bool) {
 	return GetUserFromContext(r.Context())
 }
+
+// AddUserToContext stores user claims in the provided context and returns the derived context
+func AddUserToContext(ctx context.Context, claims *UserClaims) context.Context {
+	return context.WithValue(ctx, ctxKeyUser{}, claims)
+}

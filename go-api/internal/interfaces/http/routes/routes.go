@@ -24,6 +24,9 @@ func SetupRoutes(mux *http.ServeMux, db *mongo.Database) http.Handler {
 	mux.Handle("GET /api/v1", manager.With(http.HandlerFunc(welcomeHandler.Welcome)))
 	mux.Handle("GET /health", manager.With(http.HandlerFunc(healthHandler.HealthCheck)))
 
+	// Feature route registrations
+	RegisterAuthRoutes(mux, db)
+
 	// community routes conncet
 	// RegisterCommunityRoutes(mux, db)
 
