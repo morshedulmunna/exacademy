@@ -12,14 +12,11 @@ import (
 // Register handles user registration.
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	var in Authtypes.RegisterInput
-	if ok := utils.ParseRequestBodyWithValidation(w, r, &in); !ok {
-		return
-	}
+	utils.ParseRequestBodyWithValidation(w, r, &in)
 
 	u, err := h.svc.Register(r.Context(), in)
 	if err != nil {
 		AppError.UnprocessableEntity("Registration failed", map[string]interface{}{"error": err.Error()}).WriteToResponse(w)
-		return
 	}
 	response.WriteCreated(w, "User registered", map[string]any{"user": u})
 }

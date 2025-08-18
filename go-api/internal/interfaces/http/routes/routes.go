@@ -31,9 +31,6 @@ func SetupRoutes(mux *http.ServeMux, db *mongo.Database) http.Handler {
 	// Feature route registrations
 	RegisterAuthRoutes(mux, db)
 
-	// community routes conncet
-	// RegisterCommunityRoutes(mux, db)
-
 	// Catch-all route for 404 Not Found
 	mux.HandleFunc("/", notFoundHandler.NotFound)
 

@@ -15,5 +15,5 @@ type LoginInput struct {
 }
 
 type TokenPair struct {
-	AccessToken string `json:"access_token"`
+	AccessToken string
 }

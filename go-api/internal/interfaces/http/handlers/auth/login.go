@@ -15,10 +15,7 @@ import (
 // Login handles user login.
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var in Authtypes.LoginInput
-
-	if ok := utils.ParseRequestBodyWithValidation(w, r, &in); !ok {
-		return
-	}
+	utils.ParseRequestBodyWithValidation(w, r, &in)
 
 	u, tokens, err := h.svc.Login(r.Context(), in)
 	if err != nil {

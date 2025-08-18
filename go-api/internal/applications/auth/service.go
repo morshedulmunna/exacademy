@@ -48,9 +48,6 @@ func (s *Service) Register(ctx context.Context, in Authtypes.RegisterInput) (*us
 
 // Login verifies credentials and returns a token pair on success.
 func (s *Service) Login(ctx context.Context, in Authtypes.LoginInput) (*user.User, *Authtypes.TokenPair, error) {
-	if in.Email == "" || in.Password == "" {
-		return nil, nil, errors.New("missing required fields")
-	}
 
 	u, err := s.repo.GetByEmail(ctx, in.Email)
 	if err != nil {
@@ -62,13 +59,7 @@ func (s *Service) Login(ctx context.Context, in Authtypes.LoginInput) (*user.Use
 	}
 
 	claims := map[string]any{
-		"sub":        u.ID.Hex(),
-		"email":      u.Email,
-		"username":   u.Username,
-		"roles":      u.Roles,
-		"name":       u.FullName,
-		"is_active":  u.IsActive,
-		"has_access": u.HasAccess,
+		"sub": u.ID.Hex(),
 	}
 
 	token, err := utils.GenerateTokenWithClaims(claims, nil)

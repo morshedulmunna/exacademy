@@ -64,8 +64,6 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 				logger.Status(wrapped.statusCode),
 				logger.Latency(duration),
 				logger.RequestID(requestID),
-				logger.LogID(requestID),
-				"response_body", responseBody,
 			)
 		}
 	})
