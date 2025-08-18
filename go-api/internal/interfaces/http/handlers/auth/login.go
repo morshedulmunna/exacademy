@@ -1,12 +1,11 @@
 package auth
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
 	"execute_academy/config"
-	appauth "execute_academy/internal/applications/auth"
+	Authtypes "execute_academy/internal/applications/auth/types"
 	AppError "execute_academy/pkg/shared/error"
 	"execute_academy/pkg/shared/exceptions"
 	"execute_academy/pkg/shared/response"
@@ -15,19 +14,13 @@ import (
 
 // Login handles user login.
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	var in struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-		AppError.BadRequest("Invalid JSON body").WriteToResponse(w)
+	var in Authtypes.LoginInput
+
+	if ok := utils.ParseRequestBodyWithValidation(w, r, &in); !ok {
 		return
 	}
 
-	u, tokens, err := h.svc.Login(r.Context(), appauth.LoginInput{
-		Email:    in.Email,
-		Password: in.Password,
-	})
+	u, tokens, err := h.svc.Login(r.Context(), in)
 	if err != nil {
 		AppError.Forbidden(exceptions.ErrInvalidCredentials.Error()).WriteToResponse(w)
 		return

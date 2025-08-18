@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	Authtypes "execute_academy/internal/applications/auth/types"
 	"execute_academy/internal/domain/mongo/user"
 	"execute_academy/pkg/shared/utils"
 )
@@ -20,28 +21,8 @@ func NewService(repo *user.Repository) *Service {
 	return &Service{repo: repo}
 }
 
-// RegisterInput represents input data for registering a user.
-type RegisterInput struct {
-	Email     string
-	Username  string
-	Password  string
-	FirstName string
-	LastName  string
-}
-
-// LoginInput represents input data for logging in a user.
-type LoginInput struct {
-	Email    string
-	Password string
-}
-
-// TokenPair represents the access token response.
-type TokenPair struct {
-	AccessToken string `json:"access_token"`
-}
-
 // Register creates a new user with a hashed password.
-func (s *Service) Register(ctx context.Context, in RegisterInput) (*user.User, error) {
+func (s *Service) Register(ctx context.Context, in Authtypes.RegisterInput) (*user.User, error) {
 
 	passwordHash, err := utils.HashPassword(in.Password)
 	if err != nil {
@@ -66,7 +47,7 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (*user.User, e
 }
 
 // Login verifies credentials and returns a token pair on success.
-func (s *Service) Login(ctx context.Context, in LoginInput) (*user.User, *TokenPair, error) {
+func (s *Service) Login(ctx context.Context, in Authtypes.LoginInput) (*user.User, *Authtypes.TokenPair, error) {
 	if in.Email == "" || in.Password == "" {
 		return nil, nil, errors.New("missing required fields")
 	}
@@ -95,7 +76,7 @@ func (s *Service) Login(ctx context.Context, in LoginInput) (*user.User, *TokenP
 		return nil, nil, err
 	}
 
-	return u, &TokenPair{AccessToken: token}, nil
+	return u, &Authtypes.TokenPair{AccessToken: token}, nil
 }
 
 func buildFullName(first, last string) string {
