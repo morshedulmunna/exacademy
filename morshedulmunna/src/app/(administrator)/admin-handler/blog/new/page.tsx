@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import BlockEditor from "@/components/ui/BlockEditor";
 import { BlogEditorHeader } from "@/app/(administrator)/_@components";
 import { useRouter } from "next/navigation";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 export default function NewBlogPostPage() {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [coverImage, setCoverImage] = useState<null>(null);
-  const [isPublishing, setIsPublishing] = useState<boolean>(false);
+  const [coverImage, setCoverImage] = useState<any | null>(null);
+  const [showCoverUploader, setShowCoverUploader] = useState<boolean>(false);
+  const [isPublishing, setIsPublishing] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -19,7 +21,14 @@ export default function NewBlogPostPage() {
     setError(null);
 
     try {
-      router.push(`/blog/static-blog-post`);
+      const body = {
+        title,
+        content,
+        coverImage,
+        isPublishing,
+      };
+      console.log(body, "Body___");
+      // router.push(`/blog/${post.slug}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to publish post";
       setError(message);
@@ -33,7 +42,7 @@ export default function NewBlogPostPage() {
       {/* Top editor header with Add Cover, Add Subtitle, Publish */}
       <BlogEditorHeader
         coverImage={coverImage}
-        onAddCover={(img) => setCoverImage(img)}
+        onAddCover={() => setShowCoverUploader(true)}
         onRemoveCover={() => setCoverImage(null)}
         onAddSubtitle={() => {
           /* subtitle support can be added later */
@@ -43,6 +52,18 @@ export default function NewBlogPostPage() {
       />
 
       <div className="px-4 sm:px-6 py-6 space-y-6">
+        {showCoverUploader && (
+          <div className="mb-4">
+            <ImageUpload
+              category="blog"
+              onImageUploaded={(img) => {
+                setCoverImage(img);
+                setShowCoverUploader(false);
+              }}
+              onImageRemoved={() => setCoverImage(null)}
+            />
+          </div>
+        )}
         {/* Article title */}
         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Article Title..." className="w-full bg-transparent text-4xl font-bold border-none outline-none placeholder-gray-500" />
 

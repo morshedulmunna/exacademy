@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Image, Type, MoreVertical, Settings, Copy, Moon, HelpCircle, X, ArrowLeft, ArrowUpDown } from "lucide-react";
-import type { ImageUploadResult } from "@/lib/image-upload";
-import { useImageUpload } from "@/hooks/useImageUpload";
 
 import { AddCoverHandler, AddSubtitleHandler, PublishHandler, CopyMarkdownHandler, ToggleDarkModeHandler, ToggleRawEditorHandler } from "./types";
 
+type CoverImageLike = string | { webp?: string; original?: string } | null;
+
 interface BlogEditorHeaderProps {
-  onAddCover?: (imageResult: ImageUploadResult) => void;
+  onAddCover?: AddCoverHandler;
   onRemoveCover?: () => void;
-  coverImage?: ImageUploadResult | null;
+  coverImage?: CoverImageLike;
   onAddSubtitle?: AddSubtitleHandler;
   onPublish?: PublishHandler;
   onCopyMarkdown?: CopyMarkdownHandler;
@@ -25,27 +25,6 @@ export default function BlogEditorHeader({ onAddCover, onRemoveCover, coverImage
   const [showDropdown, setShowDropdown] = useState(false);
   const [alignLeft, setAlignLeft] = useState(false);
   const [tall, setTall] = useState(false);
-  const [localPreview, setLocalPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const { handleFileChange, isUploading, progress } = useImageUpload({
-    category: "blog",
-    onSuccess: (result) => {
-      if (localPreview) URL.revokeObjectURL(localPreview);
-      setLocalPreview(null);
-      onAddCover?.(result);
-    },
-    onError: () => {
-      if (localPreview) URL.revokeObjectURL(localPreview);
-      setLocalPreview(null);
-    },
-  });
-
-  useEffect(() => {
-    return () => {
-      if (localPreview) URL.revokeObjectURL(localPreview);
-    };
-  }, [localPreview]);
 
   const handleCopyMarkdown = () => {
     onCopyMarkdown?.();
@@ -62,19 +41,15 @@ export default function BlogEditorHeader({ onAddCover, onRemoveCover, coverImage
 
   const handleImageRemoved = () => {
     onRemoveCover?.();
-    if (localPreview) {
-      URL.revokeObjectURL(localPreview);
-      setLocalPreview(null);
-    }
   };
 
   return (
     <>
-      <div className="p-4 sm:p-6 border-b border-gray-700 bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-gray-900/70 sticky top-16 z-30">
+      <div className="p-4 sm:p-6 border-b border-gray-700 bg-gray-900/20 backdrop-blur supports-[backdrop-filter]:bg-gray-900/70 sticky top-16 z-30">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {!coverImage && (
-              <button onClick={() => fileInputRef.current?.click()} className="flex items-center space-x-2 px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700 transition-colors">
+              <button onClick={() => onAddCover?.()} className="flex items-center space-x-2 px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700 transition-colors">
                 <Image className="w-4 h-4" />
                 <span className="text-sm">Add Cover</span>
               </button>
@@ -136,15 +111,10 @@ export default function BlogEditorHeader({ onAddCover, onRemoveCover, coverImage
         </div>
       </div>
       {/* Large cover preview */}
-      {(coverImage || localPreview) && (
+      {coverImage && (
         <div className="px-4 sm:px-6 pt-4">
           <div className={`relative w-full ${tall ? "h-80 md:h-96" : "h-64 md:h-72"} rounded-xl overflow-hidden  bg-gray-800`}>
-            <img src={localPreview || coverImage?.webp || coverImage?.original || ""} alt="Cover" className={`w-full h-full object-cover ${alignLeft ? "object-left" : "object-center"}`} />
-            {isUploading && (
-              <div className="absolute inset-0 bg-black/30 grid place-items-center">
-                <div className="text-xs rounded-full bg-white/90 text-gray-800 px-3 py-1">Uploading… {progress}%</div>
-              </div>
-            )}
+            <img src={typeof coverImage === "string" ? coverImage : coverImage?.webp || coverImage?.original || ""} alt="Cover" className={`w-full h-full object-cover ${alignLeft ? "object-left" : "object-center"}`} />
             {/* Controls */}
             <div className="absolute top-3 right-3 flex items-center gap-2">
               <button onClick={() => setAlignLeft((v) => !v)} className="h-8 w-8 rounded-md bg-white/90 text-gray-800 hover:bg-white shadow border border-black/10 grid place-items-center" title={alignLeft ? "Center image" : "Align left"}>
@@ -160,22 +130,6 @@ export default function BlogEditorHeader({ onAddCover, onRemoveCover, coverImage
           </div>
         </div>
       )}
-
-      {/* Hidden file input for direct selection */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          const url = URL.createObjectURL(file);
-          if (localPreview) URL.revokeObjectURL(localPreview);
-          setLocalPreview(url);
-          await handleFileChange(e);
-        }}
-      />
     </>
   );
 }

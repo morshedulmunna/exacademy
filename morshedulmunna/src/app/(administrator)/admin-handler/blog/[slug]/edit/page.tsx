@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import BlockEditor from "@/components/ui/BlockEditor";
 import { BlogEditorHeader } from "@/app/(administrator)/_@components";
-import type { ImageUploadResult } from "@/lib/image-upload";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 /**
  * Blog Edit Page
@@ -23,8 +23,9 @@ export default function EditBlogPostPage() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [coverImage, setCoverImage] = useState<ImageUploadResult | null>(null);
+  const [coverImage, setCoverImage] = useState<any | null>(null);
   const [published, setPublished] = useState(true);
+  const [showCoverUploader, setShowCoverUploader] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -120,7 +121,7 @@ export default function EditBlogPostPage() {
         </button>
       </div>
 
-      <BlogEditorHeader coverImage={coverImage} onAddCover={(img) => setCoverImage(img)} onRemoveCover={() => setCoverImage(null)} onPublish={handleSave} publishDisabled={!title.trim() || !content.trim() || isSaving} />
+      <BlogEditorHeader coverImage={coverImage} onAddCover={() => setShowCoverUploader(true)} onRemoveCover={() => setCoverImage(null)} onPublish={handleSave} publishDisabled={!title.trim() || !content.trim() || isSaving} />
 
       <div className="px-4 sm:px-6 py-6 space-y-6">
         <div className="flex items-center justify-between">
@@ -133,6 +134,19 @@ export default function EditBlogPostPage() {
             <span className={`${published ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}`}>{published ? "Published" : "Draft"}</span>
           </div>
         </div>
+
+        {showCoverUploader && (
+          <div className="mb-4">
+            <ImageUpload
+              category="blog"
+              onImageUploaded={(img) => {
+                setCoverImage(img);
+                setShowCoverUploader(false);
+              }}
+              onImageRemoved={() => setCoverImage(null)}
+            />
+          </div>
+        )}
 
         <BlockEditor initialContent={content} onChange={setContent} placeholder="Type '/' for commands" />
 

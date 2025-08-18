@@ -1,12 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useImageUpload } from "@/hooks/useImageUpload";
-import type { ImageUploadResult } from "@/lib/image-upload";
-import Image from "next/image";
-import { Upload, X, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, X, CheckCircle } from "lucide-react";
 
 interface ImageUploadProps {
   category?: "blog" | "avatars" | "thumbnails";
-  onImageUploaded?: (result: ImageUploadResult) => void;
+  onImageUploaded?: (result: any) => void;
   onImageRemoved?: () => void;
   className?: string;
   maxFileSize?: number;
@@ -21,13 +18,11 @@ interface ImageUploadProps {
 export default function ImageUpload({ category = "blog", onImageUploaded, onImageRemoved, className = "", maxFileSize = 10 * 1024 * 1024, showPreview = true, aspectRatio = "auto", placeholder = "Drop an image here or click to browse" }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileMeta, setFileMeta] = useState<{ filename: string; size: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { isUploading, progress, error, result, handleFileChange, handleDrop, handleDragOver, reset, deleteImage } = useImageUpload({
-    category,
-    maxFileSize,
-    onSuccess: onImageUploaded,
-    onError: (error) => console.error("Upload error:", error),
-  });
+  // NOTE: This component is a lightweight client-side file picker with preview.
+  // Uploading to a server should be handled by the parent via onImageUploaded.
 
   // Revoke object URL on unmount or when replaced
   useEffect(() => {
@@ -37,14 +32,11 @@ export default function ImageUpload({ category = "blog", onImageUploaded, onImag
   }, [previewUrl]);
 
   const handleRemoveImage = async () => {
-    if (result?.original) {
-      try {
-        await deleteImage(result.original);
-        onImageRemoved?.();
-      } catch (error) {
-        console.error("Failed to remove image:", error);
-      }
-    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setFileMeta(null);
+    setError(null);
+    onImageRemoved?.();
   };
 
   const handleClick = () => {
@@ -54,11 +46,38 @@ export default function ImageUpload({ category = "blog", onImageUploaded, onImag
   const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > maxFileSize) {
+        setError(`File exceeds limit of ${Math.round(maxFileSize / 1024 / 1024)}MB`);
+        return;
+      }
       const url = URL.createObjectURL(file);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(url);
+      setFileMeta({ filename: file.name, size: file.size });
+      setError(null);
+      onImageUploaded?.({ original: url, webp: url, filename: file.name, size: file.size });
     }
-    await handleFileChange(e);
+  };
+
+  const handleDrop: React.DragEventHandler<HTMLDivElement> = async (event) => {
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0];
+    if (file) {
+      if (file.size > maxFileSize) {
+        setError(`File exceeds limit of ${Math.round(maxFileSize / 1024 / 1024)}MB`);
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(url);
+      setFileMeta({ filename: file.name, size: file.size });
+      setError(null);
+      onImageUploaded?.({ original: url, webp: url, filename: file.name, size: file.size });
+    }
+  };
+
+  const handleDragOver: React.DragEventHandler<HTMLDivElement> = (event) => {
+    event.preventDefault();
   };
 
   const getAspectRatioClass = () => {
@@ -80,79 +99,56 @@ export default function ImageUpload({ category = "blog", onImageUploaded, onImag
         hover:border-blue-400 hover:bg-blue-50/50
         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
         ${getAspectRatioClass()}
-        ${isUploading ? "pointer-events-none opacity-75" : ""}
         ${className}
       `}
       onClick={handleClick}
-      onDrop={async (event) => {
-        const file = event.dataTransfer?.files?.[0];
-        if (file) {
-          const url = URL.createObjectURL(file);
-          if (previewUrl) URL.revokeObjectURL(previewUrl);
-          setPreviewUrl(url);
-        }
-        await handleDrop(event);
-      }}
+      onDrop={handleDrop}
       onDragOver={handleDragOver}
       tabIndex={0}
       role="button"
       aria-label="Upload image"
     >
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleInputChange} className="hidden" disabled={isUploading} />
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleInputChange} className="hidden" />
 
       {/* Live preview (selected file or uploaded result) */}
-      {showPreview && (previewUrl || result) && (
+      {showPreview && previewUrl && (
         <div className={`absolute inset-0 overflow-hidden rounded-lg ${getAspectRatioClass()}`}>
-          {previewUrl ? <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" /> : <Image src={result!.webp || result!.original} alt="Uploaded image" fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />}
+          <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
           {/* Overlay with remove button */}
           <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-200">
-            {result && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveImage();
-                }}
-                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
-                aria-label="Remove image"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveImage();
+              }}
+              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+              aria-label="Remove image"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center">
-        {isUploading ? (
+        {error ? (
           <>
-            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
-            <p className="text-sm text-gray-600 mb-2">Uploading...</p>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
-            </div>
-            <p className="text-xs text-gray-500 mt-1">{progress}%</p>
-          </>
-        ) : error ? (
-          <>
-            <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
-            <p className="text-sm text-red-600 mb-1">Upload failed</p>
-            <p className="text-xs text-gray-500">{error}</p>
+            <p className="text-sm text-red-600 mb-1">{error}</p>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                reset();
-                setPreviewUrl(null);
+                setError(null);
               }}
               className="mt-2 text-xs text-blue-500 hover:text-blue-700"
             >
-              Try again
+              Dismiss
             </button>
           </>
-        ) : previewUrl || result ? (
+        ) : previewUrl ? (
           <>
             <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
-            <p className="text-sm text-green-600">{result ? "Upload successful!" : "Ready to upload..."}</p>
-            {result && <p className="text-xs text-gray-500">{result.filename}</p>}
+            <p className="text-sm text-green-600">Ready to upload...</p>
+            {fileMeta && <p className="text-xs text-gray-500">{fileMeta.filename}</p>}
           </>
         ) : (
           <>
