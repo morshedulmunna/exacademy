@@ -3,7 +3,6 @@ package routes
 import (
 	"execute_academy/internal/interfaces/http/handlers/global"
 	"execute_academy/internal/interfaces/http/middleware"
-	"execute_academy/internal/interfaces/http/swagger"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,9 +23,6 @@ func SetupRoutes(mux *http.ServeMux, db *mongo.Database) http.Handler {
 	mux.Handle("GET /api", manager.With(http.HandlerFunc(welcomeHandler.Welcome)))
 	mux.Handle("GET /api/v1", manager.With(http.HandlerFunc(welcomeHandler.Welcome)))
 	mux.Handle("GET /health", manager.With(http.HandlerFunc(healthHandler.HealthCheck)))
-
-	// Swagger/OpenAPI docs
-	swagger.Register(mux, manager)
 
 	// Feature route registrations
 	RegisterAuthRoutes(mux, db)
