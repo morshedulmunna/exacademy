@@ -5,12 +5,12 @@ import (
 	"skoolz/internal/interfaces/http/handlers/global"
 	"skoolz/internal/interfaces/http/middleware"
 
-	"github.com/jmoiron/sqlx"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Router handles HTTP routing
 // SetupRoutes configures all routes with global middleware
-func SetupRoutes(mux *http.ServeMux, db *sqlx.DB) http.Handler {
+func SetupRoutes(mux *http.ServeMux, db *mongo.Database) http.Handler {
 	// Initialize middleware manager
 	manager := middleware.NewManager()
 

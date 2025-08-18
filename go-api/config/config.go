@@ -3,7 +3,9 @@ package config
 import (
 	"fmt"
 	"log/slog"
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -28,6 +30,26 @@ type PostgresDatabase struct {
 	MaxPoolSize         uint64 `envconfig:"POSTGRES_MAX_POOL_SIZE" default:"10"`
 	MinPoolSize         uint64 `envconfig:"POSTGRES_MIN_POOL_SIZE" default:"1"`
 	MaxConnIdleTimeInMs int    `envconfig:"POSTGRES_MAX_CONN_IDLE_TIME_MS" default:"300000"`
+}
+
+// MongoDatabase represents MongoDB database configuration
+type MongoDatabase struct {
+	// Full connection URI (takes precedence if provided)
+	URI string `envconfig:"MONGO_URI"`
+
+	// Individual connection parts (used when URI is empty)
+	Host       string `envconfig:"MONGO_HOST" default:"localhost"`
+	Port       int    `envconfig:"MONGO_PORT" default:"27017"`
+	User       string `envconfig:"MONGO_USER"`
+	Password   string `envconfig:"MONGO_PASSWORD"`
+	Database   string `envconfig:"MONGO_DATABASE"`
+	ReplicaSet string `envconfig:"MONGO_REPLICA_SET"`
+	TLS        bool   `envconfig:"MONGO_TLS" default:"false"`
+
+	// Pool and timeout configuration
+	MaxPoolSize      uint64 `envconfig:"MONGO_MAX_POOL_SIZE" default:"10"`
+	MinPoolSize      uint64 `envconfig:"MONGO_MIN_POOL_SIZE" default:"0"`
+	ConnectTimeoutMs int    `envconfig:"MONGO_CONNECT_TIMEOUT_MS" default:"10000"`
 }
 
 // RedisConfig represents Redis cache configuration
@@ -123,6 +145,9 @@ type Config struct {
 	// Database configuration
 	Database PostgresDatabase
 
+	// MongoDB configuration
+	Mongo MongoDatabase
+
 	// Cache configuration
 	Redis RedisConfig
 
@@ -189,4 +214,50 @@ func (c *Config) GetDatabaseURL() string {
 	}
 
 	return ""
+}
+
+// GetMongoURI returns the MongoDB connection URI
+func (c *Config) GetMongoURI() string {
+	// Prefer explicit URI if provided
+	if c.Mongo.URI != "" {
+		return c.Mongo.URI
+	}
+
+	// Build URI from discrete fields
+	var auth string
+	if c.Mongo.User != "" {
+		user := url.QueryEscape(c.Mongo.User)
+		pass := url.QueryEscape(c.Mongo.Password)
+		// Include password only if provided
+		if c.Mongo.Password != "" {
+			auth = fmt.Sprintf("%s:%s@", user, pass)
+		} else {
+			auth = fmt.Sprintf("%s@", user)
+		}
+	}
+
+	hostPort := fmt.Sprintf("%s:%d", c.Mongo.Host, c.Mongo.Port)
+
+	// Optional database path
+	path := ""
+	if c.Mongo.Database != "" {
+		path = "/" + url.PathEscape(c.Mongo.Database)
+	}
+
+	// Query parameters
+	var params []string
+	if c.Mongo.ReplicaSet != "" {
+		params = append(params, "replicaSet="+url.QueryEscape(c.Mongo.ReplicaSet))
+	}
+	if c.Mongo.TLS {
+		params = append(params, "tls=true")
+	}
+
+	query := ""
+	if len(params) > 0 {
+		query = "?" + strings.Join(params, "&")
+	}
+
+	// Construct the final URI
+	return fmt.Sprintf("mongodb://%s%s%s%s", auth, hostPort, path, query)
 }

@@ -5,11 +5,11 @@ import (
 	community "skoolz/internal/interfaces/http/handlers"
 	"skoolz/internal/interfaces/http/middleware"
 
-	"github.com/jmoiron/sqlx"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // RegisterCommunityRoutes registers community-related HTTP routes
-func RegisterCommunityRoutes(mux *http.ServeMux, db *sqlx.DB) {
+func RegisterCommunityRoutes(mux *http.ServeMux, db *mongo.Database) {
 	manager := middleware.NewManager()
 
 	communityHandler := community.NewCommunityHandler(db)

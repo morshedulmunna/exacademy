@@ -3,16 +3,16 @@ package community
 import (
 	"net/http"
 
-	"github.com/jmoiron/sqlx"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // CommunityHandler handles community-related HTTP requests
 type CommunityHandler struct {
-	db *sqlx.DB
+	db *mongo.Database
 }
 
 // NewCommunityHandler creates a new community handler
-func NewCommunityHandler(db *sqlx.DB) *CommunityHandler {
+func NewCommunityHandler(db *mongo.Database) *CommunityHandler {
 	return &CommunityHandler{db: db}
 }
 

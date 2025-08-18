@@ -13,25 +13,25 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"go.elastic.co/apm/module/apmhttp"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Server represents the HTTP server
 type Server struct {
-	server *http.Server
-	db     *sqlx.DB
-	done   chan struct{}
-	logger *slog.Logger
-	conf   *config.Config
+	server  *http.Server
+	mongoDb *mongo.Database
+	done    chan struct{}
+	logger  *slog.Logger
+	conf    *config.Config
 }
 
 // NewServer creates a new HTTP server
-func NewServer(conf *config.Config, db *sqlx.DB, logger *slog.Logger) *Server {
+func NewServer(conf *config.Config, mongoDb *mongo.Database, logger *slog.Logger) *Server {
 
 	// Create router with database connection
 	mux := http.NewServeMux()
-	handler := routes.SetupRoutes(mux, db)
+	handler := routes.SetupRoutes(mux, mongoDb)
 
 	// Wrap handler with APM monitoring
 	apmHandler := apmhttp.Wrap(handler)
@@ -44,10 +44,10 @@ func NewServer(conf *config.Config, db *sqlx.DB, logger *slog.Logger) *Server {
 			WriteTimeout: 15 * time.Second,
 			IdleTimeout:  60 * time.Second,
 		},
-		db:     db,
-		logger: logger,
-		conf:   conf,
-		done:   make(chan struct{}),
+		mongoDb: mongoDb,
+		logger:  logger,
+		conf:    conf,
+		done:    make(chan struct{}),
 	}
 }
 
@@ -80,14 +80,7 @@ func (s *Server) gracefulShutdown() error {
 
 	s.logger.Info("Initiating graceful shutdown", "timeout", "30s")
 
-	// Close database connection
-	if s.db != nil {
-		if err := s.db.Close(); err != nil {
-			s.logger.Error("Failed to close database connection", "error", err)
-		} else {
-			s.logger.Info("Database connection closed successfully")
-		}
-	}
+	// MongoDB client is managed by the caller; nothing to close here
 
 	// Attempt graceful shutdown
 	if err := s.server.Shutdown(ctx); err != nil {

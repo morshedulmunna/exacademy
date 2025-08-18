@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"skoolz/config"
 	"skoolz/internal/interfaces/http"
@@ -20,11 +21,21 @@ func serveRest(cmd *cobra.Command, args []string) error {
 	conf := config.GetConfig()
 	logger := logger.NewLogger()
 
-	db, err := config.NewPostgresDB()
+	// Connect MongoDB (kept alive for the server lifecycle)
+	ctx := context.Background()
+	mongoDB, mongoClient, err := config.NewMongoDatabase(ctx)
 	if err != nil {
-		logger.Error("Failed to connect to database", "error", err)
+		logger.Error("Failed to connect to MongoDB", "error", err)
 		os.Exit(1)
 	}
+	logger.Info("Connected to MongoDB successfully")
+	defer func() {
+		if err := mongoClient.Disconnect(ctx); err != nil {
+			logger.Error("Failed to disconnect MongoDB client", "error", err)
+		} else {
+			logger.Info("MongoDB client disconnected successfully")
+		}
+	}()
 
 	cache, err := cache.NewRedisCache(&conf.Redis)
 	if err != nil {
@@ -33,6 +44,7 @@ func serveRest(cmd *cobra.Command, args []string) error {
 	}
 	defer cache.Close()
 
-	server := http.NewServer(conf, db, logger)
+	// Pass MongoDB handle to the HTTP server. Client lifecycle is managed above.
+	server := http.NewServer(conf, mongoDB, logger)
 	return server.Start()
 }

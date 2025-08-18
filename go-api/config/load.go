@@ -117,6 +117,20 @@ func LoadConfig() error {
 			MaxConnIdleTimeInMs: viper.GetInt("POSTGRES_MAX_CONN_IDLE_TIME_MS"),
 		},
 
+		Mongo: MongoDatabase{
+			URI:              viper.GetString("MONGO_URI"),
+			Host:             viper.GetString("MONGO_HOST"),
+			Port:             viper.GetInt("MONGO_PORT"),
+			User:             viper.GetString("MONGO_USER"),
+			Password:         viper.GetString("MONGO_PASSWORD"),
+			Database:         viper.GetString("MONGO_DATABASE"),
+			ReplicaSet:       viper.GetString("MONGO_REPLICA_SET"),
+			TLS:              viper.GetBool("MONGO_TLS"),
+			MaxPoolSize:      viper.GetUint64("MONGO_MAX_POOL_SIZE"),
+			MinPoolSize:      viper.GetUint64("MONGO_MIN_POOL_SIZE"),
+			ConnectTimeoutMs: viper.GetInt("MONGO_CONNECT_TIMEOUT_MS"),
+		},
+
 		Cors: CorsOrigin{
 			Origin: viper.GetStringSlice("CORS_ORIGIN"),
 		},
