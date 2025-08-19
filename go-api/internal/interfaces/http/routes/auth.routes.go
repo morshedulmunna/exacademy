@@ -9,19 +9,21 @@ import (
 	domainUser "execute_academy/internal/domain/mongo/user"
 	handlerAuth "execute_academy/internal/interfaces/http/handlers/auth"
 	"execute_academy/internal/interfaces/http/middleware"
+	"execute_academy/pkg/cache"
+	"execute_academy/pkg/email"
 	"execute_academy/pkg/shared/session"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // RegisterAuthRoutes wires authentication and user routes
-func RegisterAuthRoutes(mux *http.ServeMux, db *mongo.Database) {
+func RegisterAuthRoutes(mux *http.ServeMux, db *mongo.Database, emailSvc *email.EmailService, cache *cache.RedisCache) {
 	manager := middleware.NewManager()
 
 	userRepo := domainUser.NewRepository(db)
 	sessMgr := session.NewManager("sid", 24*time.Hour, config.GetConfig().IsProduction())
 	authSvc := appAuth.NewService(userRepo)
-	authHandler := handlerAuth.NewHandler(authSvc, sessMgr, userRepo)
+	authHandler := handlerAuth.NewHandler(authSvc, sessMgr, userRepo, emailSvc, cache)
 
 	// Public auth routes
 	mux.Handle("POST /api/v1/auth/register", manager.With(http.HandlerFunc(authHandler.Register)))

@@ -23,8 +23,8 @@ type EmailConfig struct {
 	SMTPPort     int    `envconfig:"SMTP_PORT" default:"587"`
 	SMTPUsername string `envconfig:"SMTP_USERNAME"`
 	SMTPPassword string `envconfig:"SMTP_PASSWORD"`
-	FromEmail    string `envconfig:"FROM_EMAIL" default:"noreply@skoolz.com"`
-	FromName     string `envconfig:"FROM_NAME" default:"Skoolz"`
+	FromEmail    string `envconfig:"FROM_EMAIL" default:"noreply@execute_academy.com"`
+	FromName     string `envconfig:"FROM_NAME" default:"execute_academy"`
 	TemplatePath string `envconfig:"EMAIL_TEMPLATE_PATH" default:"./templates/email"`
 	QueueType    string `envconfig:"EMAIL_QUEUE_TYPE" default:"kafka"` // kafka or nats
 }
@@ -59,7 +59,6 @@ type EmailService struct {
 	config      *EmailConfig
 	logger      *slog.Logger
 	kafkaClient *messaging.KafkaClient
-	natsClient  *messaging.NatsClient
 	templates   map[string]*template.Template
 }
 
@@ -69,7 +68,6 @@ func NewEmailService(cfg *EmailConfig, log *slog.Logger, kafkaClient *messaging.
 		config:      cfg,
 		logger:      log,
 		kafkaClient: kafkaClient,
-		natsClient:  natsClient,
 		templates:   make(map[string]*template.Template),
 	}
 
@@ -201,11 +199,7 @@ func (e *EmailService) QueueEmail(ctx context.Context, req *EmailRequest) error 
 			return fmt.Errorf("kafka client not available")
 		}
 		return e.kafkaClient.PublishMessage(ctx, "email-requests", req.ID, req, nil)
-	case "nats":
-		if e.natsClient == nil {
-			return fmt.Errorf("nats client not available")
-		}
-		return e.natsClient.PublishMessage(ctx, "email.requests", req, nil)
+
 	default:
 		return fmt.Errorf("unsupported queue type: %s", e.config.QueueType)
 	}
@@ -216,8 +210,7 @@ func (e *EmailService) ProcessEmailQueue(ctx context.Context) error {
 	switch strings.ToLower(e.config.QueueType) {
 	case "kafka":
 		return e.processKafkaQueue(ctx)
-	case "nats":
-		return e.processNatsQueue(ctx)
+
 	default:
 		return fmt.Errorf("unsupported queue type: %s", e.config.QueueType)
 	}
@@ -232,31 +225,6 @@ func (e *EmailService) processKafkaQueue(ctx context.Context) error {
 	return e.kafkaClient.Subscribe(ctx, "email-requests", func(msg messaging.KafkaMessage) error {
 		var req EmailRequest
 		if err := json.Unmarshal([]byte(msg.Value.(string)), &req); err != nil {
-			e.logger.Error("Failed to unmarshal email request", "error", err.Error())
-			return err
-		}
-
-		// Process email
-		response, err := e.SendEmail(ctx, &req)
-		if err != nil {
-			e.logger.Error("Failed to send email", "id", req.ID, "error", err.Error())
-			return err
-		}
-
-		e.logger.Info("Email processed from queue", "id", response.ID, "status", response.Status)
-		return nil
-	})
-}
-
-// processNatsQueue processes emails from NATS queue
-func (e *EmailService) processNatsQueue(ctx context.Context) error {
-	if e.natsClient == nil {
-		return fmt.Errorf("nats client not available")
-	}
-
-	return e.natsClient.Subscribe(ctx, "email.requests", "email-processor", func(msg messaging.NatsMessage) error {
-		var req EmailRequest
-		if err := json.Unmarshal([]byte(msg.Data.(string)), &req); err != nil {
 			e.logger.Error("Failed to unmarshal email request", "error", err.Error())
 			return err
 		}

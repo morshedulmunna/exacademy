@@ -1,6 +1,6 @@
 # Email Service Package
 
-A comprehensive email service package for the Skoolz application that supports both immediate email sending and queue-based processing using Kafka or NATS.
+A comprehensive email service package for the execute_academy application that supports both immediate email sending and queue-based processing using Kafka or NATS.
 
 ## Features
 
@@ -23,24 +23,24 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
-FROM_EMAIL=noreply@skoolz.com
-FROM_NAME=Skoolz
+FROM_EMAIL=noreply@execute_academy.com
+FROM_NAME=execute_academy
 EMAIL_TEMPLATE_PATH=./pkg/email/templates
 EMAIL_QUEUE_TYPE=kafka
 ```
 
 ### Configuration Options
 
-| Variable              | Description               | Default              |
-| --------------------- | ------------------------- | -------------------- |
-| `SMTP_HOST`           | SMTP server hostname      | `localhost`          |
-| `SMTP_PORT`           | SMTP server port          | `587`                |
-| `SMTP_USERNAME`       | SMTP username             | -                    |
-| `SMTP_PASSWORD`       | SMTP password             | -                    |
-| `FROM_EMAIL`          | Default sender email      | `noreply@skoolz.com` |
-| `FROM_NAME`           | Default sender name       | `Skoolz`             |
-| `EMAIL_TEMPLATE_PATH` | Path to email templates   | `./templates/email`  |
-| `EMAIL_QUEUE_TYPE`    | Queue system (kafka/nats) | `kafka`              |
+| Variable              | Description               | Default                       |
+| --------------------- | ------------------------- | ----------------------------- |
+| `SMTP_HOST`           | SMTP server hostname      | `localhost`                   |
+| `SMTP_PORT`           | SMTP server port          | `587`                         |
+| `SMTP_USERNAME`       | SMTP username             | -                             |
+| `SMTP_PASSWORD`       | SMTP password             | -                             |
+| `FROM_EMAIL`          | Default sender email      | `noreply@execute_academy.com` |
+| `FROM_NAME`           | Default sender name       | `execute_academy`             |
+| `EMAIL_TEMPLATE_PATH` | Path to email templates   | `./templates/email`           |
+| `EMAIL_QUEUE_TYPE`    | Queue system (kafka/nats) | `kafka`                       |
 
 ## Usage
 
@@ -101,12 +101,12 @@ func sendWelcomeEmail(emailService *email.EmailService) {
 
     req := &email.EmailRequest{
         To:           []string{"user@example.com"},
-        Subject:      "Welcome to Skoolz!",
+        Subject:      "Welcome to execute_academy!",
         TemplateName: "welcome",
         TemplateData: map[string]interface{}{
             "Name":             "John Doe",
             "Email":            "user@example.com",
-            "VerificationLink": "https://skoolz.com/verify?token=abc123",
+            "VerificationLink": "https://execute_academy.com/verify?token=abc123",
         },
         Priority: 2, // Normal priority
     }
@@ -134,7 +134,7 @@ func queuePasswordResetEmail(emailService *email.EmailService) {
         TemplateData: map[string]interface{}{
             "Name":        "John Doe",
             "Email":       "user@example.com",
-            "ResetLink":   "https://skoolz.com/reset-password?token=xyz789",
+            "ResetLink":   "https://execute_academy.com/reset-password?token=xyz789",
             "ExpiryTime":  "24",
         },
         Priority: 1, // High priority
@@ -166,11 +166,11 @@ Templates use Go's `html/template` package and support dynamic content through t
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Welcome to Skoolz</title>
+    <title>Welcome to execute_academy</title>
   </head>
   <body>
     <h1>Hello {{.Name}},</h1>
-    <p>Welcome to Skoolz! Your account has been created with email: {{.Email}}</p>
+    <p>Welcome to execute_academy! Your account has been created with email: {{.Email}}</p>
 
     {{if .VerificationLink}}
     <a href="{{.VerificationLink}}">Verify Email</a>

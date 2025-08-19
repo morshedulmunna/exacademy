@@ -41,13 +41,25 @@ func replacer(groups []string, a slog.Attr) slog.Attr {
 	}
 }
 
+func resolveLevel(lvl string) slog.Leveler {
+	switch lvl {
+	case "debug":
+		return slog.LevelDebug
+	case "warn", "warning":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
+}
+
 // SetupLogger sets up the logger with automatic log ID generation
 func SetupLogger(serviceName string, mode string) {
 	var multiWriter io.Writer
 
-	// In production mode, only log to stdout
-	// In debug mode, log to both stdout and file
-	if mode == "release" {
+	// Use stdout only in production, file+stdout in other modes
+	if mode == string(config.Production) {
 		multiWriter = os.Stdout
 	} else {
 		// Create logs directory if it doesn't exist
@@ -72,10 +84,12 @@ func SetupLogger(serviceName string, mode string) {
 		multiWriter = io.MultiWriter(os.Stdout, fileLogger)
 	}
 
+	level := resolveLevel(config.GetConfig().LogLevel)
+
 	// Setup JSON handler with Grafana-friendly format
 	logger := slog.New(slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{
 		AddSource:   true,
-		Level:       slog.LevelDebug,
+		Level:       level,
 		ReplaceAttr: replacer,
 	})).With(
 		string(ServiceKey), serviceName,
@@ -88,9 +102,8 @@ func SetupLogger(serviceName string, mode string) {
 func SetupLoggerWithContext(serviceName string, mode string, ctx context.Context) {
 	var multiWriter io.Writer
 
-	// In production mode, only log to stdout
-	// In debug mode, log to both stdout and file
-	if mode == "release" {
+	// Use stdout only in production, file+stdout in other modes
+	if mode == string(config.Production) {
 		multiWriter = os.Stdout
 	} else {
 		// Create logs directory if it doesn't exist
@@ -115,10 +128,12 @@ func SetupLoggerWithContext(serviceName string, mode string, ctx context.Context
 		multiWriter = io.MultiWriter(os.Stdout, fileLogger)
 	}
 
+	level := resolveLevel(config.GetConfig().LogLevel)
+
 	// Setup JSON handler with Grafana-friendly format
 	logger := slog.New(slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{
 		AddSource:   true,
-		Level:       slog.LevelDebug,
+		Level:       level,
 		ReplaceAttr: replacer,
 	})).With(
 		string(ServiceKey), serviceName,

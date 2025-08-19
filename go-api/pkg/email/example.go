@@ -50,12 +50,12 @@ func sendWelcomeEmail(emailService *EmailService) {
 	// Create email request
 	req := &EmailRequest{
 		To:           []string{"user@example.com"},
-		Subject:      "Welcome to Skoolz!",
+		Subject:      "Welcome to execute_academy!",
 		TemplateName: "welcome",
 		TemplateData: map[string]interface{}{
 			"Name":             "John Doe",
 			"Email":            "user@example.com",
-			"VerificationLink": "https://skoolz.com/verify?token=abc123",
+			"VerificationLink": "https://execute_academy.com/verify?token=abc123",
 		},
 		Priority: 2, // Normal priority
 	}
@@ -82,7 +82,7 @@ func queuePasswordResetEmail(emailService *EmailService) {
 		TemplateData: map[string]interface{}{
 			"Name":       "John Doe",
 			"Email":      "user@example.com",
-			"ResetLink":  "https://skoolz.com/reset-password?token=xyz789",
+			"ResetLink":  "https://execute_academy.com/reset-password?token=xyz789",
 			"ExpiryTime": "24",
 		},
 		Priority: 1, // High priority
@@ -125,7 +125,7 @@ func ExampleWithCustomTemplate(emailService *EmailService) {
 			"Title":          "New Course Assignment",
 			"Message":        "You have been assigned to a new course.",
 			"Details":        "Course: Advanced Mathematics\nDuration: 12 weeks\nStart Date: 2024-01-15",
-			"ActionLink":     "https://skoolz.com/courses/123",
+			"ActionLink":     "https://execute_academy.com/courses/123",
 			"ActionText":     "View Course",
 			"AdditionalInfo": "Please complete the course within the specified timeframe.",
 		},

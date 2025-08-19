@@ -4,6 +4,8 @@ import (
 	"context"
 	"execute_academy/config"
 	"execute_academy/internal/interfaces/http/routes"
+	"execute_academy/pkg/cache"
+	"execute_academy/pkg/email"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -22,17 +24,19 @@ import (
 type Server struct {
 	server  *http.Server
 	mongoDb *mongo.Database
+	email   *email.EmailService
+	cache   *cache.RedisCache
 	done    chan struct{}
 	logger  *slog.Logger
 	conf    *config.Config
 }
 
 // NewServer creates a new HTTP server
-func NewServer(conf *config.Config, mongoDb *mongo.Database, logger *slog.Logger) *Server {
+func NewServer(conf *config.Config, mongoDb *mongo.Database, logger *slog.Logger, emailSvc *email.EmailService, cache *cache.RedisCache) *Server {
 
 	// Create router with database connection
 	mux := http.NewServeMux()
-	handler := routes.SetupRoutes(mux, mongoDb)
+	handler := routes.SetupRoutes(mux, mongoDb, emailSvc, cache)
 
 	// Wrap handler with APM monitoring
 	apmHandler := apmhttp.Wrap(handler)
@@ -46,6 +50,8 @@ func NewServer(conf *config.Config, mongoDb *mongo.Database, logger *slog.Logger
 			IdleTimeout:  60 * time.Second,
 		},
 		mongoDb: mongoDb,
+		email:   emailSvc,
+		cache:   cache,
 		logger:  logger,
 		conf:    conf,
 		done:    make(chan struct{}),
