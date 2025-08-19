@@ -36,6 +36,14 @@ type KafkaMessage struct {
 
 // NewKafkaClient creates a new Kafka client
 func NewKafkaClient(cfg *config.KafkaConfig, log *slog.Logger) (*KafkaClient, error) {
+	// Apply safe defaults to avoid accidental replays and empty configs in development
+	if len(cfg.Brokers) == 0 || (len(cfg.Brokers) == 1 && strings.TrimSpace(cfg.Brokers[0]) == "") {
+		cfg.Brokers = []string{"localhost:9092"}
+	}
+	if strings.TrimSpace(cfg.GroupID) == "" {
+		cfg.GroupID = "execute_academy-group"
+	}
+
 	client := &KafkaClient{
 		config:  cfg,
 		logger:  log,
@@ -74,7 +82,7 @@ func (k *KafkaClient) getOrCreateReader(topic string) (*kafka.Reader, error) {
 	}
 
 	// Create new reader for this topic
-	reader := kafka.NewReader(kafka.ReaderConfig{
+	readerCfg := kafka.ReaderConfig{
 		Brokers:         k.config.Brokers,
 		GroupID:         k.config.GroupID,
 		Topic:           topic,
@@ -83,7 +91,14 @@ func (k *KafkaClient) getOrCreateReader(topic string) (*kafka.Reader, error) {
 		MaxWait:         time.Duration(k.config.Consumer.MaxWaitSeconds) * time.Second,
 		ReadLagInterval: -1,
 		Logger:          kafka.LoggerFunc(func(msg string, args ...interface{}) {}), // No-op logger to suppress internal Kafka logs
-	})
+	}
+	// If GroupID is empty, avoid replaying old messages by starting at the latest offset
+	if strings.TrimSpace(k.config.GroupID) == "" {
+		readerCfg.StartOffset = kafka.LastOffset
+		fmt.Println("Kafka reader created without GroupID; using StartOffset=LastOffset to avoid replays", "topic", topic)
+	}
+
+	reader := kafka.NewReader(readerCfg)
 
 	k.readers[topic] = reader
 	fmt.Println("Created new Kafka reader", "topic", topic, "groupID", k.config.GroupID)

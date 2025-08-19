@@ -60,6 +60,8 @@ type EmailService struct {
 	logger      *slog.Logger
 	kafkaClient *messaging.KafkaClient
 	templates   map[string]*template.Template
+	// sentCache prevents duplicate sends within the process lifetime
+	sentCache map[string]time.Time
 }
 
 // NewEmailService creates a new email service
@@ -69,6 +71,7 @@ func NewEmailService(cfg *EmailConfig, log *slog.Logger, kafkaClient *messaging.
 		logger:      log,
 		kafkaClient: kafkaClient,
 		templates:   make(map[string]*template.Template),
+		sentCache:   make(map[string]time.Time),
 	}
 
 	// Load email templates
@@ -118,7 +121,6 @@ func (e *EmailService) loadTemplates() error {
 		templateName := strings.TrimSuffix(info.Name(), ".html")
 		e.templates[templateName] = tmpl
 
-		e.logger.Info("Loaded email template", "name", templateName, "path", path)
 		return nil
 	})
 
@@ -126,7 +128,6 @@ func (e *EmailService) loadTemplates() error {
 		return fmt.Errorf("failed to walk template directory: %w", err)
 	}
 
-	e.logger.Info("Email templates loaded", "count", len(e.templates))
 	return nil
 }
 
@@ -141,6 +142,13 @@ func (e *EmailService) SendEmail(ctx context.Context, req *EmailRequest) (*Email
 	if req.ID == "" {
 		req.ID = generateEmailID()
 	}
+
+	// Idempotency: prevent duplicate sends of the same ID within a short window
+	if _, exists := e.sentCache[req.ID]; exists {
+		return &EmailResponse{ID: req.ID, Status: "sent", Message: "duplicate suppressed"}, nil
+	}
+	// mark as seen (keep for a short TTL-like window)
+	e.sentCache[req.ID] = time.Now().Add(30 * time.Minute)
 
 	// Set creation time if not set
 	if req.CreatedAt.IsZero() {
@@ -230,13 +238,11 @@ func (e *EmailService) processKafkaQueue(ctx context.Context) error {
 		}
 
 		// Process email
-		response, err := e.SendEmail(ctx, &req)
+		_, err := e.SendEmail(ctx, &req)
 		if err != nil {
 			e.logger.Error("Failed to send email", "id", req.ID, "error", err.Error())
 			return err
 		}
-
-		e.logger.Info("Email processed from queue", "id", response.ID, "status", response.Status)
 		return nil
 	})
 }
