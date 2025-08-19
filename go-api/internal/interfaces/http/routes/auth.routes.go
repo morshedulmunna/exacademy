@@ -20,7 +20,7 @@ func RegisterAuthRoutes(mux *http.ServeMux, db *mongo.Database) {
 
 	userRepo := domainUser.NewRepository(db)
 	sessMgr := session.NewManager("sid", 24*time.Hour, config.GetConfig().IsProduction())
-	authSvc := appAuth.NewService(userRepo, emailSvc, cache)
+	authSvc := appAuth.NewService(userRepo)
 	authHandler := handlerAuth.NewHandler(authSvc, sessMgr, userRepo)
 
 	// Public auth routes
