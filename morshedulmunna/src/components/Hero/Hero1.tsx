@@ -24,7 +24,7 @@ export default function Hero1({
   discountPercentage = "20%",
   discountText = "Discount For All Course",
   title = "Learn Programming",
-  interactiveKeyword = "interactively",
+  interactiveKeyword = "interactively ",
   description = "From zero to job ready: learning paths, interactive courses, projects, exercises and interview preparation.",
   primaryButtonText = "Start Learning",
   secondaryButtonText = "See what's new →",
