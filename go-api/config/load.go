@@ -137,6 +137,18 @@ func LoadConfig() error {
 			Origin: viper.GetStringSlice("CORS_ORIGIN"),
 		},
 
+		OAuth: struct {
+			GoogleClientID     string "envconfig:\"GOOGLE_CLIENT_ID\""
+			GoogleClientSecret string "envconfig:\"GOOGLE_CLIENT_SECRET\""
+			OAuthRedirectURL   string "envconfig:\"OAUTH_REDIRECT_URL\""
+			FrontendAppURL     string "envconfig:\"FRONTEND_APP_URL\" default:\"http://localhost:3000\""
+		}{
+			GoogleClientID:     viper.GetString("GOOGLE_CLIENT_ID"),
+			GoogleClientSecret: viper.GetString("GOOGLE_CLIENT_SECRET"),
+			OAuthRedirectURL:   viper.GetString("OAUTH_REDIRECT_URL"),
+			FrontendAppURL:     viper.GetString("FRONTEND_APP_URL"),
+		},
+
 		Email: EmailConfig{
 			SMTPHost:     viper.GetString("SMTP_HOST"),
 			SMTPPort:     viper.GetInt("SMTP_PORT"),

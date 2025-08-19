@@ -10,7 +10,14 @@ interface SocialLoginButtonsProps {
 export default function SocialLoginButtons({ isLoading = false }: SocialLoginButtonsProps) {
   const { theme } = useTheme();
 
-  const handleGoogleSignIn = () => {};
+  const handleGoogleSignIn = () => {
+    const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/";
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
+    const url = new URL("/api/v1/auth/google/login", base);
+    url.searchParams.set("redirect", currentPath);
+    // Use full-page redirect to backend
+    window.location.href = url.toString();
+  };
 
   const handleGitHubSignIn = () => {};
 

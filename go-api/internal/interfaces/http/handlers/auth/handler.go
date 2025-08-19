@@ -11,6 +11,7 @@ type Handler struct {
 	svc     *appauth.Service
 	sessMgr *session.Manager
 	repo    *domainUser.Repository
+	// oauthStateSecret is used to bind state param for CSRF protection
 }
 
 // NewHandler constructs an auth Handler.
@@ -24,5 +25,3 @@ func pickFirstRole(roles []string) string {
 	}
 	return roles[0]
 }
-
-func toBsonM(m map[string]any) map[string]any { return m }

@@ -30,12 +30,12 @@ interface CommentItem {
  * Comments renders the comment list and an input box to submit a new comment.
  */
 export default function Comments({ slug }: { slug: string }) {
-  const status: "authenticated" | "unauthenticated" | "loading" = "unauthenticated";
   const session: any = null;
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [content, setContent] = useState<string>("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   // Active inline reply editor and its content
   const [replyParentId, setReplyParentId] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState<string>("");
@@ -86,6 +86,12 @@ export default function Comments({ slug }: { slug: string }) {
   }
 
   useEffect(() => {
+    // Detect server-managed session cookie from Go API
+    if (typeof document !== "undefined") {
+      const hasSession = document.cookie.split("; ").some((c) => c.startsWith("sid="));
+      setIsAuthenticated(hasSession);
+    }
+
     let cancelled = false;
     async function load() {
       setLoading(true);
@@ -109,7 +115,7 @@ export default function Comments({ slug }: { slug: string }) {
     if (submitting) return;
     const trimmed = content.trim();
     if (!trimmed) return;
-    if (status !== "authenticated") return;
+    if (!isAuthenticated) return;
     setSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${slug}/comments`, {
@@ -120,7 +126,13 @@ export default function Comments({ slug }: { slug: string }) {
       if (!res.ok) {
         if (res.status === 401) {
           const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-          await signIn(undefined, { callbackUrl });
+          // Redirect to backend Google login
+          if (typeof window !== "undefined") {
+            const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
+            const url = new URL("/api/v1/auth/google/login", base);
+            url.searchParams.set("redirect", callbackUrl);
+            window.location.href = url.toString();
+          }
         }
         return;
       }
@@ -137,7 +149,7 @@ export default function Comments({ slug }: { slug: string }) {
     if (!replyParentId || submitting) return;
     const trimmed = replyContent.trim();
     if (!trimmed) return;
-    if (status !== "authenticated") return;
+    if (!isAuthenticated) return;
     setSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${slug}/comments`, {
@@ -148,7 +160,12 @@ export default function Comments({ slug }: { slug: string }) {
       if (!res.ok) {
         if (res.status === 401) {
           const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-          await signIn(undefined, { callbackUrl });
+          if (typeof window !== "undefined") {
+            const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
+            const url = new URL("/api/v1/auth/google/login", base);
+            url.searchParams.set("redirect", callbackUrl);
+            window.location.href = url.toString();
+          }
         }
         return;
       }
@@ -198,7 +215,7 @@ export default function Comments({ slug }: { slug: string }) {
     if (!editingId || submitting) return;
     const trimmed = editingContent.trim();
     if (!trimmed) return;
-    if (status !== "authenticated") return;
+    if (!isAuthenticated) return;
     setSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${slug}/comments`, {
@@ -209,7 +226,12 @@ export default function Comments({ slug }: { slug: string }) {
       if (!res.ok) {
         if (res.status === 401) {
           const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-          await signIn(undefined, { callbackUrl });
+          if (typeof window !== "undefined") {
+            const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
+            const url = new URL("/api/v1/auth/google/login", base);
+            url.searchParams.set("redirect", callbackUrl);
+            window.location.href = url.toString();
+          }
         }
         return;
       }
@@ -229,9 +251,14 @@ export default function Comments({ slug }: { slug: string }) {
   }
 
   async function onDelete(commentId: string, parentId?: string) {
-    if (status !== "authenticated") {
+    if (!isAuthenticated) {
       const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-      await signIn(undefined, { callbackUrl });
+      if (typeof window !== "undefined") {
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
+        const url = new URL("/api/v1/auth/google/login", base);
+        url.searchParams.set("redirect", callbackUrl);
+        window.location.href = url.toString();
+      }
       return;
     }
     const confirmed = typeof window !== "undefined" ? window.confirm("Delete this comment?") : true;
@@ -270,20 +297,30 @@ export default function Comments({ slug }: { slug: string }) {
               onKeyDown={(e) => {
                 if ((e.metaKey || e.ctrlKey) && e.key === "Enter") onSubmit(e as unknown as React.FormEvent);
               }}
-              placeholder={status === "authenticated" ? "Share your thoughts. Use @ to mention someone…" : "Sign in to write a comment"}
+              placeholder={isAuthenticated ? "Share your thoughts. Use @ to mention someone…" : "Sign in to write a comment"}
               className="w-full resize-y rounded-lg bg-transparent p-3 text-sm outline-none placeholder:text-gray-500"
               rows={3}
-              disabled={status !== "authenticated" || submitting}
+              disabled={!isAuthenticated || submitting}
             />
             <div className="flex items-center justify-between border-t border-gray-800 px-3 py-2">
               <p className="text-[11px] text-gray-500">Press ⌘/Ctrl + Enter to post</p>
               <div className="flex items-center gap-2">
-                {status !== "authenticated" && (
-                  <button type="button" onClick={() => signIn(undefined, { callbackUrl: typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}` })} className="rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-200 hover:bg-gray-800/60">
+                {!isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const callbackUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : `/blog/${slug}`;
+                      const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
+                      const url = new URL("/api/v1/auth/google/login", base);
+                      url.searchParams.set("redirect", callbackUrl);
+                      window.location.href = url.toString();
+                    }}
+                    className="rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-200 hover:bg-gray-800/60"
+                  >
                     Sign in
                   </button>
                 )}
-                <button type="submit" disabled={status !== "authenticated" || submitting || !content.trim()} className="rounded-md bg-primary px-4 py-2 text-sm text-white disabled:opacity-50">
+                <button type="submit" disabled={!isAuthenticated || submitting || !content.trim()} className="rounded-md bg-primary px-4 py-2 text-sm text-white disabled:opacity-50">
                   {submitting ? "Posting…" : "Post"}
                 </button>
               </div>
@@ -462,7 +499,7 @@ export default function Comments({ slug }: { slug: string }) {
                         placeholder={`Reply to @${c.author.username}`}
                         className="w-full resize-y rounded-lg bg-transparent p-2 text-sm outline-none placeholder:text-gray-500"
                         rows={2}
-                        disabled={status !== "authenticated" || submitting}
+                        disabled={!isAuthenticated || submitting}
                       />
                       <div className="flex items-center justify-between border-t border-gray-800 px-2 py-2">
                         <button
@@ -475,7 +512,7 @@ export default function Comments({ slug }: { slug: string }) {
                         >
                           Cancel
                         </button>
-                        <button type="submit" disabled={status !== "authenticated" || submitting || !replyContent.trim()} className="rounded-md bg-primary px-3 py-1.5 text-xs text-white disabled:opacity-50">
+                        <button type="submit" disabled={!isAuthenticated || submitting || !replyContent.trim()} className="rounded-md bg-primary px-3 py-1.5 text-xs text-white disabled:opacity-50">
                           {submitting ? "Posting…" : "Reply"}
                         </button>
                       </div>

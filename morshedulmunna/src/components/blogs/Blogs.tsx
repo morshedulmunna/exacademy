@@ -21,11 +21,20 @@ async function fetchPosts(params: Record<string, string | number>) {
   Object.entries(params).forEach(([key, value]) => searchParams.set(key, String(value)));
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const url = `${baseUrl}/api/posts?${searchParams.toString()}`;
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) {
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) {
+      return { posts: [], pagination: { page: 1, limit: 0, total: 0, pages: 0 } } as ApiPostsResponse;
+    }
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      // Not JSON (likely HTML 404 page); return empty set gracefully
+      return { posts: [], pagination: { page: 1, limit: 0, total: 0, pages: 0 } } as ApiPostsResponse;
+    }
+    return (await res.json()) as ApiPostsResponse;
+  } catch {
     return { posts: [], pagination: { page: 1, limit: 0, total: 0, pages: 0 } } as ApiPostsResponse;
   }
-  return (await res.json()) as ApiPostsResponse;
 }
 
 export default async function Blogs() {

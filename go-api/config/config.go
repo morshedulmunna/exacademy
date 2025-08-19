@@ -171,6 +171,14 @@ type Config struct {
 
 	// CORS configuration
 	Cors CorsOrigin
+
+	// OAuth configuration
+	OAuth struct {
+		GoogleClientID     string `envconfig:"GOOGLE_CLIENT_ID"`
+		GoogleClientSecret string `envconfig:"GOOGLE_CLIENT_SECRET"`
+		OAuthRedirectURL   string `envconfig:"OAUTH_REDIRECT_URL"`
+		FrontendAppURL     string `envconfig:"FRONTEND_APP_URL" default:"http://localhost:3000"`
+	}
 }
 
 var (

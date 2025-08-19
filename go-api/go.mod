@@ -17,11 +17,13 @@ require (
 	go.elastic.co/apm/module/apmhttp v1.15.0
 	go.mongodb.org/mongo-driver v1.17.3
 	golang.org/x/crypto v0.40.0
+	golang.org/x/oauth2 v0.25.0
 	google.golang.org/grpc v1.67.3
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

@@ -13,6 +13,10 @@ type AuthHTTPHandler interface {
 	Me(w http.ResponseWriter, r *http.Request)
 	// Logout terminates the authenticated user's session.
 	Logout(w http.ResponseWriter, r *http.Request)
+	// Google OAuth start of flow: redirects to Google's consent screen
+	GoogleLogin(w http.ResponseWriter, r *http.Request)
+	// Google OAuth callback: exchanges code, creates session, and redirects to app
+	GoogleCallback(w http.ResponseWriter, r *http.Request)
 }
 
 // UserHTTPHandler defines the contract for user profile management HTTP handlers.
