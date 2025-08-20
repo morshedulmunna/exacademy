@@ -1,14 +1,14 @@
 [package]
-name = "ecocart"
+name = "execute_academy"
 version = "0.1.0"
 edition = "2024"
 
 [lib]
-name = "ecocart"
+name = "execute_academy"
 path = "src/lib.rs"
 
 [[bin]]
-name = "ecocart"
+name = "execute_academy"
 path = "src/main.rs"
 
 [dependencies]

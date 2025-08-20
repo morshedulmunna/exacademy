@@ -537,38 +537,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
-name = "ecocart"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "argon2",
- "axum",
- "axum-extra",
- "bytes",
- "chrono",
- "dotenv",
- "futures",
- "http",
- "hyper",
- "jsonwebtoken",
- "mime",
- "once_cell",
- "rand_core 0.9.3",
- "redis",
- "serde",
- "serde_json",
- "serial_test",
- "sqlx",
- "tokio",
- "tokio-util",
- "tower 0.4.13",
- "tower-http 0.5.2",
- "utoipa",
- "utoipa-swagger-ui",
- "uuid",
-]
-
-[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -618,6 +586,38 @@ name = "event-listener"
 version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
+
+[[package]]
+name = "execute_academy"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "argon2",
+ "axum",
+ "axum-extra",
+ "bytes",
+ "chrono",
+ "dotenv",
+ "futures",
+ "http",
+ "hyper",
+ "jsonwebtoken",
+ "mime",
+ "once_cell",
+ "rand_core 0.9.3",
+ "redis",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sqlx",
+ "tokio",
+ "tokio-util",
+ "tower 0.4.13",
+ "tower-http 0.5.2",
+ "utoipa",
+ "utoipa-swagger-ui",
+ "uuid",
+]
 
 [[package]]
 name = "fastrand"

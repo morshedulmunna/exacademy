@@ -1,4 +1,4 @@
-use ecocart::pkg::logger::{debug, error, info, warn};
+use execute_academy::pkg::logger::{debug, error, info, warn};
 
 // Log anything that implements Display
 info("Hello world");
@@ -11,7 +11,7 @@ info(my_custom_struct);
 debug(my_enum);
 
 // Log with formatting using macros
-use ecocart::{log_info, log_debug, log_warn, log_error};
+use execute_academy::{log_info, log_debug, log_warn, log_error};
 
 log_info!("User {} logged in", username);
 log_debug!("Processing {} items", count);

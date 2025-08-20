@@ -21,12 +21,6 @@ pub mod api_docs {
     #[doc = include_str!("../docs/users.md")]
     pub mod users {}
 
-    #[doc = include_str!("../docs/categories.md")]
-    pub mod categories {}
-
-    #[doc = include_str!("../docs/products.md")]
-    pub mod products {}
-
     #[doc = include_str!("../docs/health.md")]
     pub mod health {}
 

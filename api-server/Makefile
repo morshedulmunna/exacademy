@@ -10,17 +10,17 @@
 SHELL := /bin/sh
 
 # Binary/crate name from Cargo.toml
-BIN ?= ecocart
+BIN ?= execute_academy
 
 # Default subcommand for `cargo run -- <CMD>`
-CMD ?= ecocart-apis
+CMD ?= execute_academy-apis
 
 .PHONY: help dev run build build-release test fmt fmt-check clippy check clean migrate migrate-down sqlx-install
 
 help:
 	@echo "Available targets:"
 	@echo "  dev             - Hot-reload run (cargo-watch)"
-	@echo "  run [CMD=...]   - Run the binary with a subcommand (default: ecocart-apis)"
+	@echo "  run [CMD=...]   - Run the binary with a subcommand (default: execute_academy-apis)"
 	@echo "  build           - Build in debug mode"
 	@echo "  build-release   - Build in release mode"
 	@echo "  test            - Run tests"

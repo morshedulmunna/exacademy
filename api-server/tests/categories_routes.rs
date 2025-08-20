@@ -9,12 +9,12 @@ use serde_json::json;
 use tower::util::ServiceExt; // for `oneshot`
 
 // Crate modules
-use ecocart::configs::app_context::AppContext;
-use ecocart::configs::auth_config::AuthConfig;
-use ecocart::configs::redis_config::RedisConfig;
-use ecocart::configs::system_config::SystemConfig;
-use ecocart::interfaces::http::routes;
-use ecocart::pkg::security::{build_access_claims, sign_jwt};
+use execute_academy::configs::app_context::AppContext;
+use execute_academy::configs::auth_config::AuthConfig;
+use execute_academy::configs::redis_config::RedisConfig;
+use execute_academy::configs::system_config::SystemConfig;
+use execute_academy::interfaces::http::routes;
+use execute_academy::pkg::security::{build_access_claims, sign_jwt};
 
 use redis::Client as RedisClient;
 use sqlx::postgres::PgPoolOptions;
@@ -36,7 +36,7 @@ fn make_test_context() -> Arc<AppContext> {
     let system = SystemConfig::load_from_env().unwrap();
     let auth = AuthConfig {
         jwt_secret: "test_secret_change_me".to_string(),
-        jwt_issuer: "ecocart-tests".to_string(),
+        jwt_issuer: "execute_academy-tests".to_string(),
         access_ttl_seconds: 900,
         refresh_ttl_seconds: 3600,
     };

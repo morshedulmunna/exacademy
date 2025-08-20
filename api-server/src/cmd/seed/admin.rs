@@ -22,7 +22,7 @@ pub async fn seed_admin() -> Result<(), Box<dyn std::error::Error>> {
         .connect(&db.database_url)
         .await?;
 
-    let admin_email = env::var("ADMIN_EMAIL").unwrap_or_else(|_| "admin@ecocart.local".to_string());
+    let admin_email = env::var("ADMIN_EMAIL").unwrap_or_else(|_| "admin@execute_academy.local".to_string());
     let admin_username = env::var("ADMIN_USERNAME").unwrap_or_else(|_| "admin".to_string());
     let admin_password = env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "admin123".to_string());
 

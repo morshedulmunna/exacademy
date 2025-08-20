@@ -7,7 +7,7 @@
 //!
 //! Typical usage:
 //! ```rust
-//! use ecocart::pkg::rate_limit::{InMemorySlidingWindowRateLimiter, RateLimitConfig};
+//! use execute_academy::pkg::rate_limit::{InMemorySlidingWindowRateLimiter, RateLimitConfig};
 //! use std::time::Duration;
 //!
 //! let limiter = InMemorySlidingWindowRateLimiter::new(RateLimitConfig::new(10, Duration::from_secs(1)));

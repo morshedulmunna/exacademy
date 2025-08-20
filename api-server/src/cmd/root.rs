@@ -20,7 +20,7 @@ impl RootCommand {
             "cli" => {
                 crate::cmd::cli::cli_command()?;
             }
-            "ecocart-apis" => {
+            "execute_academy-apis" => {
                 let rt = tokio::runtime::Runtime::new()?;
                 rt.block_on(crate::cmd::apis::apis_command())?;
             }
@@ -48,13 +48,13 @@ impl RootCommand {
     }
 
     fn print_help(&self) {
-        println!("ecocart - A query processing tool");
+        println!("execute_academy - A query processing tool");
         println!();
-        println!("Usage: ecocart <command> [options]");
+        println!("Usage: execute_academy <command> [options]");
         println!();
         println!("Commands:");
         println!("  cli     - Run CLI interface");
-        println!("  ecocart-apis    - Run API server");
+        println!("  execute_academy-apis    - Run API server");
         println!("  grpc    - Run gRPC server");
         println!("  migrate - Run SQLx database migrations (Postgres)");
         println!("  seed    - Seed default admin user (idempotent)");

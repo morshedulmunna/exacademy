@@ -6,7 +6,7 @@ pub async fn handler() -> (StatusCode, Json<Value>) {
         StatusCode::OK,
         Json(json!({
             "status": "healthy",
-            "service": "ecocart"
+            "service": "execute_academy"
         })),
     )
 }

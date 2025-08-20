@@ -3,7 +3,7 @@ use once_cell::sync::Lazy;
 use std::sync::Arc;
 
 // Global logger instance
-static GLOBAL_LOGGER: Lazy<Arc<Logger>> = Lazy::new(|| Arc::new(Logger::new("ecocart")));
+static GLOBAL_LOGGER: Lazy<Arc<Logger>> = Lazy::new(|| Arc::new(Logger::new("execute_academy")));
 
 /// Get the global logger instance
 pub fn get_logger() -> Arc<Logger> {

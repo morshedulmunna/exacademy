@@ -15,7 +15,7 @@ impl AuthConfig {
 
         let jwt_secret =
             env::var("JWT_SECRET").unwrap_or_else(|_| "dev_secret_change_me".to_string());
-        let jwt_issuer = env::var("JWT_ISSUER").unwrap_or_else(|_| "ecocart".to_string());
+        let jwt_issuer = env::var("JWT_ISSUER").unwrap_or_else(|_| "execute_academy".to_string());
         let access_ttl_seconds = env::var("JWT_ACCESS_TTL_SECONDS")
             .ok()
             .and_then(|v| v.parse::<i64>().ok())

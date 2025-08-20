@@ -1,4 +1,4 @@
-# EcoCart API (rustdoc)
+# execute_academy API (rustdoc)
 
 Base URL: `http://127.0.0.1:8080` (override with `API_HOST` and `API_PORT`).
 

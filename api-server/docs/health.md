@@ -5,5 +5,5 @@
 Response 200:
 
 ```json
-{ "status": "healthy", "service": "ecocart" }
+{ "status": "healthy", "service": "execute_academy" }
 ```

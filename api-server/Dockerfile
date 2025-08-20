@@ -22,7 +22,7 @@ FROM alpine:3.20
 RUN apk add --no-cache ca-certificates wget curl \
     && adduser -D -H -u 10001 appuser
 
-COPY --from=builder /app/target/release/ecocart /usr/local/bin/ecocart
+COPY --from=builder /app/target/release/execute_academy /usr/local/bin/execute_academy
 COPY --from=builder /app/migrations /app/migrations
 COPY uploads /app/uploads
 WORKDIR /app
@@ -34,5 +34,5 @@ USER appuser
 
 # Allow overriding the subcommand at runtime while keeping a sane default
 # Default entrypoint runs the binary; we'll override CMD to run migrations + server in compose
-ENTRYPOINT ["ecocart"]
-CMD ["ecocart-apis"]
+ENTRYPOINT ["execute_academy"]
+CMD ["execute_academy-apis"]
