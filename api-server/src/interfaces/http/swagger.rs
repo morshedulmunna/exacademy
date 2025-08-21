@@ -1,4 +1,5 @@
-use utoipa::OpenApi;
+use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
+use utoipa::{Modify, OpenApi};
 
 /// Central OpenAPI document for execute_academy HTTP API.
 ///
@@ -11,7 +12,7 @@ use utoipa::OpenApi;
         description = "REST API for execute_academy. See category, product, auth, and user endpoints."
     ),
     servers(
-        (url = "http://localhost:8080", description = "Local dev")
+        (url = "http://localhost:9098", description = "Local dev")
     ),
     paths(
         crate::interfaces::http::handlers::auth::register,
@@ -22,17 +23,35 @@ use utoipa::OpenApi;
         crate::interfaces::http::handlers::users::update_user,
     ),
     components(schemas(
-        crate::pkg::response::ApiErrorResponse,
-        crate::types::user_types::RegisterRequest,
-        crate::types::user_types::LoginRequest,
-        crate::types::user_types::RefreshRequest,
-        crate::types::user_types::RegisterResponse,
-        crate::types::user_types::LoginResponse,
-        crate::types::user_types::TokenResponse,
-        crate::types::user_types::OkResponse,
-        crate::types::user_types::UserResponse,
-        crate::types::user_types::UserProfile,
-        crate::types::user_types::UpdateUserRequest
-    ))
+            crate::pkg::response::ApiErrorResponse,
+            crate::types::user_types::RegisterRequest,
+            crate::types::user_types::LoginRequest,
+            crate::types::user_types::RefreshRequest,
+            crate::types::user_types::RegisterResponse,
+            crate::types::user_types::LoginResponse,
+            crate::types::user_types::TokenResponse,
+            crate::types::user_types::OkResponse,
+            crate::types::user_types::UserResponse,
+            crate::types::user_types::UserProfile,
+            crate::types::user_types::UpdateUserRequest
+    )),
+    modifiers(&ApiSecurity)
 )]
 pub struct ApiDoc;
+
+struct ApiSecurity;
+
+impl Modify for ApiSecurity {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        let components = openapi.components.get_or_insert_default();
+        components.add_security_scheme(
+            "bearerAuth",
+            SecurityScheme::Http(
+                HttpBuilder::new()
+                    .scheme(HttpAuthScheme::Bearer)
+                    .bearer_format("JWT")
+                    .build(),
+            ),
+        );
+    }
+}

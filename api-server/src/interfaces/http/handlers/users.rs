@@ -10,6 +10,7 @@ use crate::{configs::app_context::AppContext, types::user_types::UpdateUserReque
 #[utoipa::path(
     get,
     path = "/api/users/{id}",
+    security(("bearerAuth" = [])),
     params(("id" = String, Path, description = "User id (UUID)")),
     responses(
         (status = 200, description = "User profile", body = UserProfile),
@@ -30,6 +31,7 @@ pub async fn get_user(
 #[utoipa::path(
     patch,
     path = "/api/users/me",
+    security(("bearerAuth" = [])),
     request_body = UpdateUserRequest,
     responses((status = 200, description = "Updated user", body = UserProfile)),
     tag = "Users"

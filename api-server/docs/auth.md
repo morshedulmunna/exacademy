@@ -2,6 +2,8 @@
 
 Obtain and manage JWT tokens for authenticated requests.
 
+Base URL: `http://127.0.0.1:8080`
+
 ## Register
 
 - POST `/api/auth/register`
@@ -17,6 +19,8 @@ Request:
   "password": "StrongP@ssw0rd"
 }
 ```
+
+Note: `first_name` and `last_name` are accepted during registration but are not persisted at create time. They can be updated later via the user update endpoint.
 
 Response 200:
 
@@ -92,6 +96,8 @@ Response 200:
   }
 }
 ```
+
+Note: The refresh endpoint returns a new `access_token` and echoes back the provided `refresh_token` unchanged.
 
 ## Logout
 
