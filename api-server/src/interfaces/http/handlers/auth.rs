@@ -1,8 +1,9 @@
-use axum::{Json, extract::Extension};
+use axum::{Json, extract::Extension, http::StatusCode};
 
 use crate::applications::auth as auth_service;
 use crate::configs::app_context::AppContext;
 
+use crate::pkg::Response;
 use crate::pkg::error::AppResult;
 use crate::types::user_types::{
     LoginRequest, LoginResponse, OkResponse, RefreshRequest, RegisterRequest, RegisterResponse,
@@ -20,9 +21,10 @@ use crate::types::user_types::{
 pub async fn register(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     Json(req): Json<RegisterRequest>,
-) -> AppResult<Json<RegisterResponse>> {
+) -> AppResult<(StatusCode, Json<Response<RegisterResponse>>)> {
     let output = auth_service::register(&ctx, ctx.repos.users.as_ref(), req).await?;
-    Ok(Json(output))
+    let body = Response::with_data("Registered", output, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
 }
 
 /// Log in and receive access/refresh tokens
@@ -36,9 +38,10 @@ pub async fn register(
 pub async fn login(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     Json(req): Json<LoginRequest>,
-) -> AppResult<Json<LoginResponse>> {
+) -> AppResult<(StatusCode, Json<Response<LoginResponse>>)> {
     let output = auth_service::login(&ctx, ctx.repos.users.as_ref(), req).await?;
-    Ok(Json(output))
+    let body = Response::with_data("Logged in", output, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
 }
 
 /// Exchange refresh token for new access token
@@ -52,9 +55,10 @@ pub async fn login(
 pub async fn refresh(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     Json(req): Json<RefreshRequest>,
-) -> AppResult<Json<TokenResponse>> {
+) -> AppResult<(StatusCode, Json<Response<TokenResponse>>)> {
     let output = auth_service::refresh(&ctx, req).await?;
-    Ok(Json(output))
+    let body = Response::with_data("New access token", output, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
 }
 
 /// Logout (stateless)
@@ -64,6 +68,7 @@ pub async fn refresh(
     responses((status = 200, description = "Ok", body = OkResponse)),
     tag = "Auth"
 )]
-pub async fn logout() -> AppResult<Json<OkResponse>> {
-    Ok(Json(OkResponse { ok: true }))
+pub async fn logout() -> AppResult<(StatusCode, Json<Response<OkResponse>>)> {
+    let body = Response::with_data("Ok", OkResponse { ok: true }, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
 }

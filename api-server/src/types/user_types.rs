@@ -75,7 +75,7 @@ pub struct OkResponse {
 // Users route types
 // ========================
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct UserProfile {
     pub id: uuid::Uuid,
     pub username: String,

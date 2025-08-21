@@ -14,7 +14,8 @@ use crate::pkg::security_services::{
 };
 use crate::repositories::Repositories;
 
-use redis::Client as RedisClient;
+use crate::pkg::redis::RedisManager;
+use crate::pkg::redis::RedisOps;
 use tokio::sync::OnceCell;
 
 /// Application context containing runtime configuration and core connections.
@@ -23,7 +24,7 @@ pub struct AppContext {
     pub system: SystemConfig,
     pub db_pool: Pool<Postgres>,
     pub redis_config: RedisConfig,
-    pub redis_client: Arc<RedisClient>,
+    pub redis: Arc<RedisManager>,
     pub auth: AuthConfig,
     pub repos: Repositories,
     pub password_hasher: Arc<dyn PasswordHasher>,
@@ -46,12 +47,9 @@ impl AppContext {
 
         log_info!("Connected to Postgres");
 
-        // Initialize Redis client and verify connectivity once
-        let redis_client = Arc::new(RedisClient::open(redis_cfg.redis_url.clone())?);
-        {
-            let mut conn = redis_client.get_multiplexed_tokio_connection().await?;
-            let _: String = redis::cmd("PING").query_async(&mut conn).await?;
-        }
+        // Initialize Redis manager and verify connectivity once
+        let redis_manager = Arc::new(RedisManager::from_config(&redis_cfg)?);
+        redis_manager.ping().await?;
         log_info!("Connected to Redis");
 
         let repos = Repositories::new(db_pool.clone());
@@ -66,7 +64,7 @@ impl AppContext {
             system,
             db_pool: db_pool.clone(),
             redis_config: redis_cfg,
-            redis_client,
+            redis: redis_manager,
             auth,
             repos,
             password_hasher,

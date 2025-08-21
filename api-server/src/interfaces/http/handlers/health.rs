@@ -5,7 +5,8 @@ use serde::Serialize;
 use tokio::time::{Duration, timeout};
 
 use crate::configs::app_context::AppContext;
-use crate::pkg::response::ApiResponse;
+use crate::pkg::redis::RedisOps;
+use crate::pkg::response::Response;
 
 /// Health check endpoint
 ///
@@ -13,7 +14,7 @@ use crate::pkg::response::ApiResponse;
 /// checks pass; otherwise returns HTTP 503 with component-level details.
 pub async fn handler(
     Extension(ctx): Extension<Arc<AppContext>>,
-) -> (StatusCode, Json<ApiResponse<HealthReport>>) {
+) -> (StatusCode, Json<Response<HealthReport>>) {
     let postgres_ok = check_postgres(ctx.as_ref()).await;
     let redis_ok = check_redis(ctx.as_ref()).await;
 
@@ -40,7 +41,7 @@ pub async fn handler(
         "One or more dependencies are unavailable"
     };
 
-    let body = ApiResponse::with_data(message, report, status_code.as_u16());
+    let body = Response::with_data(message, report, status_code.as_u16());
     (status_code, Json(body))
 }
 
@@ -89,8 +90,7 @@ async fn check_postgres(ctx: &AppContext) -> ComponentStatus {
 
 async fn check_redis(ctx: &AppContext) -> ComponentStatus {
     let fut = async {
-        let mut conn = ctx.redis_client.get_multiplexed_tokio_connection().await?;
-        let _: String = redis::cmd("PING").query_async(&mut conn).await?;
+        ctx.redis.ping().await?;
         Ok::<(), redis::RedisError>(())
     };
 

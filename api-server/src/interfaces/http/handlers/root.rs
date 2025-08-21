@@ -1,9 +1,9 @@
-use crate::pkg::response::ApiResponse;
+use crate::pkg::response::Response;
 use axum::{Json, http::StatusCode};
 
 /// Root route handler returning a standardized success payload
-pub async fn handler() -> (StatusCode, Json<ApiResponse<serde_json::Value>>) {
-    let body = ApiResponse::<serde_json::Value>::with_message(
+pub async fn handler() -> (StatusCode, Json<Response<serde_json::Value>>) {
+    let body = Response::<serde_json::Value>::with_message(
         "execute_academy API Server",
         StatusCode::OK.as_u16(),
     );

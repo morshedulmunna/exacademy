@@ -45,7 +45,7 @@ impl ApiErrorResponse {
 
 /// Standard success response payload returned by the API
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ApiResponse<T>
+pub struct Response<T>
 where
     T: Serialize,
 {
@@ -59,7 +59,7 @@ where
     pub data: Option<T>,
 }
 
-impl<T> ApiResponse<T>
+impl<T> Response<T>
 where
     T: Serialize,
 {
