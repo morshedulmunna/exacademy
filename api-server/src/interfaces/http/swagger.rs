@@ -19,10 +19,20 @@ use utoipa::OpenApi;
         crate::interfaces::http::routes::auth::refresh,
         crate::interfaces::http::routes::auth::logout,
         crate::interfaces::http::routes::users::get_user,
+        crate::interfaces::http::routes::users::update_user,
     ),
     components(schemas(
         crate::pkg::response::ApiErrorResponse,
-     
+        crate::types::user_types::RegisterRequest,
+        crate::types::user_types::LoginRequest,
+        crate::types::user_types::RefreshRequest,
+        crate::types::user_types::RegisterResponse,
+        crate::types::user_types::LoginResponse,
+        crate::types::user_types::TokenResponse,
+        crate::types::user_types::OkResponse,
+        crate::types::user_types::UserResponse,
+        crate::types::user_types::UserProfile,
+        crate::types::user_types::UpdateUserRequest
     ))
 )]
 pub struct ApiDoc;

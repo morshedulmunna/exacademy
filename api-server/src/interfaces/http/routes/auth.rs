@@ -6,7 +6,7 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::error::AppResult;
 use crate::types::user_types::{
     LoginRequest, LoginResponse, OkResponse, RefreshRequest, RegisterRequest, RegisterResponse,
-    TokenResponse, UserResponse,
+    TokenResponse,
 };
 
 pub fn router() -> Router {
@@ -29,17 +29,8 @@ async fn register(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     Json(req): Json<RegisterRequest>,
 ) -> AppResult<Json<RegisterResponse>> {
-    let output = auth_service::register(
-        &ctx,
-        ctx.repos.users.as_ref(),
-        auth_service::RegisterInput {
-            username: req.username,
-            email: req.email,
-            password: req.password,
-        },
-    )
-    .await?;
-    Ok(Json(RegisterResponse { id: output.id }))
+    let output = auth_service::register(&ctx, ctx.repos.users.as_ref(), req).await?;
+    Ok(Json(output))
 }
 
 /// Log in and receive access/refresh tokens
@@ -54,36 +45,8 @@ async fn login(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     Json(req): Json<LoginRequest>,
 ) -> AppResult<Json<LoginResponse>> {
-    let output = auth_service::login(
-        &ctx,
-        ctx.repos.users.as_ref(),
-        auth_service::LoginInput {
-            email: req.email,
-            password: req.password,
-        },
-    )
-    .await?;
-
-    let user = UserResponse {
-        id: output.user.id,
-        username: output.user.username,
-        email: output.user.email,
-        role: output.user.role,
-        first_name: output.user.first_name,
-        last_name: output.user.last_name,
-        full_name: output.user.full_name,
-        avatar_url: output.user.avatar_url,
-        is_active: output.user.is_active,
-        is_blocked: output.user.is_blocked,
-    };
-
-    Ok(Json(LoginResponse {
-        user,
-        access_token: output.access_token,
-        refresh_token: output.refresh_token,
-        token_type: output.token_type,
-        expires_in: output.expires_in,
-    }))
+    let output = auth_service::login(&ctx, ctx.repos.users.as_ref(), req).await?;
+    Ok(Json(output))
 }
 
 /// Exchange refresh token for new access token
@@ -98,19 +61,8 @@ async fn refresh(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     Json(req): Json<RefreshRequest>,
 ) -> AppResult<Json<TokenResponse>> {
-    let output = auth_service::refresh(
-        &ctx,
-        auth_service::RefreshInput {
-            refresh_token: req.refresh_token,
-        },
-    )
-    .await?;
-    Ok(Json(TokenResponse {
-        access_token: output.access_token,
-        refresh_token: output.refresh_token,
-        token_type: output.token_type,
-        expires_in: output.expires_in,
-    }))
+    let output = auth_service::refresh(&ctx, req).await?;
+    Ok(Json(output))
 }
 
 /// Logout (stateless)

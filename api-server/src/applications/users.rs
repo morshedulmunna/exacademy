@@ -1,35 +1,20 @@
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::repositories::users::{UpdateUserRecord, UsersRepository};
-
-/// Response shape for a single user profile
-#[derive(Debug)]
-pub struct UserProfileOutput {
-    pub id: uuid::Uuid,
-    pub username: String,
-    pub email: String,
-    pub role: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub full_name: Option<String>,
-    pub avatar_url: Option<String>,
-    pub is_active: bool,
-    pub is_blocked: bool,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-}
+use crate::types::user_types::{UpdateUserRequest, UserProfile};
 
 /// Fetch a user by id
 pub async fn get_user_by_id(
     _ctx: &AppContext,
     repo: &dyn UsersRepository,
     id: uuid::Uuid,
-) -> AppResult<UserProfileOutput> {
+) -> AppResult<UserProfile> {
     let user = match repo.find_by_id(id).await? {
         Some(u) => u,
         None => return Err(AppError::NotFound("User not found".into())),
     };
 
-    Ok(UserProfileOutput {
+    Ok(UserProfile {
         id: user.id,
         username: user.username,
         email: user.email,
@@ -44,43 +29,13 @@ pub async fn get_user_by_id(
     })
 }
 
-/// Input shape for updating a subset of user profile fields
-#[derive(Debug, Default)]
-pub struct UpdateUserInput {
-    pub username: Option<String>,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub avatar_url: Option<String>,
-    pub bio: Option<String>,
-    pub date_of_birth: Option<chrono::NaiveDate>,
-    pub gender: Option<String>,
-    pub phone: Option<String>,
-    pub secondary_email: Option<String>,
-    pub website_url: Option<String>,
-    pub github_url: Option<String>,
-    pub twitter_url: Option<String>,
-    pub linkedin_url: Option<String>,
-    pub facebook_url: Option<String>,
-    pub instagram_url: Option<String>,
-    pub youtube_url: Option<String>,
-    pub address_line1: Option<String>,
-    pub address_line2: Option<String>,
-    pub city: Option<String>,
-    pub state: Option<String>,
-    pub postal_code: Option<String>,
-    pub country: Option<String>,
-    pub locale: Option<String>,
-    pub timezone: Option<String>,
-    pub marketing_opt_in: Option<bool>,
-}
-
 /// Update a user by id with only provided fields; returns the updated profile
 pub async fn update_user_by_id(
     _ctx: &AppContext,
     repo: &dyn UsersRepository,
     id: uuid::Uuid,
-    input: UpdateUserInput,
-) -> AppResult<UserProfileOutput> {
+    input: UpdateUserRequest,
+) -> AppResult<UserProfile> {
     let updated = repo
         .update_partial(
             id,
@@ -119,7 +74,7 @@ pub async fn update_user_by_id(
         None => return Err(AppError::NotFound("User not found".into())),
     };
 
-    Ok(UserProfileOutput {
+    Ok(UserProfile {
         id: user.id,
         username: user.username,
         email: user.email,

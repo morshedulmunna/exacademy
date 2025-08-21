@@ -30,19 +30,7 @@ async fn get_user(
     Path(id): Path<uuid::Uuid>,
 ) -> AppResult<Json<UserProfile>> {
     let user = users_service::get_user_by_id(&ctx, ctx.repos.users.as_ref(), id).await?;
-    Ok(Json(UserProfile {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        full_name: user.full_name,
-        avatar_url: user.avatar_url,
-        is_active: user.is_active,
-        is_blocked: user.is_blocked,
-        created_at: user.created_at,
-    }))
+    Ok(Json(user))
 }
 
 #[utoipa::path(
@@ -58,51 +46,6 @@ async fn update_user(
     Path(id): Path<uuid::Uuid>,
     Json(req): Json<UpdateUserRequest>,
 ) -> AppResult<Json<UserProfile>> {
-    let updated = users_service::update_user_by_id(
-        &ctx,
-        ctx.repos.users.as_ref(),
-        id,
-        users_service::UpdateUserInput {
-            username: req.username,
-            first_name: req.first_name,
-            last_name: req.last_name,
-            avatar_url: req.avatar_url,
-            bio: req.bio,
-            date_of_birth: req.date_of_birth,
-            gender: req.gender,
-            phone: req.phone,
-            secondary_email: req.secondary_email,
-            website_url: req.website_url,
-            github_url: req.github_url,
-            twitter_url: req.twitter_url,
-            linkedin_url: req.linkedin_url,
-            facebook_url: req.facebook_url,
-            instagram_url: req.instagram_url,
-            youtube_url: req.youtube_url,
-            address_line1: req.address_line1,
-            address_line2: req.address_line2,
-            city: req.city,
-            state: req.state,
-            postal_code: req.postal_code,
-            country: req.country,
-            locale: req.locale,
-            timezone: req.timezone,
-            marketing_opt_in: req.marketing_opt_in,
-        },
-    )
-    .await?;
-
-    Ok(Json(UserProfile {
-        id: updated.id,
-        username: updated.username,
-        email: updated.email,
-        role: updated.role,
-        first_name: updated.first_name,
-        last_name: updated.last_name,
-        full_name: updated.full_name,
-        avatar_url: updated.avatar_url,
-        is_active: updated.is_active,
-        is_blocked: updated.is_blocked,
-        created_at: updated.created_at,
-    }))
+    let updated = users_service::update_user_by_id(&ctx, ctx.repos.users.as_ref(), id, req).await?;
+    Ok(Json(updated))
 }

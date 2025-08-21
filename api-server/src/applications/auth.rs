@@ -3,74 +3,17 @@ use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::security::{Claims, build_access_claims};
 
 use crate::repositories::users::{CreateUserRecord, UsersRepository};
-
-/// Request DTO for user registration
-#[derive(Debug)]
-pub struct RegisterInput {
-    pub username: String,
-    pub email: String,
-    pub password: String,
-}
-
-/// Response DTO for user registration
-#[derive(Debug)]
-pub struct RegisterOutput {
-    pub id: uuid::Uuid,
-}
-
-/// Request DTO for login
-#[derive(Debug)]
-pub struct LoginInput {
-    pub email: String,
-    pub password: String,
-}
-
-/// Minimal user shape for responses
-#[derive(Debug)]
-pub struct UserInfo {
-    pub id: uuid::Uuid,
-    pub username: String,
-    pub email: String,
-    pub role: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub full_name: Option<String>,
-    pub avatar_url: Option<String>,
-    pub is_active: bool,
-    pub is_blocked: bool,
-}
-
-/// Response DTO for login containing tokens
-#[derive(Debug)]
-pub struct LoginOutput {
-    pub user: UserInfo,
-    pub access_token: String,
-    pub refresh_token: String,
-    pub token_type: String,
-    pub expires_in: i64,
-}
-
-/// Request DTO for refresh token exchange
-#[derive(Debug)]
-pub struct RefreshInput {
-    pub refresh_token: String,
-}
-
-/// Response DTO for token issuing
-#[derive(Debug)]
-pub struct TokenOutput {
-    pub access_token: String,
-    pub refresh_token: String,
-    pub token_type: String,
-    pub expires_in: i64,
-}
+use crate::types::user_types::{
+    LoginRequest, LoginResponse, RefreshRequest, RegisterRequest, RegisterResponse, TokenResponse,
+    UserResponse,
+};
 
 /// Register a new user
 pub async fn register(
     ctx: &AppContext,
     repo: &dyn UsersRepository,
-    input: RegisterInput,
-) -> AppResult<RegisterOutput> {
+    input: RegisterRequest,
+) -> AppResult<RegisterResponse> {
     let existing = repo.find_by_email(&input.email).await?;
     if existing.is_some() {
         return Err(AppError::Conflict("Email already exists".into()));
@@ -89,15 +32,17 @@ pub async fn register(
         })
         .await?;
 
-    Ok(RegisterOutput { id })
+    // Note: first_name/last_name are accepted at HTTP level but not persisted on create path.
+    // They can be updated later via the user update endpoint.
+    Ok(RegisterResponse { id })
 }
 
 /// Authenticate a user and return tokens
 pub async fn login(
     ctx: &AppContext,
     repo: &dyn UsersRepository,
-    input: LoginInput,
-) -> AppResult<LoginOutput> {
+    input: LoginRequest,
+) -> AppResult<LoginResponse> {
     let user = match repo.find_by_email(&input.email).await? {
         Some(u) => u,
         None => return Err(AppError::Unauthorized("Invalid credentials".into())),
@@ -134,7 +79,7 @@ pub async fn login(
         .sign(&refresh_claims)
         .map_err(|e| AppError::Internal(e.to_string()))?;
 
-    let user = UserInfo {
+    let user = UserResponse {
         id: user.id,
         username: user.username,
         email: user.email,
@@ -147,7 +92,7 @@ pub async fn login(
         is_blocked: user.is_blocked,
     };
 
-    Ok(LoginOutput {
+    Ok(LoginResponse {
         user,
         access_token,
         refresh_token,
@@ -157,7 +102,7 @@ pub async fn login(
 }
 
 /// Exchange a refresh token for an access token
-pub async fn refresh(ctx: &AppContext, input: RefreshInput) -> AppResult<TokenOutput> {
+pub async fn refresh(ctx: &AppContext, input: RefreshRequest) -> AppResult<TokenResponse> {
     let claims: Claims = ctx
         .jwt_service
         .verify(&input.refresh_token)
@@ -169,7 +114,7 @@ pub async fn refresh(ctx: &AppContext, input: RefreshInput) -> AppResult<TokenOu
         .sign(&access_claims)
         .map_err(|e| AppError::Internal(e.to_string()))?;
 
-    Ok(TokenOutput {
+    Ok(TokenResponse {
         access_token: new_access,
         refresh_token: input.refresh_token,
         token_type: "Bearer".into(),
