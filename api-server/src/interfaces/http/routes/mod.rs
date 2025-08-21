@@ -1,9 +1,8 @@
 pub mod auth;
-pub mod health;
-pub mod not_found;
 pub mod root;
 pub mod users;
 
+use crate::interfaces::http::handlers::health;
 use axum::{Router, routing::get};
 
 /// Build the API routes router

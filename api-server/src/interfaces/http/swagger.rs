@@ -14,12 +14,12 @@ use utoipa::OpenApi;
         (url = "http://localhost:8080", description = "Local dev")
     ),
     paths(
-        crate::interfaces::http::routes::auth::register,
-        crate::interfaces::http::routes::auth::login,
-        crate::interfaces::http::routes::auth::refresh,
-        crate::interfaces::http::routes::auth::logout,
-        crate::interfaces::http::routes::users::get_user,
-        crate::interfaces::http::routes::users::update_user,
+        crate::interfaces::http::handlers::auth::register,
+        crate::interfaces::http::handlers::auth::login,
+        crate::interfaces::http::handlers::auth::refresh,
+        crate::interfaces::http::handlers::auth::logout,
+        crate::interfaces::http::handlers::users::get_user,
+        crate::interfaces::http::handlers::users::update_user,
     ),
     components(schemas(
         crate::pkg::response::ApiErrorResponse,

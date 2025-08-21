@@ -60,8 +60,6 @@ pub async fn login(
     if !ok {
         return Err(AppError::Unauthorized("Invalid credentials".into()));
     }
-    // Debug: print user struct for troubleshooting login issues
-    dbg!(&user);
 
     // Prevent login for inactive accounts
     if !user.is_active {

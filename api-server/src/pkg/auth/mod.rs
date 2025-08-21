@@ -7,7 +7,7 @@ use crate::pkg::error::AppError;
 
 #[derive(Debug, Clone)]
 pub struct AuthUser {
-    pub user_id: String,
+    pub user_id: uuid::Uuid,
     pub role: String,
 }
 
@@ -42,7 +42,8 @@ where
             .map_err(|_| AppError::Unauthorized("Invalid token".into()))?;
 
         Ok(AuthUser {
-            user_id: claims.sub,
+            user_id: uuid::Uuid::parse_str(&claims.sub)
+                .map_err(|_| AppError::BadRequest("Invalid user id in token".into()))?,
             role: claims.role,
         })
     }

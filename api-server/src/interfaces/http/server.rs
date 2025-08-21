@@ -29,7 +29,7 @@ fn build_app(ctx: Arc<AppContext>) -> Router {
     let app = Router::new()
         .merge(api)
         .nest_service("/uploads", ServeDir::new("./uploads"))
-        .fallback(super::routes::not_found::handler)
+        .fallback(super::handlers::not_found::handler)
         .layer(
             ServiceBuilder::new()
                 .layer(trace)
