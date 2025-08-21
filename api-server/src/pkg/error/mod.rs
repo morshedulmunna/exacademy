@@ -5,6 +5,7 @@
 //! `IntoResponse` so handlers can return `Result<T, AppError>` and get
 //! consistent JSON error responses.
 
+use axum::extract::rejection::JsonRejection;
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 
@@ -141,6 +142,13 @@ impl From<std::io::Error> for AppError {
 impl From<serde_json::Error> for AppError {
     fn from(err: serde_json::Error) -> Self {
         AppError::BadRequest(err.to_string())
+    }
+}
+
+impl From<JsonRejection> for AppError {
+    fn from(err: JsonRejection) -> Self {
+        // Map Axum's JSON extractor errors into a clean BadRequest
+        AppError::BadRequest(err.body_text())
     }
 }
 

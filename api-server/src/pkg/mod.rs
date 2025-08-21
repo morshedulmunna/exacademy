@@ -6,6 +6,7 @@ pub mod redis;
 pub mod response;
 pub mod security;
 pub mod upload;
+pub mod validators;
 
 // Back-compat: expose `pkg::security_services` pointing to `pkg::security::security_services`
 pub use self::security::security_services;

@@ -56,6 +56,9 @@ bytes = "1"
 tokio-util = { version = "0.7", features = ["io"] }
 futures = "0.3"
 
+# Validation (derive-based, similar to Zod schemas)
+validator = { version = "0.18", features = ["derive"] }
+
 # OpenAPI / Swagger
 utoipa = { version = "4", features = ["chrono", "uuid"] }
 utoipa-swagger-ui = { version = "7", features = ["axum", "reqwest"] }

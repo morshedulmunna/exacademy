@@ -1,3 +1,4 @@
+use crate::pkg::validators::ValidatedJson;
 use axum::{Json, extract::Extension, http::StatusCode};
 
 use crate::applications::auth as auth_service;
@@ -20,9 +21,9 @@ use crate::types::user_types::{
 )]
 pub async fn register(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
-    Json(req): Json<RegisterRequest>,
+    ValidatedJson(input_data): ValidatedJson<RegisterRequest>,
 ) -> AppResult<(StatusCode, Json<Response<RegisterResponse>>)> {
-    let output = auth_service::register(&ctx, ctx.repos.users.as_ref(), req).await?;
+    let output = auth_service::register(&ctx, ctx.repos.users.as_ref(), input_data).await?;
     let body = Response::with_data("Registered", output, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
@@ -37,9 +38,9 @@ pub async fn register(
 )]
 pub async fn login(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
-    Json(req): Json<LoginRequest>,
+    ValidatedJson(input_data): ValidatedJson<LoginRequest>,
 ) -> AppResult<(StatusCode, Json<Response<LoginResponse>>)> {
-    let output = auth_service::login(&ctx, ctx.repos.users.as_ref(), req).await?;
+    let output = auth_service::login(&ctx, ctx.repos.users.as_ref(), input_data).await?;
     let body = Response::with_data("Logged in", output, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
@@ -54,9 +55,9 @@ pub async fn login(
 )]
 pub async fn refresh(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
-    Json(req): Json<RefreshRequest>,
+    ValidatedJson(input_data): ValidatedJson<RefreshRequest>,
 ) -> AppResult<(StatusCode, Json<Response<TokenResponse>>)> {
-    let output = auth_service::refresh(&ctx, req).await?;
+    let output = auth_service::refresh(&ctx, input_data).await?;
     let body = Response::with_data("New access token", output, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
