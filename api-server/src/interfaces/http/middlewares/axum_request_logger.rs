@@ -52,8 +52,12 @@ pub async fn request_logger(req: Request<Body>, next: Next) -> Response {
         fields.insert("user_agent".to_string(), user_agent.into());
     }
 
-    let logger = get_logger();
-    logger.log_with_fields(LogLevel::Info, "http_request", None, fields);
+    // Log only successful (<400) requests here to avoid double logging
+    // for errors, which are already logged by the centralized error handler.
+    if status < 400 {
+        let logger = get_logger();
+        logger.log_with_fields(LogLevel::Info, "http_request", None, fields);
+    }
 
     response
 }

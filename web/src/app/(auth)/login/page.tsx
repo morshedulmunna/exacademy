@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
+import { login } from "@/actions/auth/login";
+import { getErrorMessage } from "@utils/error";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,7 +23,17 @@ export default function LoginPage() {
     setError("");
 
     try {
-      setError("An error occurred. Please try again.");
+      const res = await login({ email, password });
+      // Store tokens
+      window.localStorage.setItem("exacademy.access_token", res.access_token);
+      window.localStorage.setItem("exacademy.refresh_token", res.refresh_token);
+      router.push("/");
+      router.refresh();
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Login failed"));
+      // Ensure any stale tokens are cleared on error
+      window.localStorage.removeItem("exacademy.access_token");
+      window.localStorage.removeItem("exacademy.refresh_token");
     } finally {
       setIsLoading(false);
     }

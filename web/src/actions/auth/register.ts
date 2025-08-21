@@ -8,32 +8,14 @@ export type RegisterInput = {
   password: string;
 };
 
-export type LoginResponse = {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  expires_in: number;
-  user: {
-    id: string;
-    username: string;
-    email: string;
-    role: string;
-    first_name: string | null;
-    last_name: string | null;
-    full_name: string | null;
-    avatar_url: string | null;
-    is_active: boolean;
-    is_blocked: boolean;
-  };
-};
+export type RegisterResponse = { id: string };
 
 /**
- * Register a new user, then perform login to obtain tokens and user payload.
- * Returns the login response on success.
+ * Register a new user. Does not login.
+ * Returns the created user id.
  */
-export async function register(input: RegisterInput): Promise<LoginResponse> {
-  // Create account
-  await ServerFetch<{ id: string }>("/api/auth/register", {
+export async function register(input: RegisterInput): Promise<RegisterResponse> {
+  const res = await ServerFetch<RegisterResponse>("/api/auth/register", {
     method: "POST",
     body: JSON.stringify({
       first_name: input.firstName,
@@ -43,12 +25,5 @@ export async function register(input: RegisterInput): Promise<LoginResponse> {
       password: input.password,
     }),
   });
-
-  // Auto-login to fetch tokens
-  const loginRes = await ServerFetch<LoginResponse>("/api/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email: input.email, password: input.password }),
-  });
-
-  return loginRes;
+  return res;
 }

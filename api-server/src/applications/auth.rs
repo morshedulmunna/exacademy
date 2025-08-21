@@ -23,6 +23,7 @@ pub async fn register(
         .password_hasher
         .hash(&input.password)
         .map_err(|e| AppError::Internal(e.to_string()))?;
+
     let id = repo
         .create(CreateUserRecord {
             username: input.username,
@@ -47,17 +48,24 @@ pub async fn login(
         Some(u) => u,
         None => return Err(AppError::Unauthorized("Invalid credentials".into())),
     };
-    let hashed: String = user
+    let hashed: &str = user
         .password_hash
-        .clone()
+        .as_deref()
         .ok_or_else(|| AppError::Internal("User has no password hash".into()))?;
 
     let ok = ctx
         .password_hasher
-        .verify(&input.password, &hashed)
+        .verify(&input.password, hashed)
         .map_err(|e| AppError::Internal(e.to_string()))?;
     if !ok {
         return Err(AppError::Unauthorized("Invalid credentials".into()));
+    }
+    // Debug: print user struct for troubleshooting login issues
+    dbg!(&user);
+
+    // Prevent login for inactive accounts
+    if !user.is_active {
+        return Err(AppError::Forbidden("Account is inactive".into()));
     }
 
     let access_claims = build_access_claims(

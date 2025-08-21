@@ -81,23 +81,15 @@ export default function RegisterPage() {
               setError("");
               setSuccess("");
               try {
-                const loginRes = await registerAction({
+                const registerRes = await registerAction({
                   firstName: values.firstName,
                   lastName: values.lastName,
                   email: values.email,
                   username: values.username,
                   password: values.password,
                 });
-
-                // Store tokens for subsequent authenticated requests
-                if (typeof window !== "undefined") {
-                  window.localStorage.setItem("exacademy.access_token", loginRes.access_token);
-                  window.localStorage.setItem("exacademy.refresh_token", loginRes.refresh_token);
-                }
-
-                setSuccess("Registration successful! Signing you in...");
-                router.push("/");
-                router.refresh();
+                setSuccess("Registration successful! Please verify your email.");
+                router.push(`/verify?email=${encodeURIComponent(values.email)}`);
               } catch (err: unknown) {
                 const apiError = (err as ApiError) || undefined;
                 setError(apiError?.message || "Registration failed. Please try again.");
