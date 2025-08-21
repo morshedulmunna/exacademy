@@ -9,6 +9,8 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { type ApiError } from "@/actions/http";
+import { register as registerAction } from "@/actions/auth/register";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
@@ -79,31 +81,26 @@ export default function RegisterPage() {
               setError("");
               setSuccess("");
               try {
-                const response = await fetch("/api/auth/register", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    first_name: values.firstName,
-                    last_name: values.lastName,
-                    email: values.email,
-                    username: values.username,
-                    password: values.password,
-                  }),
+                const loginRes = await registerAction({
+                  firstName: values.firstName,
+                  lastName: values.lastName,
+                  email: values.email,
+                  username: values.username,
+                  password: values.password,
                 });
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                  setError(data.error || "Registration failed");
-                } else {
-                  setSuccess("Registration successful! Signing you in...");
-                  router.push("/");
-                  router.refresh();
+                // Store tokens for subsequent authenticated requests
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem("exacademy.access_token", loginRes.access_token);
+                  window.localStorage.setItem("exacademy.refresh_token", loginRes.refresh_token);
                 }
-              } catch (err) {
-                setError("An error occurred. Please try again.");
+
+                setSuccess("Registration successful! Signing you in...");
+                router.push("/");
+                router.refresh();
+              } catch (err: unknown) {
+                const apiError = (err as ApiError) || undefined;
+                setError(apiError?.message || "Registration failed. Please try again.");
               } finally {
                 setSubmitting(false);
               }

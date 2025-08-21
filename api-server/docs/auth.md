@@ -10,6 +10,8 @@ Request:
 
 ```json
 {
+  "first_name": "Alice",
+  "last_name": "Doe",
   "username": "alice",
   "email": "alice@example.com",
   "password": "StrongP@ssw0rd"
@@ -63,6 +65,17 @@ Request:
 
 ```json
 { "refresh_token": "<jwt>" }
+```
+
+Response 200:
+
+```json
+{
+  "access_token": "<jwt>",
+  "refresh_token": "<jwt>",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
 ```
 
 ## Logout
