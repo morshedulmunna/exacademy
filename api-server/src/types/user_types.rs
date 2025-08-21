@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 use validator::Validate;
 
 /// Common HTTP request/response types for the Auth and Users routes.
@@ -41,12 +42,12 @@ pub struct RefreshRequest {
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct RegisterResponse {
-    pub id: uuid::Uuid,
+    pub id: Uuid,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct UserResponse {
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     pub username: String,
     pub email: String,
     pub role: String,
@@ -86,7 +87,7 @@ pub struct OkResponse {
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct UserProfile {
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     pub username: String,
     pub email: String,
     pub role: String,
