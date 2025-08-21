@@ -2,32 +2,57 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
-import { User, Settings, ChevronDown, Settings2, Shield, FileText } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { User, Settings, ChevronDown, Settings2, Shield, FileText, LogOut } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 /**
  * User menu component with dropdown for authenticated users
  */
+type MinimalUser = {
+  id: string;
+  email: string;
+  username?: string | null;
+  name?: string | null;
+  role?: string | null;
+  avatar?: string | null;
+};
+
 export default function UserMenu() {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const status = "unauthenticated";
-  const session: any = null;
+  const [user, setUser] = useState<MinimalUser | null>(null);
   const { theme } = useTheme();
 
   // Ref for user dropdown menu
   const userMenuRef = useOutsideClick(() => setShowUserMenu(false));
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem("exacademy.user");
+      setUser(raw ? JSON.parse(raw) : null);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
   const handleSignOut = async () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("exacademy.access_token");
+      window.localStorage.removeItem("exacademy.refresh_token");
+      window.localStorage.removeItem("exacademy.user");
+    }
     setShowUserMenu(false);
+    // Soft refresh to update UI state
+    if (typeof window !== "undefined") window.location.reload();
   };
 
-  if (status === "loading") {
+  if (false) {
     return <div className={`w-8 h-8 rounded-full animate-pulse ${theme === "dark" ? "bg-gray-600" : "bg-gray-300"}`}></div>;
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="flex items-center space-x-3">
         <Link href="/login" className={`transition-colors duration-300 text-sm font-medium ${theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"}`}>
@@ -43,14 +68,14 @@ export default function UserMenu() {
   return (
     <div className="relative" ref={userMenuRef}>
       <button onClick={() => setShowUserMenu(!showUserMenu)} className={`flex items-center space-x-2 transition-colors duration-300 group ${theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"}`}>
-        {session.user?.avatar ? (
-          <Image src={session.user.avatar} alt={session.user.name || "User"} width={32} height={32} className="rounded-full ring-2 ring-transparent group-hover:ring-purple-500 transition-all duration-300" />
+        {user?.avatar ? (
+          <Image src={user.avatar} alt={user.name || user.username || "User"} width={32} height={32} className="rounded-full ring-2 ring-transparent group-hover:ring-purple-500 transition-all duration-300" />
         ) : (
           <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
             <User className="w-4 h-4 text-white" />
           </div>
         )}
-        <span className="text-sm font-medium">{session.user?.name || session.user?.username}</span>
+        <span className="text-sm font-medium">{user.name || user.username}</span>
         <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showUserMenu ? "rotate-180" : ""}`} />
       </button>
 
@@ -60,11 +85,11 @@ export default function UserMenu() {
           <div className="p-2">
             <div className={`px-3 py-2 border-b ${theme === "dark" ? "border-white/10" : "border-gray-200"}`}>
               <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Signed in as</p>
-              <p className={`font-medium truncate ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{session.user?.email}</p>
+              <p className={`font-medium truncate ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{user.email}</p>
             </div>
             <div className="py-2">
               {/* Admin Links */}
-              {session.user?.role === "ADMIN" && (
+              {user.role === "ADMIN" && (
                 <>
                   <div className={`px-3 py-1 text-xs font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>ADMIN</div>
                   <Link

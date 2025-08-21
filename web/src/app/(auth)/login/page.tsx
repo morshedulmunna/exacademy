@@ -24,9 +24,20 @@ export default function LoginPage() {
 
     try {
       const res = await login({ email, password });
-      // Store tokens
-      window.localStorage.setItem("exacademy.access_token", res.access_token);
-      window.localStorage.setItem("exacademy.refresh_token", res.refresh_token);
+      window.localStorage.setItem("exacademy.access_token", res.data.access_token);
+      window.localStorage.setItem("exacademy.refresh_token", res.data.refresh_token);
+      // Persist minimal user info for navbar rendering
+      window.localStorage.setItem(
+        "exacademy.user",
+        JSON.stringify({
+          id: res.data.user.id,
+          email: res.data.user.email,
+          username: res.data.user.username,
+          name: res.data.user.full_name || `${res.data.user.first_name ?? ""} ${res.data.user.last_name ?? ""}`.trim(),
+          role: res.data.user.role,
+          avatar: res.data.user.avatar_url,
+        })
+      );
       router.push("/");
       router.refresh();
     } catch (err: unknown) {
@@ -34,6 +45,7 @@ export default function LoginPage() {
       // Ensure any stale tokens are cleared on error
       window.localStorage.removeItem("exacademy.access_token");
       window.localStorage.removeItem("exacademy.refresh_token");
+      window.localStorage.removeItem("exacademy.user");
     } finally {
       setIsLoading(false);
     }
