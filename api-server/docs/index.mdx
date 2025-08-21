@@ -25,10 +25,23 @@ Errors are consistent across endpoints and include a machine code, message, and 
 
 See: `./errors.mdx`
 
+### Response Envelope
+
+All successful responses are wrapped in an object with fields:
+
+```json
+{
+  "message": "<string>",
+  "timestamp": "<RFC3339 datetime>",
+  "status_code": <number>,
+  "data": { /* endpoint-specific payload */ }
+}
+```
+
 ### Endpoints by Category
 
 - Auth: `./auth.mdx`
-- Users: `./users.mdx`
+- Users: `./users.md`
 - Categories: `./categories.mdx`
 - Products: `./products.mdx`
 - Health: `./health.mdx`

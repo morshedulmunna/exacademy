@@ -24,7 +24,12 @@ Request:
 Response 200:
 
 ```json
-{ "id": "f2c3f7a2-6b6d-4a1e-9a12-0f0f0f0f0f0f" }
+{
+  "message": "Registered",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "id": "f2c3f7a2-6b6d-4a1e-9a12-0f0f0f0f0f0f" }
+}
 ```
 
 ### Login
@@ -41,10 +46,15 @@ Response 200:
 
 ```json
 {
-  "access_token": "<jwt>",
-  "refresh_token": "<jwt>",
-  "token_type": "Bearer",
-  "expires_in": 3600
+  "message": "Logged in",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": {
+    "access_token": "<jwt>",
+    "refresh_token": "<jwt>",
+    "token_type": "Bearer",
+    "expires_in": 3600
+  }
 }
 ```
 
@@ -58,7 +68,7 @@ Request:
 { "refresh_token": "<jwt>" }
 ```
 
-Response 200: same shape as Login.
+Response 200: same envelope as Login with message "New access token".
 
 ### Logout
 
@@ -67,7 +77,12 @@ Response 200: same shape as Login.
 Response 200:
 
 ```json
-{ "ok": true }
+{
+  "message": "Ok",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "ok": true }
+}
 ```
 
 ### cURL Examples

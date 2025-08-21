@@ -8,17 +8,22 @@ Response 200:
 
 ```json
 {
-  "id": "<uuid>",
-  "username": "alice",
-  "email": "alice@example.com",
-  "role": "user",
-  "first_name": null,
-  "last_name": null,
-  "full_name": null,
-  "avatar_url": null,
-  "is_active": true,
-  "is_blocked": false,
-  "created_at": "2024-01-01T12:34:56.789Z"
+  "message": "User profile",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": {
+    "id": "<uuid>",
+    "username": "alice",
+    "email": "alice@example.com",
+    "role": "user",
+    "first_name": null,
+    "last_name": null,
+    "full_name": null,
+    "avatar_url": null,
+    "is_active": true,
+    "is_blocked": false,
+    "created_at": "2024-01-01T12:34:56.789Z"
+  }
 }
 ```
 
@@ -60,4 +65,4 @@ Request (any subset of fields):
 }
 ```
 
-Response 200: same shape as Get User.
+Response 200: same envelope as above with message "Updated user" and updated user in `data`.

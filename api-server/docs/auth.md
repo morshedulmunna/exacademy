@@ -21,7 +21,12 @@ Request:
 Response 200:
 
 ```json
-{ "id": "<uuid>" }
+{
+  "message": "Registered",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "id": "<uuid>" }
+}
 ```
 
 ## Login
@@ -38,22 +43,27 @@ Response 200:
 
 ```json
 {
-  "user": {
-    "id": "<uuid>",
-    "username": "alice",
-    "email": "alice@example.com",
-    "role": "user",
-    "first_name": null,
-    "last_name": null,
-    "full_name": null,
-    "avatar_url": null,
-    "is_active": true,
-    "is_blocked": false
-  },
-  "access_token": "<jwt>",
-  "refresh_token": "<jwt>",
-  "token_type": "Bearer",
-  "expires_in": 3600
+  "message": "Logged in",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": {
+    "user": {
+      "id": "<uuid>",
+      "username": "alice",
+      "email": "alice@example.com",
+      "role": "user",
+      "first_name": null,
+      "last_name": null,
+      "full_name": null,
+      "avatar_url": null,
+      "is_active": true,
+      "is_blocked": false
+    },
+    "access_token": "<jwt>",
+    "refresh_token": "<jwt>",
+    "token_type": "Bearer",
+    "expires_in": 3600
+  }
 }
 ```
 
@@ -71,10 +81,15 @@ Response 200:
 
 ```json
 {
-  "access_token": "<jwt>",
-  "refresh_token": "<jwt>",
-  "token_type": "Bearer",
-  "expires_in": 3600
+  "message": "New access token",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": {
+    "access_token": "<jwt>",
+    "refresh_token": "<jwt>",
+    "token_type": "Bearer",
+    "expires_in": 3600
+  }
 }
 ```
 
@@ -85,7 +100,12 @@ Response 200:
 Response 200:
 
 ```json
-{ "ok": true }
+{
+  "message": "Ok",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "ok": true }
+}
 ```
 
 ## Authorization Header
