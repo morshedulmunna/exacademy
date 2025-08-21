@@ -1,6 +1,7 @@
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
-use crate::pkg::security::{Claims, build_access_claims, hash_password, sign_jwt, verify_password};
+use crate::pkg::security::{Claims, build_access_claims};
+
 use crate::repositories::users::{CreateUserRecord, UsersRepository};
 
 /// Request DTO for user registration
@@ -66,7 +67,7 @@ pub struct TokenOutput {
 
 /// Register a new user
 pub async fn register(
-    _ctx: &AppContext,
+    ctx: &AppContext,
     repo: &dyn UsersRepository,
     input: RegisterInput,
 ) -> AppResult<RegisterOutput> {
@@ -75,8 +76,10 @@ pub async fn register(
         return Err(AppError::Conflict("Email already exists".into()));
     }
 
-    let password_hash =
-        hash_password(&input.password).map_err(|e| AppError::Internal(e.to_string()))?;
+    let password_hash = ctx
+        .password_hasher
+        .hash(&input.password)
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let id = repo
         .create(CreateUserRecord {
             username: input.username,
@@ -104,8 +107,10 @@ pub async fn login(
         .clone()
         .ok_or_else(|| AppError::Internal("User has no password hash".into()))?;
 
-    let ok =
-        verify_password(&input.password, &hashed).map_err(|e| AppError::Internal(e.to_string()))?;
+    let ok = ctx
+        .password_hasher
+        .verify(&input.password, &hashed)
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     if !ok {
         return Err(AppError::Unauthorized("Invalid credentials".into()));
     }
@@ -120,9 +125,13 @@ pub async fn login(
         &user.role,
         ctx.auth.refresh_ttl_seconds,
     );
-    let access_token = sign_jwt(&access_claims, &ctx.auth.jwt_secret)
+    let access_token = ctx
+        .jwt_service
+        .sign(&access_claims)
         .map_err(|e| AppError::Internal(e.to_string()))?;
-    let refresh_token = sign_jwt(&refresh_claims, &ctx.auth.jwt_secret)
+    let refresh_token = ctx
+        .jwt_service
+        .sign(&refresh_claims)
         .map_err(|e| AppError::Internal(e.to_string()))?;
 
     let user = UserInfo {
@@ -149,12 +158,15 @@ pub async fn login(
 
 /// Exchange a refresh token for an access token
 pub async fn refresh(ctx: &AppContext, input: RefreshInput) -> AppResult<TokenOutput> {
-    let claims: Claims =
-        crate::pkg::security::verify_jwt(&input.refresh_token, &ctx.auth.jwt_secret)
-            .map_err(|_| AppError::Unauthorized("Invalid refresh token".into()))?;
+    let claims: Claims = ctx
+        .jwt_service
+        .verify(&input.refresh_token)
+        .map_err(|_| AppError::Unauthorized("Invalid refresh token".into()))?;
 
     let access_claims = build_access_claims(&claims.sub, &claims.role, ctx.auth.access_ttl_seconds);
-    let new_access = sign_jwt(&access_claims, &ctx.auth.jwt_secret)
+    let new_access = ctx
+        .jwt_service
+        .sign(&access_claims)
         .map_err(|e| AppError::Internal(e.to_string()))?;
 
     Ok(TokenOutput {

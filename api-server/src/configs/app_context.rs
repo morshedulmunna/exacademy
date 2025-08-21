@@ -9,6 +9,9 @@ use crate::configs::db_config::DatabaseConfig;
 use crate::configs::redis_config::RedisConfig;
 use crate::configs::system_config::SystemConfig;
 use crate::log_info;
+use crate::pkg::security_services::{
+    Argon2PasswordHasher, Hs256JwtService, JwtService, PasswordHasher,
+};
 use crate::repositories::Repositories;
 
 use redis::Client as RedisClient;
@@ -23,6 +26,8 @@ pub struct AppContext {
     pub redis_client: Arc<RedisClient>,
     pub auth: AuthConfig,
     pub repos: Repositories,
+    pub password_hasher: Arc<dyn PasswordHasher>,
+    pub jwt_service: Arc<dyn JwtService>,
 }
 
 impl AppContext {
@@ -51,6 +56,12 @@ impl AppContext {
 
         let repos = Repositories::new(db_pool.clone());
 
+        // Build security services (concrete implementations) and box behind traits
+        let password_hasher: Arc<dyn PasswordHasher> = Arc::new(Argon2PasswordHasher);
+        let jwt_service: Arc<dyn JwtService> = Arc::new(Hs256JwtService {
+            secret: auth.jwt_secret.clone(),
+        });
+
         Ok(Self {
             system,
             db_pool: db_pool.clone(),
@@ -58,6 +69,8 @@ impl AppContext {
             redis_client,
             auth,
             repos,
+            password_hasher,
+            jwt_service,
         })
     }
 

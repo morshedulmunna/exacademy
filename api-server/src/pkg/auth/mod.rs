@@ -4,7 +4,6 @@ use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
 
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::AppError;
-use crate::pkg::security::verify_jwt;
 
 #[derive(Debug, Clone)]
 pub struct AuthUser {
@@ -37,7 +36,9 @@ where
             .strip_prefix("Bearer ")
             .ok_or_else(|| AppError::Unauthorized("Invalid Authorization scheme".into()))?;
 
-        let claims: crate::pkg::security::Claims = verify_jwt(token, &ctx.auth.jwt_secret)
+        let claims: crate::pkg::security::Claims = ctx
+            .jwt_service
+            .verify(token)
             .map_err(|_| AppError::Unauthorized("Invalid token".into()))?;
 
         Ok(AuthUser {

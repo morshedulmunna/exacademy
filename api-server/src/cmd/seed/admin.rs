@@ -3,7 +3,7 @@ use std::env;
 use sqlx::{Row, postgres::PgPoolOptions};
 
 use crate::configs::db_config::DatabaseConfig;
-use crate::pkg::security::hash_password;
+use crate::pkg::security_services::PasswordHasher;
 
 /// Seed an admin user into the `users` table.
 ///
@@ -26,7 +26,8 @@ pub async fn seed_admin() -> Result<(), Box<dyn std::error::Error>> {
     let admin_username = env::var("ADMIN_USERNAME").unwrap_or_else(|_| "admin".to_string());
     let admin_password = env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "admin123".to_string());
 
-    let password_hash = hash_password(&admin_password).map_err(|e| {
+    let hasher = crate::pkg::security_services::Argon2PasswordHasher;
+    let password_hash = hasher.hash(&admin_password).map_err(|e| {
         std::io::Error::new(std::io::ErrorKind::Other, format!("hash error: {}", e))
     })?;
 
