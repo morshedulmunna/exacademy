@@ -12,6 +12,12 @@ Response 200:
   "username": "alice",
   "email": "alice@example.com",
   "role": "user",
+  "first_name": null,
+  "last_name": null,
+  "full_name": null,
+  "avatar_url": null,
+  "is_active": true,
+  "is_blocked": false,
   "created_at": "2024-01-01T12:34:56.789Z"
 }
 ```

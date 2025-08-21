@@ -40,7 +40,13 @@ Response 200:
     "id": "<uuid>",
     "username": "alice",
     "email": "alice@example.com",
-    "role": "user"
+    "role": "user",
+    "first_name": null,
+    "last_name": null,
+    "full_name": null,
+    "avatar_url": null,
+    "is_active": true,
+    "is_blocked": false
   },
   "access_token": "<jwt>",
   "refresh_token": "<jwt>",

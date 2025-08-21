@@ -22,15 +22,7 @@ use utoipa::OpenApi;
     ),
     components(schemas(
         crate::pkg::response::ApiErrorResponse,
-        crate::interfaces::http::routes::users::UserProfile,
-        crate::interfaces::http::routes::auth::RegisterRequest,
-        crate::interfaces::http::routes::auth::RegisterResponse,
-        crate::interfaces::http::routes::auth::LoginRequest,
-        crate::interfaces::http::routes::auth::UserResponse,
-        crate::interfaces::http::routes::auth::LoginResponse,
-        crate::interfaces::http::routes::auth::TokenResponse,
-        crate::interfaces::http::routes::auth::RefreshRequest,
-        crate::interfaces::http::routes::auth::OkResponse,
+     
     ))
 )]
 pub struct ApiDoc;

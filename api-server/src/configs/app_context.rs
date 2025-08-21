@@ -9,6 +9,7 @@ use crate::configs::db_config::DatabaseConfig;
 use crate::configs::redis_config::RedisConfig;
 use crate::configs::system_config::SystemConfig;
 use crate::log_info;
+use crate::repositories::Repositories;
 
 use redis::Client as RedisClient;
 use tokio::sync::OnceCell;
@@ -21,6 +22,7 @@ pub struct AppContext {
     pub redis_config: RedisConfig,
     pub redis_client: Arc<RedisClient>,
     pub auth: AuthConfig,
+    pub repos: Repositories,
 }
 
 impl AppContext {
@@ -47,12 +49,15 @@ impl AppContext {
         }
         log_info!("Connected to Redis");
 
+        let repos = Repositories::new(db_pool.clone());
+
         Ok(Self {
             system,
-            db_pool,
+            db_pool: db_pool.clone(),
             redis_config: redis_cfg,
             redis_client,
             auth,
+            repos,
         })
     }
 
