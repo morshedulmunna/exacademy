@@ -67,9 +67,9 @@ export function PageLoader() {
         <TechLogosBackground />
         {/* Logo or Brand */}
         <div className="mb-12 animate-fade-in">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-pulse">Morshedul Islam Munna</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-pulse">Execute Academy</h1>
           <p className="text-sm text-center mt-3" style={{ color: "hsl(var(--muted-foreground))" }}>
-            Software Engineer & Full-Stack Developer
+            Learn Programming interactively
           </p>
         </div>
 

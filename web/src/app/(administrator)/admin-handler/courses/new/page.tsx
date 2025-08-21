@@ -61,11 +61,6 @@ export default function CreateCoursePage() {
     };
   }, [status, session]);
 
-  // Redirect if not authenticated or not admin
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
-
   // allow access in static build
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

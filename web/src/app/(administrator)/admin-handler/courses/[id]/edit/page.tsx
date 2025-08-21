@@ -163,9 +163,6 @@ export default function EditCoursePage() {
   };
 
   // Handle authentication and authorization after all hooks are called
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
 
   if (!session || session.user.role !== "ADMIN") {
     redirect("/dashboard");

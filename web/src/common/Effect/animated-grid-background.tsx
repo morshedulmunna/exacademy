@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useTheme } from "@/themes/ThemeProvider";
 
 interface LightWave {
   x: number;
@@ -25,7 +24,6 @@ interface AnimatedGridBackgroundProps {
 
 export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.15, waveFrequency = 3000, waveIntensity = 0.25, waveSpeed = 1.5, className = "" }: AnimatedGridBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,8 +64,10 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
     const drawGrid = (currentTime: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Theme-aware background color
-      const backgroundColor = theme === "dark" ? "#000000" : "#ffffff";
+      // Theme-aware background color using CSS variables or document class
+      const rootStyles = getComputedStyle(document.documentElement);
+      const backgroundVar = rootStyles.getPropertyValue("--background").trim();
+      const backgroundColor = backgroundVar ? `hsl(${backgroundVar})` : document.documentElement.classList.contains("dark") ? "#000000" : "#ffffff";
       ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -87,8 +87,9 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
       });
 
       // Theme-aware grid colors
-      const gridColor = theme === "dark" ? "rgba(50, 50, 50" : "rgba(200, 200, 200";
-      const pointColor = theme === "dark" ? "rgba(80, 80, 80" : "rgba(150, 150, 150";
+      const isDark = document.documentElement.classList.contains("dark");
+      const gridColor = isDark ? "rgba(50, 50, 50" : "rgba(200, 200, 200";
+      const pointColor = isDark ? "rgba(80, 80, 80" : "rgba(150, 150, 150";
 
       // Vertical lines
       for (let x = 0; x <= canvas.width; x += gridSize) {
@@ -189,7 +190,7 @@ export default function AnimatedGridBackground({ gridSize = 80, gridOpacity = 0.
     return () => {
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, [gridSize, gridOpacity, waveFrequency, waveIntensity, waveSpeed, theme]);
+  }, [gridSize, gridOpacity, waveFrequency, waveIntensity, waveSpeed]);
 
-  return <canvas ref={canvasRef} className={`fixed -z-10 inset-0 w-full h-full ${theme === "dark" ? "bg-black" : "bg-white"} ${className}`} aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={`fixed -z-10 inset-0 w-full h-full ${className}`} aria-hidden="true" />;
 }

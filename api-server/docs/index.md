@@ -16,7 +16,5 @@ See the rustdoc book for background: [What is rustdoc?](https://doc.rust-lang.or
 
 - [Auth](crate::api_docs::auth)
 - [Users](crate::api_docs::users)
-- [Categories](crate::api_docs::categories)
-- [Products](crate::api_docs::products)
 - [Health](crate::api_docs::health)
 - [Error Model](crate::api_docs::errors)
