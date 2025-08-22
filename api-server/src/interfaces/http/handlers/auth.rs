@@ -8,7 +8,7 @@ use crate::pkg::Response;
 use crate::pkg::error::AppResult;
 use crate::types::user_types::{
     LoginRequest, LoginResponse, OkResponse, RefreshRequest, RegisterRequest, RegisterResponse,
-    TokenResponse,
+    ResendOtpRequest, TokenResponse, VerifyOtpRequest,
 };
 
 /// Register a new user account
@@ -71,5 +71,39 @@ pub async fn refresh(
 )]
 pub async fn logout() -> AppResult<(StatusCode, Json<Response<OkResponse>>)> {
     let body = Response::with_data("Ok", OkResponse { ok: true }, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
+}
+
+/// Verify email with OTP code
+#[utoipa::path(
+    post,
+    path = "/api/auth/verify",
+    request_body = VerifyOtpRequest,
+    responses((status = 200, description = "Verified", body = OkResponse)),
+    tag = "Auth"
+)]
+pub async fn verify(
+    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+    ValidatedJson(input_data): ValidatedJson<VerifyOtpRequest>,
+) -> AppResult<(StatusCode, Json<Response<OkResponse>>)> {
+    auth_service::verify_otp(&ctx, ctx.repos.users.as_ref(), input_data).await?;
+    let body = Response::with_data("Verified", OkResponse { ok: true }, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
+}
+
+/// Resend OTP email
+#[utoipa::path(
+    post,
+    path = "/api/auth/resend-otp",
+    request_body = ResendOtpRequest,
+    responses((status = 200, description = "Sent", body = OkResponse)),
+    tag = "Auth"
+)]
+pub async fn resend_otp(
+    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+    ValidatedJson(input_data): ValidatedJson<ResendOtpRequest>,
+) -> AppResult<(StatusCode, Json<Response<OkResponse>>)> {
+    auth_service::resend_otp(&ctx, ctx.repos.users.as_ref(), input_data).await?;
+    let body = Response::with_data("Sent", OkResponse { ok: true }, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }

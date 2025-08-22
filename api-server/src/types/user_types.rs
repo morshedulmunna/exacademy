@@ -82,6 +82,24 @@ pub struct OkResponse {
 }
 
 // ========================
+// Email verification (OTP)
+// ========================
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct VerifyOtpRequest {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 6, max = 6))]
+    pub code: String,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct ResendOtpRequest {
+    #[validate(email)]
+    pub email: String,
+}
+
+// ========================
 // Users route types
 // ========================
 

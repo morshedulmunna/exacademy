@@ -16,7 +16,7 @@ function getAccessToken(): string | null {
   return window.localStorage.getItem("exacademy.access_token");
 }
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function ServerFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init?.headers as Record<string, string>),
@@ -55,4 +55,4 @@ export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
 }
 
 // ServerFetch: alias to apiFetch so callers can use a semantic name in server contexts
-export const ServerFetch = apiFetch;
+export default ServerFetch;

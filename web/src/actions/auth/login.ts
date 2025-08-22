@@ -1,4 +1,4 @@
-import { apiFetch } from "@/actions/http";
+import { ServerFetch } from "@/actions/http";
 
 export type LoginInput = { email: string; password: string };
 
@@ -27,7 +27,7 @@ export type LoginResponse = {
  * Login with email and password.
  */
 export async function login(input: LoginInput): Promise<LoginResponse> {
-  const res = await apiFetch<LoginResponse>("/api/auth/login", {
+  const res = await ServerFetch<LoginResponse>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify({ email: input.email, password: input.password }),
   });

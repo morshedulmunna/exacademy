@@ -1,12 +1,16 @@
 use crate::configs::app_context::AppContext;
+use crate::pkg::email::{EmailContent, EmailMessage};
 use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::security::{Claims, build_access_claims};
 
-use crate::repositories::users::{CreateUserRecord, UsersRepository};
+use crate::pkg::redis::RedisOps;
+use crate::repositories::users::{CreateUserRecord, UpdateUserRecord, UsersRepository};
 use crate::types::user_types::{
-    LoginRequest, LoginResponse, RefreshRequest, RegisterRequest, RegisterResponse, TokenResponse,
-    UserResponse,
+    LoginRequest, LoginResponse, RefreshRequest, RegisterRequest, RegisterResponse,
+    ResendOtpRequest, TokenResponse, UserResponse, VerifyOtpRequest,
 };
+use rand::RngCore;
+use std::time::Duration;
 
 /// Register a new user
 pub async fn register(
@@ -33,8 +37,15 @@ pub async fn register(
         })
         .await?;
 
-    // Note: first_name/last_name are accepted at HTTP level but not persisted on create path.
-    // They can be updated later via the user update endpoint.
+    // After registration, generate an email verification OTP and send it.
+    let user = repo
+        .find_by_id(id)
+        .await?
+        .ok_or_else(|| AppError::Internal("User not found after create".into()))?;
+    let code = generate_otp_code();
+    store_otp(ctx, &user.email, &code, Duration::from_secs(10 * 60)).await?;
+    send_otp_email(ctx, &user.email, &code).await?;
+
     Ok(RegisterResponse { id })
 }
 
@@ -126,4 +137,123 @@ pub async fn refresh(ctx: &AppContext, input: RefreshRequest) -> AppResult<Token
         token_type: "Bearer".into(),
         expires_in: ctx.auth.access_ttl_seconds,
     })
+}
+
+/// Verify a user's email by matching the OTP code and activating the account.
+pub async fn verify_otp(
+    ctx: &AppContext,
+    repo: &dyn UsersRepository,
+    input: VerifyOtpRequest,
+) -> AppResult<()> {
+    let user = match repo.find_by_email(&input.email).await? {
+        Some(u) => u,
+        None => return Err(AppError::NotFound("Account not found".into())),
+    };
+
+    // If already active, treat as success (idempotent)
+    if user.is_active {
+        return Ok(());
+    }
+
+    let key = otp_key(&input.email);
+    let stored: Option<String> = ctx
+        .redis
+        .get(&key)
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))?;
+
+    let Some(expected) = stored else {
+        return Err(AppError::Unauthorized("Invalid or expired code".into()));
+    };
+    if expected != input.code {
+        return Err(AppError::Unauthorized("Invalid or expired code".into()));
+    }
+
+    // Activate account
+    let updated = repo
+        .update_partial(
+            user.id,
+            UpdateUserRecord {
+                is_active: Some(true),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+    if updated.is_none() {
+        return Err(AppError::Internal("Failed to activate account".into()));
+    }
+
+    // Best-effort invalidate the OTP quickly by overwriting with short TTL
+    let _ = store_otp(ctx, &input.email, "used", Duration::from_secs(1)).await;
+
+    Ok(())
+}
+
+/// Resend a fresh OTP to the user's email if not yet activated.
+pub async fn resend_otp(
+    ctx: &AppContext,
+    repo: &dyn UsersRepository,
+    input: ResendOtpRequest,
+) -> AppResult<()> {
+    let user = match repo.find_by_email(&input.email).await? {
+        Some(u) => u,
+        None => return Err(AppError::NotFound("Account not found".into())),
+    };
+    if user.is_active {
+        return Err(AppError::Conflict("Account already verified".into()));
+    }
+
+    let code = generate_otp_code();
+    store_otp(ctx, &user.email, &code, Duration::from_secs(10 * 60)).await?;
+    send_otp_email(ctx, &user.email, &code).await?;
+    Ok(())
+}
+
+/// Generate a 6-digit numeric code using a cryptographically secure RNG.
+fn generate_otp_code() -> String {
+    let mut bytes = [0u8; 4];
+    rand::rngs::OsRng.fill_bytes(&mut bytes);
+    let val = u32::from_be_bytes(bytes) % 1_000_000;
+    format!("{:06}", val)
+}
+
+/// Build the Redis key for storing OTP by email.
+fn otp_key(email: &str) -> String {
+    format!("otp:verify:{}", email.to_lowercase())
+}
+
+/// Store the OTP into Redis with a TTL.
+async fn store_otp(ctx: &AppContext, email: &str, code: &str, ttl: Duration) -> AppResult<()> {
+    ctx.redis
+        .set(&otp_key(email), &code.to_string(), Some(ttl))
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))
+}
+
+/// Enqueue an OTP email via Kafka email producer.
+async fn send_otp_email(ctx: &AppContext, email: &str, code: &str) -> AppResult<()> {
+    let subject = Some("Verify your email".to_string());
+    let html = format!(
+        "<h2>Verify your email</h2><p>Your code is: <strong>{}</strong></p><p>This code expires in 10 minutes.</p>",
+        code
+    );
+    let text = format!(
+        "Verify your email. Your code is: {}. This code expires in 10 minutes.",
+        code
+    );
+    let msg = EmailMessage {
+        to: email.to_string(),
+        subject,
+        content: EmailContent::Raw {
+            html_body: html,
+            text_body: Some(text),
+        },
+        cc: None,
+        bcc: None,
+    };
+    ctx.email_producer
+        .send_email(&msg)
+        .await
+        .map_err(|e| AppError::ServiceUnavailable(format!("Failed to enqueue email: {}", e)))
 }

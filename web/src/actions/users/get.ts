@@ -2,7 +2,7 @@
  * Fetch a user's profile by ID from the API.
  * Returns the Users API "data" object (not the full envelope).
  */
-import { apiFetch } from "../http";
+import { ServerFetch } from "../http";
 
 export interface ApiEnvelope<T> {
   message: string;
@@ -27,8 +27,7 @@ export interface ApiUser {
   created_at: string; // ISO datetime
 }
 
-export async function getUserById(userId: string): Promise<ApiUser> {
-  if (!userId) throw new Error("userId is required");
-  const res = await apiFetch<ApiEnvelope<ApiUser>>(`/api/users/${userId}`);
+export async function getUserById(): Promise<ApiUser> {
+  const res = await ServerFetch<ApiEnvelope<ApiUser>>(`/api/users/`);
   return res.data;
 }

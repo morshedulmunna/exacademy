@@ -85,8 +85,9 @@ impl UsersRepository for PostgresUsersRepository {
                 country = COALESCE($22, country),
                 locale = COALESCE($23, locale),
                 timezone = COALESCE($24, timezone),
-                marketing_opt_in = COALESCE($25, marketing_opt_in)
-            WHERE id = $26
+                marketing_opt_in = COALESCE($25, marketing_opt_in),
+                is_active = COALESCE($26, is_active)
+            WHERE id = $27
             RETURNING id, username, email, password_hash, role, first_name, last_name, full_name, avatar_url, is_active, is_blocked, created_at
             "#,
         )
@@ -115,6 +116,7 @@ impl UsersRepository for PostgresUsersRepository {
         .bind(input.locale)
         .bind(input.timezone)
         .bind(input.marketing_opt_in)
+        .bind(input.is_active)
         .bind(id)
         .fetch_optional(&self.pool)
         .await

@@ -1,0 +1,41 @@
+<!--
+Example HTML template referenced by EmailContent::Template { template: "welcome_email", ... }
+Variables expected:
+  - firstName: string
+  - ctaUrl: string (absolute URL)
+Subject can be provided by producer (EmailMessage.subject) or resolved by the consumer.
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to Execute Academy</title>
+    <style>
+      .btn {
+        background: #0ea5e9;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .muted {
+        color: #6b7280;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome, {{firstName}} 🎉</h1>
+    <p>We're excited to have you at Execute Academy.</p>
+    <p>Get started by verifying your account:</p>
+    <p>
+      <a class="btn" href="{{ctaUrl}}" target="_blank" rel="noopener noreferrer">Verify account</a>
+    </p>
+    <p class="muted">
+      If the button doesn't work, copy and paste this URL into your browser:<br />
+      {{ctaUrl}}
+    </p>
+  </body>
+</html>

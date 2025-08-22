@@ -1,4 +1,4 @@
-import { apiFetch } from "@/actions/http";
+import { ServerFetch } from "@/actions/http";
 
 export type VerifyOtpInput = { email: string; code: string };
 export type SimpleOk = { ok: boolean };
@@ -8,7 +8,7 @@ export type SimpleOk = { ok: boolean };
  * Assumes POST /api/auth/verify accepts { email, code } and returns 200 on success.
  */
 export async function verifyOtp(input: VerifyOtpInput): Promise<SimpleOk> {
-  const res = await apiFetch<SimpleOk>("/api/auth/verify", {
+  const res = await ServerFetch<SimpleOk>("/api/auth/verify", {
     method: "POST",
     body: JSON.stringify({ email: input.email, code: input.code }),
   });
@@ -20,7 +20,7 @@ export async function verifyOtp(input: VerifyOtpInput): Promise<SimpleOk> {
  * Assumes POST /api/auth/resend-otp accepts { email } and returns 200 on success.
  */
 export async function resendOtp(email: string): Promise<SimpleOk> {
-  const res = await apiFetch<SimpleOk>("/api/auth/resend-otp", {
+  const res = await ServerFetch<SimpleOk>("/api/auth/resend-otp", {
     method: "POST",
     body: JSON.stringify({ email }),
   });

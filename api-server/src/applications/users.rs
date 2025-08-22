@@ -87,6 +87,7 @@ pub async fn update_user_by_id(
                 locale: input.locale,
                 timezone: input.timezone,
                 marketing_opt_in: input.marketing_opt_in,
+                is_active: None,
             },
         )
         .await?;

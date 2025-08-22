@@ -54,6 +54,7 @@ pub struct UpdateUserRecord {
     pub locale: Option<String>,
     pub timezone: Option<String>,
     pub marketing_opt_in: Option<bool>,
+    pub is_active: Option<bool>,
 }
 
 #[async_trait::async_trait]

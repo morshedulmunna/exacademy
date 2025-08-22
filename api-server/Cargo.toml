@@ -25,6 +25,7 @@ sqlx = { version = "0.7", default-features = false, features = [
 ] }
 dotenv = "0.15.0"
 rand_core = "0.9.3"
+rand = "0.8"
 argon2 = "0.5.3"
 anyhow = "1.0.99"
 jsonwebtoken = "9.3.1"
@@ -55,6 +56,12 @@ mime = "0.3"
 bytes = "1"
 tokio-util = { version = "0.7", features = ["io"] }
 futures = "0.3"
+
+# Kafka client (producer for email queue)
+rdkafka = { version = "0.36", default-features = false, features = [
+    "tokio",
+    "cmake-build",
+] }
 
 # Validation (derive-based, similar to Zod schemas)
 validator = { version = "0.18", features = ["derive"] }

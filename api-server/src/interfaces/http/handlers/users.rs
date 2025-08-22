@@ -10,9 +10,8 @@ use crate::{configs::app_context::AppContext, types::user_types::UpdateUserReque
 /// Get a user profile by id
 #[utoipa::path(
     get,
-    path = "/api/users/{id}",
+    path = "/api/users",
     security(("bearerAuth" = [])),
-    params(("id" = String, Path, description = "User id (UUID)")),
     responses(
         (status = 200, description = "User profile", body = UserProfile),
         (status = 404, description = "Not found", body = crate::pkg::response::ApiErrorResponse)
