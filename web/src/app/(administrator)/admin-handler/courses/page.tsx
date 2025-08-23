@@ -4,32 +4,14 @@ import Link from "next/link";
 import { Plus, Edit, Eye, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
 import Image from "next/image";
 import DeleteCourseButton from "@/components/course/DeleteCourseButton";
+import listCourses from "@/actions/courses/list";
 
 /**
  * Course Management Page
  * Displays all courses with management options
  */
 export default async function CourseManagementPage() {
-  const courses = [
-    {
-      id: "c1",
-      title: "Sample Course",
-      slug: "sample-course",
-      excerpt: "This is a sample course",
-      description: "Details...",
-      thumbnail: undefined,
-      duration: "5h",
-      lessons: 20,
-      featured: true,
-      price: 99,
-      originalPrice: 149,
-      viewCount: 123,
-      createdAt: new Date().toISOString(),
-      instructor: { name: "Instructor", email: "inst@example.com", avatar: undefined },
-      _count: { enrollments: 12 },
-      published: true,
-    },
-  ] as any[];
+  const courses = await listCourses();
 
   return (
     <div className="space-y-6">
@@ -78,7 +60,7 @@ export default async function CourseManagementPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Students</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{courses.reduce((total: number, course: any) => total + course._count.enrollments, 0)}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{courses.reduce((total: number, course: any) => total + (course.students || 0), 0)}</p>
             </div>
           </div>
         </div>
@@ -90,7 +72,7 @@ export default async function CourseManagementPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">${courses.reduce((total: number, course: any) => total + course.price * course._count.enrollments, 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">${courses.reduce((total: number, course: any) => total + course.price * (course.students || 0), 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -145,7 +127,7 @@ export default async function CourseManagementPage() {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">{course.title}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{course.excerpt || course.description.substring(0, 60)}...</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{course.excerpt || (course.description || "").substring(0, 60)}...</div>
                         <div className="flex items-center mt-1 space-x-2">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                             <Clock className="w-3 h-3 mr-1" />
@@ -165,21 +147,21 @@ export default async function CourseManagementPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-8 w-8">
-                        <Image src={course.instructor.avatar || "/placeholder-user.jpg"} alt={course.instructor.name} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+                        <Image src={"/placeholder-user.jpg"} alt={"Instructor"} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
                       </div>
                       <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{course.instructor.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{course.instructor.email}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">Instructor</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">—</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-white">${course.price}</div>
-                    {course.originalPrice && course.originalPrice > course.price && <div className="text-sm text-gray-500 dark:text-gray-400 line-through">${course.originalPrice}</div>}
+                    {course.original_price && course.original_price > course.price && <div className="text-sm text-gray-500 dark:text-gray-400 line-through">${course.original_price}</div>}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{course._count.enrollments}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">{course.viewCount} views</div>
+                    <div className="text-sm text-gray-900 dark:text-white">{course.students || 0}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{course.view_count} views</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -201,7 +183,7 @@ export default async function CourseManagementPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(course.createdAt).toLocaleDateString()}
+                      {new Date(course.created_at).toLocaleDateString()}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

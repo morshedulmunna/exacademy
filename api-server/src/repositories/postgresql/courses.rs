@@ -1,7 +1,9 @@
 use sqlx::Row;
 
 use crate::pkg::error::{AppError, AppResult};
-use crate::repositories::courses::{CourseRecord, CoursesRepository, CreateCourseRecord, UpdateCourseRecord};
+use crate::repositories::courses::{
+    CourseRecord, CoursesRepository, CreateCourseRecord, UpdateCourseRecord,
+};
 
 pub struct PostgresCoursesRepository {
     pub pool: sqlx::Pool<sqlx::Postgres>,
@@ -35,6 +37,21 @@ impl CoursesRepository for PostgresCoursesRepository {
         Ok(rec.get("id"))
     }
 
+    async fn list_all(&self) -> AppResult<Vec<CourseRecord>> {
+        let rows = sqlx::query(
+            r#"SELECT id, slug, title, description, excerpt, thumbnail,
+                       price, original_price, duration, lessons, students,
+                       published, featured, view_count, instructor_id,
+                       published_at, created_at, updated_at
+               FROM courses
+               ORDER BY created_at DESC"#,
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows.into_iter().map(map_course_row).collect())
+    }
+
     async fn find_by_id(&self, id: uuid::Uuid) -> AppResult<Option<CourseRecord>> {
         let row = sqlx::query(
             r#"SELECT id, slug, title, description, excerpt, thumbnail,
@@ -65,7 +82,11 @@ impl CoursesRepository for PostgresCoursesRepository {
         Ok(row.map(map_course_row))
     }
 
-    async fn update_partial(&self, id: uuid::Uuid, input: UpdateCourseRecord) -> AppResult<Option<CourseRecord>> {
+    async fn update_partial(
+        &self,
+        id: uuid::Uuid,
+        input: UpdateCourseRecord,
+    ) -> AppResult<Option<CourseRecord>> {
         let row = sqlx::query(
             r#"UPDATE courses SET
                     title = COALESCE($1, title),
@@ -136,5 +157,3 @@ fn map_course_row(row: sqlx::postgres::PgRow) -> CourseRecord {
         updated_at: row.try_get("updated_at").ok(),
     }
 }
-
-

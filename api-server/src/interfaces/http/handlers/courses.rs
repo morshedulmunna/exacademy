@@ -25,6 +25,20 @@ pub async fn create_course(
 
 #[utoipa::path(
     get,
+    path = "/api/courses",
+    responses((status = 200, description = "Courses", body = [Course])),
+    tag = "Courses"
+)]
+pub async fn list_courses(
+    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+) -> AppResult<(StatusCode, Json<Response<Vec<Course>>>)> {
+    let courses = service::list_courses(ctx.repos.courses.as_ref()).await?;
+    let body = Response::with_data("Courses", courses, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
+}
+
+#[utoipa::path(
+    get,
     path = "/api/courses/:id",
     responses((status = 200, description = "Course", body = Course)),
     tag = "Courses"

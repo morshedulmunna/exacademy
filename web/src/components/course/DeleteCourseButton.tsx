@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import deleteCourse from "@/actions/courses/delete";
 
 interface DeleteCourseButtonProps {
   courseId: string;
@@ -25,7 +26,7 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
     setError(null);
 
     try {
-      // Static UI: pretend delete succeeded
+      await deleteCourse(courseId);
 
       // Close confirmation dialog
       setShowConfirmation(false);

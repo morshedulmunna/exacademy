@@ -1,7 +1,7 @@
 // Runtime-aware API base URL selection
 // - On the server (SSR / Route handlers), talk to the Docker network service name
 // - In the browser, use same-origin and rely on Next.js rewrites to proxy to the API
-export const INTERNAL_API_BASE_URL = process.env.INTERNAL_API_BASE_URL || process.env.API_BASE_URL || "http://api:8080";
+export const INTERNAL_API_BASE_URL = process.env.INTERNAL_API_BASE_URL || process.env.API_BASE_URL || "http://localhost:9098";
 
 export function getApiUrl(path: string): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

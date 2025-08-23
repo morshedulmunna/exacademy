@@ -56,6 +56,7 @@ pub struct UpdateCourseRecord {
 #[async_trait::async_trait]
 pub trait CoursesRepository: Send + Sync {
     async fn create(&self, input: CreateCourseRecord) -> AppResult<uuid::Uuid>;
+    async fn list_all(&self) -> AppResult<Vec<CourseRecord>>;
     async fn find_by_id(&self, id: uuid::Uuid) -> AppResult<Option<CourseRecord>>;
     async fn find_by_slug(&self, slug: &str) -> AppResult<Option<CourseRecord>>;
     async fn update_partial(
@@ -65,5 +66,3 @@ pub trait CoursesRepository: Send + Sync {
     ) -> AppResult<Option<CourseRecord>>;
     async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()>;
 }
-
-

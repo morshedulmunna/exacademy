@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+import {} from "next/navigation";
 // Auth removed; keep UI only
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Upload, X, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Tag } from "@/lib/types";
@@ -16,8 +16,6 @@ import createCourse from "@/actions/courses/create";
  * Form for creating new courses with comprehensive fields
  */
 export default function CreateCoursePage() {
-  const session: any = { user: { role: "ADMIN" } };
-  const status: "authenticated" | "unauthenticated" | "loading" = "authenticated";
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -41,9 +39,8 @@ export default function CreateCoursePage() {
     tagIds: [] as string[],
   });
 
-  // Load tags for selection (declare before any early returns; gate inside effect)
+  // Load tags for selection on mount only to avoid re-render loops
   useEffect(() => {
-    if (status !== "authenticated" || !session || session.user.role !== "ADMIN") return;
     let mounted = true;
     const loadTags = async () => {
       try {
@@ -60,7 +57,7 @@ export default function CreateCoursePage() {
     return () => {
       mounted = false;
     };
-  }, [status, session]);
+  }, []);
 
   // allow access in static build
 

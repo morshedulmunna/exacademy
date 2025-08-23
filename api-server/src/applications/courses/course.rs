@@ -57,6 +57,11 @@ pub async fn get_course_by_id(repo: &dyn CoursesRepository, id: uuid::Uuid) -> A
     Ok(map_course(course))
 }
 
+pub async fn list_courses(repo: &dyn CoursesRepository) -> AppResult<Vec<Course>> {
+    let records = repo.list_all().await?;
+    Ok(records.into_iter().map(map_course).collect())
+}
+
 pub async fn get_course_by_slug(repo: &dyn CoursesRepository, slug: &str) -> AppResult<Course> {
     let course = repo
         .find_by_slug(slug)

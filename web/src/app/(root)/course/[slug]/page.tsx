@@ -11,33 +11,38 @@ import MoreCoursesByInstructor from "@/components/course-details/MoreCoursesByIn
 import StudentReviews from "@/components/course-details/StudentReviews";
 import React from "react";
 import { notFound } from "next/navigation";
+import getCourseBySlug from "@/actions/courses/getBySlug";
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
+type Props = { params: { slug: string } };
 
 async function getCourse(slug: string): Promise<any | null> {
-  // Static placeholder for UI-only build
-  return {
-    id: "1",
-    title: "Sample Course",
-    slug,
-    description: "Static description",
-    excerpt: "Static excerpt",
-    duration: "5h",
-    lessons: 20,
-    price: 99,
-    originalPrice: 149,
-    thumbnail: undefined,
-    reviews: [],
-    modules: [
-      { id: "m1", lessons: [{ id: "l1", videoUrl: "" }] },
-    ],
-  };
+  try {
+    const course = await getCourseBySlug(slug);
+    // Map backend field names to UI expectations
+    return {
+      id: course.id,
+      title: course.title,
+      slug: course.slug,
+      description: course.description,
+      excerpt: course.excerpt ?? undefined,
+      duration: course.duration,
+      lessons: course.lessons,
+      price: course.price,
+      originalPrice: course.original_price ?? undefined,
+      thumbnail: course.thumbnail ?? undefined,
+      students: course.students,
+      instructor: undefined,
+      outcomes: [],
+      modules: [],
+      reviews: [],
+    };
+  } catch (e) {
+    return null;
+  }
 }
 
 export default async function CourseDetailsPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug } = params;
   const course = await getCourse(slug);
   if (!course) return notFound();
 

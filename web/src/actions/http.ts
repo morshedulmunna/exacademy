@@ -3,7 +3,7 @@
  * - Attaches Authorization header when access token exists
  * - Parses JSON and normalizes API errors
  */
-import { getApiUrl } from "./config";
+import { getApiUrl, INTERNAL_API_BASE_URL } from "./config";
 
 export type ApiError = {
   code: string;
@@ -77,11 +77,35 @@ export async function ServerFetch<T>(path: string, init?: RequestInit): Promise<
     const token = getAccessToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await fetch(getApiUrl(path), { ...init, headers });
-    const contentType = res.headers.get("content-type") || "";
-    const isJson = contentType.includes("application/json");
-    const payload = isJson ? await res.json() : await res.text();
-    return { ok: res.ok, status: res.status, payload, isJson };
+    // If in browser, use Next.js rewrite via same-origin
+    if (typeof window !== "undefined") {
+      const res = await fetch(getApiUrl(path), { ...init, headers });
+      const contentType = res.headers.get("content-type") || "";
+      const isJson = contentType.includes("application/json");
+      const payload = isJson ? await res.json() : await res.text();
+      return { ok: res.ok, status: res.status, payload, isJson };
+    }
+
+    // SSR: try multiple base URLs to avoid hard failures when one host is unreachable
+    const normalize = (p: string) => (p.startsWith("/") ? p : `/${p}`);
+    const normalizedPath = normalize(path);
+    const candidates = [INTERNAL_API_BASE_URL, process.env.API_BASE_URL, "http://127.0.0.1:9098", "http://127.0.0.1:8080", "http://localhost:9098", "http://localhost:8080"].filter(Boolean) as string[];
+
+    let lastError: unknown = null;
+    for (const base of candidates) {
+      const url = `${base}${normalizedPath}`;
+      try {
+        const res = await fetch(url, { ...init, headers });
+        const contentType = res.headers.get("content-type") || "";
+        const isJson = contentType.includes("application/json");
+        const payload = isJson ? await res.json() : await res.text();
+        return { ok: res.ok, status: res.status, payload, isJson };
+      } catch (e) {
+        lastError = e;
+        continue;
+      }
+    }
+    throw lastError ?? new Error("All server fetch attempts failed");
   };
 
   // First attempt
