@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Eye, EyeOff, ChevronDown, ChevronRight, Upload, FileText, Video, Play, GripVertical } from "lucide-react";
 import CourseContentUpload from "@/components/ui/CourseContentUpload";
 import { FileUploadResult } from "@/hooks/useCourseContentUpload";
+import { listModules, createModule as apiCreateModule, updateModule as apiUpdateModule, deleteModule as apiDeleteModule, Module as ApiModule } from "@/actions/modules";
+import { listLessons, createLesson as apiCreateLesson, updateLesson as apiUpdateLesson, deleteLesson as apiDeleteLesson, Lesson as ApiLesson } from "@/actions/lessons";
 
 export interface Module {
   id: string;
@@ -61,10 +63,28 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
   const loadModules = async () => {
     try {
       setIsLoading(true);
-      // Static UI: start with an empty list
-      const data: Module[] = [];
-      setModules(data);
-      onModulesChange?.(data);
+      const apiModules = await listModules(courseId);
+      const mapped: Module[] = apiModules.sort((a, b) => a.position - b.position).map((m) => ({ id: m.id, title: m.title, description: m.description || "", order: m.position, lessons: [] }));
+      // Load lessons per module
+      for (const m of mapped) {
+        const apiLessons = await listLessons(m.id);
+        m.lessons = apiLessons
+          .sort((a, b) => a.position - b.position)
+          .map((l) => ({
+            id: l.id,
+            title: l.title,
+            description: l.description || "",
+            content: l.content || "",
+            videoUrl: l.video_url || "",
+            duration: l.duration,
+            order: l.position,
+            isFree: l.is_free,
+            published: l.published,
+            contents: [],
+          }));
+      }
+      setModules(mapped);
+      onModulesChange?.(mapped);
     } catch (error) {
       console.error("Error loading modules:", error);
     } finally {
@@ -130,7 +150,10 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
     // Update orders in database
     try {
-      // Static UI: no-op
+      // No dedicated reorder endpoint. Persist by updating positions one-by-one.
+      for (const m of updatedModules) {
+        await apiUpdateModule(m.id, { position: m.order });
+      }
     } catch (error) {
       console.error("Error updating module orders:", error);
     }
@@ -175,23 +198,20 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
     if (sourceLessonIndex === -1 || targetLessonIndex === -1) return;
 
+    // Only support reorder within same module for now
+    if (sourceModuleId !== targetModuleId) return;
+
     const newModules = [...modules];
     const sourceModuleIndex = newModules.findIndex((m) => m.id === sourceModuleId);
-    const targetModuleIndex = newModules.findIndex((m) => m.id === targetModuleId);
 
     // Remove lesson from source module
     const [movedLesson] = newModules[sourceModuleIndex].lessons.splice(sourceLessonIndex, 1);
 
-    // Add lesson to target module
-    newModules[targetModuleIndex].lessons.splice(targetLessonIndex, 0, movedLesson);
+    // Add lesson back in new position
+    newModules[sourceModuleIndex].lessons.splice(targetLessonIndex, 0, movedLesson);
 
-    // Update order for all lessons in both modules
+    // Update order for lessons in the module
     newModules[sourceModuleIndex].lessons = newModules[sourceModuleIndex].lessons.map((lesson, index) => ({
-      ...lesson,
-      order: index + 1,
-    }));
-
-    newModules[targetModuleIndex].lessons = newModules[targetModuleIndex].lessons.map((lesson, index) => ({
       ...lesson,
       order: index + 1,
     }));
@@ -201,7 +221,9 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
     // Update lesson in database
     try {
-      // Static UI: no-op
+      for (const l of newModules[sourceModuleIndex].lessons) {
+        await apiUpdateLesson(l.id, { position: l.order });
+      }
     } catch (error) {
       console.error("Error updating lesson order:", error);
     }
@@ -209,16 +231,12 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const createModule = async () => {
     try {
-      const newModule: Module = {
-        id: crypto.randomUUID(),
-        title: "New Module",
-        description: "",
-        order: modules.length + 1,
-        lessons: [],
-      };
-      setModules((prev) => [...prev, newModule]);
+      const id = await apiCreateModule({ course_id: courseId, title: "New Module", position: modules.length + 1 });
+      const newModule: Module = { id, title: "New Module", description: "", order: modules.length + 1, lessons: [] };
+      const next = [...modules, newModule];
+      setModules(next);
       setExpandedModules((prev) => new Set([...prev, newModule.id]));
-      onModulesChange?.([...modules, newModule]);
+      onModulesChange?.(next);
     } catch (error) {
       console.error("Error creating module:", error);
     }
@@ -226,8 +244,10 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const updateModule = async (moduleId: string, data: Partial<Module>) => {
     try {
-      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, ...data } : m)));
-      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, ...data } : m)));
+      await apiUpdateModule(moduleId, { title: data.title, description: data.description, position: data.order } as any);
+      const next = modules.map((m) => (m.id === moduleId ? { ...m, ...data } : m));
+      setModules(next);
+      onModulesChange?.(next);
       setEditingModule(null);
     } catch (error) {
       console.error("Error updating module:", error);
@@ -240,8 +260,10 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     }
 
     try {
-      setModules((prev) => prev.filter((m) => m.id !== moduleId));
-      onModulesChange?.(modules.filter((m) => m.id !== moduleId));
+      await apiDeleteModule(moduleId);
+      const next = modules.filter((m) => m.id !== moduleId);
+      setModules(next);
+      onModulesChange?.(next);
     } catch (error) {
       console.error("Error deleting module:", error);
     }
@@ -251,20 +273,11 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     try {
       const module = modules.find((m) => m.id === moduleId);
       const lessonOrder = module ? module.lessons.length + 1 : 1;
-      const newLesson: Lesson = {
-        id: crypto.randomUUID(),
-        title: "New Lesson",
-        description: "",
-        content: "",
-        videoUrl: "",
-        duration: "0m",
-        order: lessonOrder,
-        isFree: false,
-        published: false,
-        contents: [],
-      };
-      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m)));
-      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m)));
+      const id = await apiCreateLesson({ module_id: moduleId, title: "New Lesson", duration: "0m", position: lessonOrder, is_free: false, published: false });
+      const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", videoUrl: "", duration: "0m", order: lessonOrder, isFree: false, published: false, contents: [] };
+      const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m));
+      setModules(next);
+      onModulesChange?.(next);
       setEditingLesson(newLesson.id);
     } catch (error) {
       console.error("Error creating lesson:", error);
@@ -273,8 +286,19 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const updateLesson = async (moduleId: string, lessonId: string, data: Partial<Lesson>) => {
     try {
-      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m)));
-      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m)));
+      await apiUpdateLesson(lessonId, {
+        title: data.title,
+        description: data.description,
+        content: data.content,
+        video_url: data.videoUrl,
+        duration: data.duration,
+        position: data.order,
+        is_free: data.isFree,
+        published: data.published,
+      } as any);
+      const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m));
+      setModules(next);
+      onModulesChange?.(next);
       setEditingLesson(null);
     } catch (error) {
       console.error("Error updating lesson:", error);
@@ -287,8 +311,10 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     }
 
     try {
-      setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m)));
-      onModulesChange?.(modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m)));
+      await apiDeleteLesson(lessonId);
+      const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m));
+      setModules(next);
+      onModulesChange?.(next);
     } catch (error) {
       console.error("Error deleting lesson:", error);
     }

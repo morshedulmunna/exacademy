@@ -9,6 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Tag } from "@/lib/types";
 import RichTextEditor from "@/components/rich-text-editor";
+import createCourse from "@/actions/courses/create";
 
 /**
  * Course Creation Page
@@ -117,6 +118,22 @@ export default function CreateCoursePage() {
         setIsLoading(false);
         return;
       }
+
+      const payload = {
+        slug: formData.slug.trim(),
+        title: formData.title.trim(),
+        description: formData.description,
+        excerpt: formData.excerpt || undefined,
+        thumbnail: formData.thumbnail || undefined,
+        price: Number(formData.price || 0),
+        original_price: formData.originalPrice ? Number(formData.originalPrice) : undefined,
+        duration: formData.duration || "",
+        lessons: Number(formData.lessons || 0),
+        featured: !!formData.featured,
+        instructor_id: undefined,
+      };
+
+      await createCourse(payload);
       router.push(`/admin-handler/courses`);
     } catch (error) {
       console.error("Error creating course:", error);

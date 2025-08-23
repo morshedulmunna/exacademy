@@ -8,6 +8,9 @@ import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Loader2, BookOpen } from "luci
 import Link from "next/link";
 import Image from "next/image";
 import CourseBuilder from "@/components/course/CourseBuilder";
+import getCourseById from "@/actions/courses/getById";
+import updateCourse from "@/actions/courses/update";
+import deleteCourse from "@/actions/courses/delete";
 import BlockEditor from "@/components/ui/BlockEditor";
 
 /**
@@ -46,34 +49,22 @@ export default function EditCoursePage() {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const course = {
-          title: "Sample Course",
-          slug: "sample-course",
-          description: "",
-          excerpt: "",
-          price: 99,
-          originalPrice: 149,
-          duration: "5h",
-          lessons: 20,
-          thumbnail: "",
-          published: true,
-          featured: false,
-        } as any;
+        const course = await getCourseById(courseId);
         setFormData({
-          title: course.title || "",
-          slug: course.slug || "",
-          description: course.description || "",
-          excerpt: course.excerpt || "",
-          price: course.price?.toString() || "",
-          originalPrice: course.originalPrice?.toString() || "",
-          duration: course.duration || "",
-          lessons: course.lessons?.toString() || "",
-          thumbnail: course.thumbnail || "",
-          published: course.published || false,
-          featured: course.featured || false,
+          title: course.title ?? "",
+          slug: course.slug ?? "",
+          description: course.description ?? "",
+          excerpt: (course.excerpt as any) ?? "",
+          price: String(course.price ?? ""),
+          originalPrice: String((course as any).originalPrice ?? (course as any).original_price ?? ""),
+          duration: course.duration ?? "",
+          lessons: String(course.lessons ?? ""),
+          thumbnail: (course.thumbnail as any) ?? "",
+          published: !!course.published,
+          featured: !!course.featured,
         });
-        if (course.thumbnail) {
-          setThumbnailPreview(course.thumbnail);
+        if (course.thumbnail as any) {
+          setThumbnailPreview(course.thumbnail as any);
         }
       } catch (error) {
         setError("Failed to load course");
@@ -135,6 +126,18 @@ export default function EditCoursePage() {
         setIsLoading(false);
         return;
       }
+      await updateCourse(courseId, {
+        title: formData.title.trim(),
+        description: formData.description,
+        excerpt: formData.excerpt || undefined,
+        thumbnail: formData.thumbnail || undefined,
+        price: formData.price ? Number(formData.price) : undefined,
+        original_price: formData.originalPrice ? Number(formData.originalPrice) : undefined,
+        duration: formData.duration || undefined,
+        lessons: formData.lessons ? Number(formData.lessons) : undefined,
+        published: formData.published,
+        featured: formData.featured,
+      } as any);
       router.push("/admin-handler/courses");
     } catch (error) {
       console.error("Error updating course:", error);
@@ -153,6 +156,7 @@ export default function EditCoursePage() {
     setError(null);
 
     try {
+      await deleteCourse(courseId);
       router.push("/admin-handler/courses");
     } catch (error) {
       console.error("Error deleting course:", error);

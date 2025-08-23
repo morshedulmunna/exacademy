@@ -5,4 +5,7 @@
 //! these services for core behavior.
 
 pub mod auth;
+pub mod courses;
+pub mod modules;
+pub mod lessons;
 pub mod users;

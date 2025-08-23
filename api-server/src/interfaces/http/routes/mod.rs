@@ -1,5 +1,8 @@
 pub mod auth;
 pub mod users;
+pub mod courses;
+pub mod modules;
+pub mod lessons;
 pub use crate::interfaces::http::handlers::root::handler;
 
 use crate::interfaces::http::handlers::health;
@@ -12,4 +15,7 @@ pub fn router() -> Router {
         .route("/api/health", get(health::handler))
         .merge(auth::router())
         .merge(users::router())
+        .merge(courses::router())
+        .merge(modules::router())
+        .merge(lessons::router())
 }

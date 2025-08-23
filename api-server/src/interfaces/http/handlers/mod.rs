@@ -3,3 +3,6 @@ pub mod health;
 pub mod not_found;
 pub mod root;
 pub mod users;
+pub mod courses;
+pub mod modules;
+pub mod lessons;
