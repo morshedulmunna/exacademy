@@ -1,0 +1,27 @@
+use crate::pkg::error::AppResult;
+use crate::repositories::courses::{CoursesRepository, CreateCourseRecord};
+use crate::types::course_types::CreateCourseRequest;
+
+/// Create a new course and return its id.
+pub async fn create_course(
+    repo: &dyn CoursesRepository,
+    instructor_id: uuid::Uuid,
+    input: CreateCourseRequest,
+) -> AppResult<uuid::Uuid> {
+    let id = repo
+        .create(CreateCourseRecord {
+            slug: input.slug,
+            title: input.title,
+            description: input.description,
+            excerpt: input.excerpt,
+            thumbnail: input.thumbnail,
+            price: input.price,
+            original_price: input.original_price,
+            duration: input.duration,
+            lessons: input.lessons,
+            featured: input.featured,
+            instructor_id: Some(instructor_id),
+        })
+        .await?;
+    Ok(id)
+}

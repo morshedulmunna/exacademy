@@ -52,6 +52,23 @@ impl CoursesRepository for PostgresCoursesRepository {
         Ok(rows.into_iter().map(map_course_row).collect())
     }
 
+    async fn list_by_instructor(&self, instructor_id: uuid::Uuid) -> AppResult<Vec<CourseRecord>> {
+        let rows = sqlx::query(
+            r#"SELECT id, slug, title, description, excerpt, thumbnail,
+                       price, original_price, duration, lessons, students,
+                       published, featured, view_count, instructor_id,
+                       published_at, created_at, updated_at
+               FROM courses
+               WHERE instructor_id = $1
+               ORDER BY created_at DESC"#,
+        )
+        .bind(instructor_id)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(AppError::from)?;
+        Ok(rows.into_iter().map(map_course_row).collect())
+    }
+
     async fn list_paginated(&self, offset: i64, limit: i64) -> AppResult<(Vec<CourseRecord>, i64)> {
         // fetch items
         let rows = sqlx::query(

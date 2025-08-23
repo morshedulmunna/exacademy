@@ -1,5 +1,45 @@
-//! Course application services - split by domain (course, modules, lessons)
+//! Course application services - split by function files
 
-pub mod course;
+pub mod create;
+pub mod delete_by_id;
+pub mod get_by_id;
+pub mod get_by_slug;
+pub mod list;
+pub mod list_paginated;
+pub mod update_by_id;
 
-pub use course::*;
+pub use create::create_course;
+pub use delete_by_id::delete_course_by_id;
+pub use get_by_id::get_course_by_id;
+pub use get_by_slug::get_course_by_slug;
+pub use list::list_courses;
+pub use list_paginated::list_courses_paginated;
+pub use update_by_id::update_course_by_id;
+
+use crate::repositories::courses::CourseRecord;
+use crate::types::course_types::Course;
+
+impl From<CourseRecord> for Course {
+    fn from(record: CourseRecord) -> Self {
+        Course {
+            id: record.id,
+            slug: record.slug,
+            title: record.title,
+            description: record.description,
+            excerpt: record.excerpt,
+            thumbnail: record.thumbnail,
+            price: record.price,
+            original_price: record.original_price,
+            duration: record.duration,
+            lessons: record.lessons,
+            students: record.students,
+            published: record.published,
+            featured: record.featured,
+            view_count: record.view_count,
+            instructor_id: record.instructor_id,
+            published_at: record.published_at,
+            created_at: record.created_at,
+            updated_at: record.updated_at,
+        }
+    }
+}

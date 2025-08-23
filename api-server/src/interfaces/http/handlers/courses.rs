@@ -37,9 +37,10 @@ pub async fn create_course(
     tag = "Courses"
 )]
 pub async fn list_courses(
+    auth_user: AuthUser,
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
 ) -> AppResult<(StatusCode, Json<Response<Vec<Course>>>)> {
-    let courses = service::list_courses(ctx.repos.courses.as_ref()).await?;
+    let courses = service::list_courses(ctx.repos.courses.as_ref(), auth_user.user_id).await?;
     let body = Response::with_data("Courses", courses, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
@@ -129,3 +130,18 @@ pub async fn delete_course(
 }
 
 // modules and lessons are moved to their own handlers
+
+#[utoipa::path(
+    get,
+    path = "/api/instructors/:id/courses",
+    responses((status = 200, description = "Courses by instructor", body = [Course])),
+    tag = "Courses"
+)]
+pub async fn list_courses_by_instructor(
+    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+    Path(id): Path<uuid::Uuid>,
+) -> AppResult<(StatusCode, Json<Response<Vec<Course>>>)> {
+    let courses = service::list_courses(ctx.repos.courses.as_ref(), id).await?;
+    let body = Response::with_data("Courses", courses, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
+}

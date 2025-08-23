@@ -60,6 +60,81 @@ curl -X POST \
   }'
 ```
 
+## List My Courses (Instructor)
+
+- GET `/api/courses`
+
+Notes:
+
+- Requires authentication. Returns only the courses owned by the authenticated instructor (`Authorization: Bearer <token>`).
+
+Response 200 (data truncated):
+
+```json
+{
+  "message": "Courses",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": [
+    {
+      "id": "<uuid>",
+      "slug": "rust-for-beginners",
+      "title": "Rust for Beginners",
+      "description": "...",
+      "price": 99.0,
+      "duration": "5h",
+      "lessons": 20,
+      "instructor_id": "<uuid>",
+      "created_at": "..."
+    }
+  ]
+}
+```
+
+Example:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  http://127.0.0.1:8080/api/courses
+```
+
+## List Courses by Instructor ID (Public)
+
+- GET `/api/instructors/:id/courses`
+
+Notes:
+
+- Public endpoint. Returns courses for the given instructor UUID in the path.
+
+Response 200 (data truncated):
+
+```json
+{
+  "message": "Courses",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": [
+    {
+      "id": "<uuid>",
+      "slug": "rust-for-beginners",
+      "title": "Rust for Beginners",
+      "description": "...",
+      "price": 99.0,
+      "duration": "5h",
+      "lessons": 20,
+      "instructor_id": "<uuid>",
+      "created_at": "..."
+    }
+  ]
+}
+```
+
+Example:
+
+```bash
+curl http://127.0.0.1:8080/api/instructors/<instructor_uuid>/courses
+```
+
 ## List Courses (Paginated)
 
 - GET `/api/courses/paginated`
