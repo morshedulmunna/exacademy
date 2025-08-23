@@ -6,15 +6,15 @@ use sqlx::{Pool, Postgres};
 
 use crate::configs::auth_config::AuthConfig;
 use crate::configs::db_config::DatabaseConfig;
-use crate::configs::kafka_config::KafkaConfig;
+// Kafka is not used
 use crate::configs::redis_config::RedisConfig;
 use crate::configs::system_config::SystemConfig;
+// Email is sent directly where needed; no producer required
 use crate::pkg::security_services::{
     Argon2PasswordHasher, Hs256JwtService, JwtService, PasswordHasher,
 };
 use crate::repositories::Repositories;
 
-use crate::pkg::email::{EmailQueueProducer, EmailSender};
 use crate::pkg::redis::RedisManager;
 use crate::pkg::redis::RedisOps;
 use tokio::sync::OnceCell;
@@ -30,8 +30,7 @@ pub struct AppContext {
     pub repos: Repositories,
     pub password_hasher: Arc<dyn PasswordHasher>,
     pub jwt_service: Arc<dyn JwtService>,
-    pub kafka: KafkaConfig,
-    pub email_producer: Arc<dyn EmailSender>,
+    // No email producer; replace with real implementation when needed
 }
 
 impl AppContext {
@@ -42,7 +41,7 @@ impl AppContext {
         let database = DatabaseConfig::load_from_env()?;
         let redis_cfg = RedisConfig::load_from_env()?;
         let auth = AuthConfig::load_from_env()?;
-        let kafka = KafkaConfig::load_from_env()?;
+        // No Kafka configuration required
 
         let db_pool = PgPoolOptions::new()
             .max_connections(10)
@@ -63,7 +62,7 @@ impl AppContext {
             secret: auth.jwt_secret.clone(),
         });
 
-        let email_producer: Arc<dyn EmailSender> = Arc::new(EmailQueueProducer::from_config(&kafka)?);
+        // No email producer initialization
 
         Ok(Self {
             system,
@@ -74,8 +73,6 @@ impl AppContext {
             repos,
             password_hasher,
             jwt_service,
-            kafka,
-            email_producer,
         })
     }
 

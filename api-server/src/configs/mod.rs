@@ -18,6 +18,8 @@ pub mod app_context;
 #[path = "auth.config.rs"]
 pub mod auth_config;
 
-// Kafka config lives in a file with a dot in the name
-#[path = "kafka.config.rs"]
-pub mod kafka_config;
+// Kafka config is not used
+
+// Email config lives in a file with a dot in the name
+#[path = "email.config.rs"]
+pub mod email_config;

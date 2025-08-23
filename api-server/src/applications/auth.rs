@@ -1,5 +1,4 @@
 use crate::configs::app_context::AppContext;
-use crate::pkg::email::{EmailContent, EmailMessage};
 use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::security::{Claims, build_access_claims};
 
@@ -231,29 +230,12 @@ async fn store_otp(ctx: &AppContext, email: &str, code: &str, ttl: Duration) -> 
         .map_err(|e| AppError::Internal(e.to_string()))
 }
 
-/// Enqueue an OTP email via Kafka email producer.
-async fn send_otp_email(ctx: &AppContext, email: &str, code: &str) -> AppResult<()> {
-    let subject = Some("Verify your email".to_string());
-    let html = format!(
-        "<h2>Verify your email</h2><p>Your code is: <strong>{}</strong></p><p>This code expires in 10 minutes.</p>",
-        code
-    );
-    let text = format!(
-        "Verify your email. Your code is: {}. This code expires in 10 minutes.",
-        code
-    );
-    let msg = EmailMessage {
-        to: email.to_string(),
-        subject,
-        content: EmailContent::Raw {
-            html_body: html,
-            text_body: Some(text),
-        },
-        cc: None,
-        bcc: None,
-    };
-    ctx.email_producer
-        .send_email(&msg)
-        .await
-        .map_err(|e| AppError::ServiceUnavailable(format!("Failed to enqueue email: {}", e)))
+/// Send OTP email.
+///
+/// Kafka is not used in this application. For now, we log the OTP so
+/// developers can verify flows without an external mail provider.
+/// Replace this with a real SMTP/ESP integration when available.
+async fn send_otp_email(_ctx: &AppContext, email: &str, code: &str) -> AppResult<()> {
+    println!("OTP for {}: {} (expires in 10 minutes)", email, code);
+    Ok(())
 }

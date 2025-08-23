@@ -57,11 +57,7 @@ bytes = "1"
 tokio-util = { version = "0.7", features = ["io"] }
 futures = "0.3"
 
-# Kafka client (producer for email queue)
-rdkafka = { version = "0.36", default-features = false, features = [
-    "tokio",
-    "cmake-build",
-] }
+# Kafka removed; no messaging dependency
 
 # Validation (derive-based, similar to Zod schemas)
 validator = { version = "0.18", features = ["derive"] }
