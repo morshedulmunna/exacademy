@@ -25,7 +25,14 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password });
       window.localStorage.setItem("exacademy.access_token", res.data.access_token);
+      try {
+        // Mirror access token into cookie so SSR requests can attach Authorization
+        document.cookie = `exacademy.access_token=${encodeURIComponent(res.data.access_token)}; Path=/; Max-Age=${Math.max(60, Number(res.data.expires_in || 900))}; SameSite=Lax`;
+      } catch {}
       window.localStorage.setItem("exacademy.refresh_token", res.data.refresh_token);
+      try {
+        document.cookie = `exacademy.refresh_token=${encodeURIComponent(res.data.refresh_token)}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+      } catch {}
       // Persist minimal user info for navbar rendering
       window.localStorage.setItem(
         "exacademy.user",

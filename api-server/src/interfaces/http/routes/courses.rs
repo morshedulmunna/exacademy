@@ -18,6 +18,10 @@ pub fn router() -> Router {
             "/api/instructors/:id/courses",
             get(h::list_courses_by_instructor),
         )
+        .route(
+            "/api/instructors/:id/courses/paginated",
+            get(h::list_courses_by_instructor_paginated),
+        )
         // Public fetch by slug
         .route("/api/course/:slug", get(h::get_course_by_slug))
 }

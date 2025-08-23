@@ -13,6 +13,7 @@ pub use delete_by_id::delete_course_by_id;
 pub use get_by_id::get_course_by_id;
 pub use get_by_slug::get_course_by_slug;
 pub use list::list_courses;
+pub use list::list_courses_paginated_by_instructor;
 pub use list_paginated::list_courses_paginated;
 pub use update_by_id::update_course_by_id;
 

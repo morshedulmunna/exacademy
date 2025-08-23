@@ -32,6 +32,11 @@ function getRefreshToken(): string | null {
 function setAccessToken(token: string) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem("exacademy.access_token", token);
+  // Mirror into cookie for SSR to pick up Authorization header automatically
+  // Use a short default max-age; will be refreshed by tryRefreshToken when needed
+  try {
+    document.cookie = `exacademy.access_token=${encodeURIComponent(token)}; Path=/; Max-Age=900; SameSite=Lax`;
+  } catch {}
 }
 
 function clearAuthStorage() {
@@ -39,6 +44,11 @@ function clearAuthStorage() {
   window.localStorage.removeItem("exacademy.access_token");
   window.localStorage.removeItem("exacademy.refresh_token");
   window.localStorage.removeItem("exacademy.user");
+  try {
+    // Expire cookies immediately
+    document.cookie = "exacademy.access_token=; Path=/; Max-Age=0; SameSite=Lax";
+    document.cookie = "exacademy.refresh_token=; Path=/; Max-Age=0; SameSite=Lax";
+  } catch {}
 }
 
 async function tryRefreshToken(): Promise<boolean> {
@@ -63,6 +73,10 @@ async function tryRefreshToken(): Promise<boolean> {
   const data = (payload as ApiEnvelope<{ access_token: string; refresh_token: string; token_type: string; expires_in: number }>).data;
   if (!data?.access_token) return false;
   setAccessToken(data.access_token);
+  try {
+    // Keep cookie in sync for SSR
+    document.cookie = `exacademy.access_token=${encodeURIComponent(data.access_token)}; Path=/; Max-Age=${Math.max(60, Number(data.expires_in || 900))}; SameSite=Lax`;
+  } catch {}
   // Backend echoes the same refresh_token per docs; keep existing
   return true;
 }
@@ -85,6 +99,16 @@ export async function ServerFetch<T>(path: string, init?: RequestInit): Promise<
       const payload = isJson ? await res.json() : await res.text();
       return { ok: res.ok, status: res.status, payload, isJson };
     }
+
+    // SSR: attach Authorization from cookie if present, then try multiple base URLs
+    try {
+      const { cookies } = await import("next/headers");
+      const store = await cookies();
+      const cookieToken = store.get("exacademy.access_token")?.value;
+      if (cookieToken && !headers["Authorization"]) {
+        headers["Authorization"] = `Bearer ${cookieToken}`;
+      }
+    } catch {}
 
     // SSR: try multiple base URLs to avoid hard failures when one host is unreachable
     const normalize = (p: string) => (p.startsWith("/") ? p : `/${p}`);
@@ -125,20 +149,6 @@ export async function ServerFetch<T>(path: string, init?: RequestInit): Promise<
     throw error;
   }
 
-  return payload as T;
-}
-
-export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
-  const headers: Record<string, string> = {};
-  const token = getAccessToken();
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const res = await fetch(getApiUrl(path), { method: "POST", body: form, headers });
-  const payload = await res.json();
-  if (!res.ok) {
-    const error: ApiError = { code: payload?.code ?? "INTERNAL_ERROR", message: payload?.message ?? "Upload failed", details: payload?.details };
-    throw error;
-  }
   return payload as T;
 }
 

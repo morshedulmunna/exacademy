@@ -42,6 +42,10 @@ export default function UserMenu() {
       window.localStorage.removeItem("exacademy.access_token");
       window.localStorage.removeItem("exacademy.refresh_token");
       window.localStorage.removeItem("exacademy.user");
+      try {
+        document.cookie = "exacademy.access_token=; Path=/; Max-Age=0; SameSite=Lax";
+        document.cookie = "exacademy.refresh_token=; Path=/; Max-Age=0; SameSite=Lax";
+      } catch {}
     }
     setShowUserMenu(false);
     // Soft refresh to update UI state

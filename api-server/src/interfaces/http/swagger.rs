@@ -15,15 +15,42 @@ use utoipa::{Modify, OpenApi};
         (url = "http://localhost:9098", description = "Local dev")
     ),
     paths(
+        // Auth
         crate::interfaces::http::handlers::auth::register,
         crate::interfaces::http::handlers::auth::login,
         crate::interfaces::http::handlers::auth::refresh,
         crate::interfaces::http::handlers::auth::logout,
+        crate::interfaces::http::handlers::auth::verify,
+        crate::interfaces::http::handlers::auth::resend_otp,
+        // Users
         crate::interfaces::http::handlers::users::get_user,
         crate::interfaces::http::handlers::users::update_user,
+        // Courses
+        crate::interfaces::http::handlers::courses::create_course,
+        crate::interfaces::http::handlers::courses::list_courses,
+        crate::interfaces::http::handlers::courses::list_courses_paginated,
+        crate::interfaces::http::handlers::courses::get_course_by_id,
+        crate::interfaces::http::handlers::courses::get_course_by_slug,
+        crate::interfaces::http::handlers::courses::update_course,
+        crate::interfaces::http::handlers::courses::delete_course,
+        crate::interfaces::http::handlers::courses::list_courses_by_instructor,
+        crate::interfaces::http::handlers::courses::list_courses_by_instructor_paginated,
+        // Modules
+        crate::interfaces::http::handlers::modules::list_modules,
+        crate::interfaces::http::handlers::modules::create_module,
+        crate::interfaces::http::handlers::modules::update_module,
+        crate::interfaces::http::handlers::modules::delete_module,
+        // Lessons
+        crate::interfaces::http::handlers::lessons::list_lessons,
+        crate::interfaces::http::handlers::lessons::create_lesson,
+        crate::interfaces::http::handlers::lessons::update_lesson,
+        crate::interfaces::http::handlers::lessons::delete_lesson,
+        crate::interfaces::http::handlers::lessons::upload_lesson_video,
     ),
     components(schemas(
+            // Shared
             crate::pkg::response::ApiErrorResponse,
+            // Users
             crate::types::user_types::RegisterRequest,
             crate::types::user_types::LoginRequest,
             crate::types::user_types::RefreshRequest,
@@ -33,7 +60,19 @@ use utoipa::{Modify, OpenApi};
             crate::types::user_types::OkResponse,
             crate::types::user_types::UserResponse,
             crate::types::user_types::UserProfile,
-            crate::types::user_types::UpdateUserRequest
+            crate::types::user_types::UpdateUserRequest,
+            // Courses & content
+            crate::types::course_types::Course,
+            crate::types::course_types::PaginationQuery,
+            crate::types::course_types::PageMeta,
+            crate::types::course_types::CreateCourseRequest,
+            crate::types::course_types::UpdateCourseRequest,
+            crate::types::course_types::CourseModule,
+            crate::types::course_types::CreateModuleRequest,
+            crate::types::course_types::UpdateModuleRequest,
+            crate::types::course_types::Lesson,
+            crate::types::course_types::CreateLessonRequest,
+            crate::types::course_types::UpdateLessonRequest
     )),
     modifiers(&ApiSecurity)
 )]

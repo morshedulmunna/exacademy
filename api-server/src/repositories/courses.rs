@@ -59,6 +59,13 @@ pub trait CoursesRepository: Send + Sync {
     async fn list_all(&self) -> AppResult<Vec<CourseRecord>>;
     /// List all courses created by a specific instructor
     async fn list_by_instructor(&self, instructor_id: uuid::Uuid) -> AppResult<Vec<CourseRecord>>;
+    /// List courses created by a specific instructor with pagination; returns (items, total)
+    async fn list_by_instructor_paginated(
+        &self,
+        instructor_id: uuid::Uuid,
+        offset: i64,
+        limit: i64,
+    ) -> AppResult<(Vec<CourseRecord>, i64)>;
     /// Return a page of courses and the total count for pagination
     async fn list_paginated(&self, offset: i64, limit: i64) -> AppResult<(Vec<CourseRecord>, i64)>;
     async fn find_by_id(&self, id: uuid::Uuid) -> AppResult<Option<CourseRecord>>;
