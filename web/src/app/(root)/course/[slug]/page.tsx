@@ -13,6 +13,9 @@ import React from "react";
 import { notFound } from "next/navigation";
 import getCourseBySlug from "@/actions/courses/getBySlug";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type Props = { params: { slug: string } };
 
 async function getCourse(slug: string): Promise<any | null> {

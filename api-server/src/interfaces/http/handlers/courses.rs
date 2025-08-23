@@ -1,11 +1,17 @@
-use axum::{Extension, Json, extract::Path, http::StatusCode};
+use axum::{
+    Extension, Json,
+    extract::{Path, Query},
+    http::StatusCode,
+};
 
 use crate::applications::courses as service;
 use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
 use crate::pkg::validators::ValidatedJson;
-use crate::types::course_types::{Course, CreateCourseRequest, UpdateCourseRequest};
+use crate::types::course_types::{
+    Course, CreateCourseRequest, Page, PaginationQuery, UpdateCourseRequest,
+};
 
 #[utoipa::path(
     post,
@@ -34,6 +40,24 @@ pub async fn list_courses(
 ) -> AppResult<(StatusCode, Json<Response<Vec<Course>>>)> {
     let courses = service::list_courses(ctx.repos.courses.as_ref()).await?;
     let body = Response::with_data("Courses", courses, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/courses/paginated",
+    params(("page" = Option<i64>, Query, description = "1-based page"), ("per_page" = Option<i64>, Query, description = "items per page")),
+    responses((status = 200, description = "Paginated courses", body = Page<Course>)),
+    tag = "Courses"
+)]
+pub async fn list_courses_paginated(
+    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+    Query(q): Query<PaginationQuery>,
+) -> AppResult<(StatusCode, Json<Response<Page<Course>>>)> {
+    let page = q.page.unwrap_or(1);
+    let per_page = q.per_page.unwrap_or(10);
+    let data = service::list_courses_paginated(ctx.repos.courses.as_ref(), page, per_page).await?;
+    let body = Response::with_data("Courses", data, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
 

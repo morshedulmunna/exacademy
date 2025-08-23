@@ -1,11 +1,15 @@
 import React from "react";
+import Link from "next/link";
 import CourseCard from "./CourseCard";
-import listCourses from "@/actions/courses/list";
+import listCoursesPaginated from "@/actions/courses/listPaginated";
 
-type Props = {};
+type Props = {
+  page?: number;
+  perPage?: number;
+};
 
-export default async function Course({}: Props) {
-  const courses = await listCourses();
+export default async function Course({ page = 1, perPage = 6 }: Props) {
+  const { items: courses, meta } = await listCoursesPaginated(page, perPage);
 
   return (
     <>
@@ -32,6 +36,28 @@ export default async function Course({}: Props) {
               />
             ))}
           </div>
+          {/* Pagination */}
+          {meta && meta.total_pages > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-4">
+              {meta.page > 1 ? (
+                <Link aria-label="Previous page" className="px-4 py-2 rounded-md border border-border hover:bg-accent text-foreground" href={`/?page=${meta.page - 1}&per_page=${meta.per_page}`}>
+                  ← Previous
+                </Link>
+              ) : (
+                <span className="px-4 py-2 rounded-md border border-border text-muted-foreground cursor-not-allowed">← Previous</span>
+              )}
+              <span className="text-sm text-muted-foreground">
+                Page {meta.page} of {meta.total_pages}
+              </span>
+              {meta.page < meta.total_pages ? (
+                <Link aria-label="Next page" className="px-4 py-2 rounded-md border border-border hover:bg-accent text-foreground" href={`/?page=${meta.page + 1}&per_page=${meta.per_page}`}>
+                  Next →
+                </Link>
+              ) : (
+                <span className="px-4 py-2 rounded-md border border-border text-muted-foreground cursor-not-allowed">Next →</span>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </>

@@ -26,6 +26,38 @@ pub struct Course {
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
+/// Pagination query for list endpoints
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct PaginationQuery {
+    /// 1-based page index
+    #[serde(default)]
+    pub page: Option<i64>,
+    /// Items per page
+    #[serde(default, rename = "per_page")]
+    pub per_page: Option<i64>,
+}
+
+/// Pagination metadata
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PageMeta {
+    pub page: i64,
+    #[serde(rename = "per_page")]
+    pub per_page: i64,
+    pub total: i64,
+    #[serde(rename = "total_pages")]
+    pub total_pages: i64,
+}
+
+/// Paginated list response payload
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct Page<T>
+where
+    T: Serialize,
+{
+    pub items: Vec<T>,
+    pub meta: PageMeta,
+}
+
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CourseModule {
     pub id: Uuid,
