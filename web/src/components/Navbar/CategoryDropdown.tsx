@@ -49,7 +49,7 @@ export default function CategoryDropdown() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className={`absolute top-full left-0 mt-2 w-80 rounded-lg shadow-lg border transition-all duration-200 ${theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}`}>
+        <div className={`absolute top-full left-0 mt-2 w-80 rounded-lg shadow-lg border transition-all duration-200 ${theme === "dark" ? "bg-black border-gray-800" : "bg-white border-gray-200"}`}>
           <div className="p-2">
             {CATEGORIES.map((category) => {
               const IconComponent = category.icon;
