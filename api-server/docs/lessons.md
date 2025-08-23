@@ -120,3 +120,35 @@ curl -X DELETE \
   http://127.0.0.1:8080/api/lessons/<lesson_id> \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+## Upload Lesson Video (Vimeo)
+
+- POST `/api/lessons/:id/video`
+
+Consumes `multipart/form-data` and uploads the provided file to Vimeo. On success, the lesson's `video_url` is updated with the Vimeo link.
+
+Multipart fields:
+
+- `file` (required): binary video file
+- `name` (optional): video title (defaults to filename or `lesson-video`)
+- `description` (optional): video description
+- `privacy_view` (optional): Vimeo privacy option (default from env `VIMEO_PRIVACY_VIEW`, fallback `unlisted`)
+- `content_type` (optional): MIME type, defaults to `video/mp4`
+
+Response 200: envelope with updated lesson.
+
+Example:
+
+```bash
+curl -X POST \
+  http://127.0.0.1:8080/api/lessons/<lesson_id>/video \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@/path/to/video.mp4" \
+  -F "name=Introduction video" \
+  -F "description=Welcome to the course" \
+  -F "privacy_view=unlisted"
+```
+
+Notes:
+
+- Uploaded videos are stored on Vimeo. Deleting lessons or courses does not delete the Vimeo video.

@@ -21,3 +21,12 @@ See the rustdoc book for background: [What is rustdoc?](https://doc.rust-lang.or
 - [Lessons](./lessons.md)
 - [Health](crate::api_docs::health)
 - [Error Model](crate::api_docs::errors)
+
+## Environment Variables
+
+Set the following to enable video uploads to Vimeo:
+
+- `VIMEO_TOKEN`: Vimeo API access token with scopes `video_files` and `private`.
+- `VIMEO_PRIVACY_VIEW` (optional): default privacy for new uploads (e.g., `unlisted`, `anybody`, `nobody`).
+
+Videos uploaded to Vimeo are not deleted when a course or lesson is deleted in this system.

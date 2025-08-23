@@ -23,3 +23,7 @@ pub mod auth_config;
 // Email config lives in a file with a dot in the name
 #[path = "email.config.rs"]
 pub mod email_config;
+
+// Vimeo config
+#[path = "vimeo.config.rs"]
+pub mod vimeo_config;

@@ -218,6 +218,8 @@ curl -X DELETE \
   -H "Authorization: Bearer $TOKEN"
 ```
 
+Note: Deleting a course (or its lessons) does not delete videos uploaded to Vimeo. Manage video lifecycle in Vimeo separately if needed.
+
 ---
 
 ## Modules

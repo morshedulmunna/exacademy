@@ -31,6 +31,7 @@ fn map_course(record: CourseRecord) -> Course {
 
 pub async fn create_course(
     repo: &dyn CoursesRepository,
+    instructor_id: uuid::Uuid,
     input: CreateCourseRequest,
 ) -> AppResult<uuid::Uuid> {
     let id = repo
@@ -45,7 +46,7 @@ pub async fn create_course(
             duration: input.duration,
             lessons: input.lessons,
             featured: input.featured,
-            instructor_id: input.instructor_id,
+            instructor_id: Some(instructor_id),
         })
         .await?;
     Ok(id)
