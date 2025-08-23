@@ -22,7 +22,8 @@ pub async fn seed_admin() -> Result<(), Box<dyn std::error::Error>> {
         .connect(&db.database_url)
         .await?;
 
-    let admin_email = env::var("ADMIN_EMAIL").unwrap_or_else(|_| "admin@execute_academy.local".to_string());
+    let admin_email =
+        env::var("ADMIN_EMAIL").unwrap_or_else(|_| "admin@execute_academy.local".to_string());
     let admin_username = env::var("ADMIN_USERNAME").unwrap_or_else(|_| "admin".to_string());
     let admin_password = env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "admin123".to_string());
 
@@ -39,18 +40,23 @@ pub async fn seed_admin() -> Result<(), Box<dyn std::error::Error>> {
     {
         let current_role: String = row.get("role");
         if current_role != "admin" {
-            // Promote to admin and rotate password
-            sqlx::query("UPDATE users SET role = 'admin', password_hash = $1 WHERE email = $2")
+            // Promote to admin, rotate password, and ensure active
+            sqlx::query("UPDATE users SET role = 'admin', password_hash = $1, is_active = TRUE WHERE email = $2")
                 .bind(&password_hash)
                 .bind(&admin_email)
                 .execute(&pool)
                 .await?;
             println!(
-                "Seed: existing user with email {} promoted to admin",
+                "Seed: existing user with email {} promoted to admin and activated",
                 admin_email
             );
         } else {
-            println!("Seed: admin user already present; nothing to do");
+            // Ensure admin is active (idempotent)
+            sqlx::query("UPDATE users SET is_active = TRUE WHERE email = $1 AND is_active = FALSE")
+                .bind(&admin_email)
+                .execute(&pool)
+                .await?;
+            println!("Seed: admin user already present; ensured active");
         }
         return Ok(());
     }
@@ -68,7 +74,7 @@ pub async fn seed_admin() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let rec = sqlx::query(
-		"INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, 'admin') RETURNING id",
+		"INSERT INTO users (username, email, password_hash, role, is_active) VALUES ($1, $2, $3, 'admin', TRUE) RETURNING id",
 	)
 	.bind(&desired_username)
 	.bind(&admin_email)

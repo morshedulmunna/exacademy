@@ -15,7 +15,7 @@ BIN ?= execute_academy
 # Default subcommand for `cargo run -- <CMD>`
 CMD ?= execute_academy-apis
 
-.PHONY: help dev run build build-release test fmt fmt-check clippy check clean migrate migrate-down sqlx-install
+.PHONY: help dev run build build-release test fmt fmt-check clippy check clean migrate migrate-down sqlx-install seed
 
 help:
 	@echo "Available targets:"
@@ -33,6 +33,7 @@ help:
 	@echo "  migrate-down    - Revert the last migration (requires sqlx-cli)"
 	@echo "  sqlx-install    - Install sqlx-cli (rustls, postgres)"
 	@echo "  docs            - Build rustdoc and open in browser"
+	@echo "  seed            - Seed default admin user (idempotent)"
 
 # Hot-reload dev server (requires cargo-watch: cargo install cargo-watch)
 dev:
@@ -53,6 +54,10 @@ migrate-down:
 # Helper to install sqlx-cli if you don't have it
 sqlx-install:
 	cargo install sqlx-cli --no-default-features --features rustls,postgres
+
+# Seed default admin user (idempotent; reads env or uses defaults)
+seed:
+	cargo run -- seed
 
 build:
 	cargo build

@@ -89,7 +89,7 @@ export default function UserMenu() {
             </div>
             <div className="py-2">
               {/* Admin Links */}
-              {user.role === "ADMIN" && (
+              {user.role === "admin" && (
                 <>
                   <div className={`px-3 py-1 text-xs font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>ADMIN</div>
                   <Link
