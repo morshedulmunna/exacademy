@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod email;
 pub mod error;
 pub mod logger;
 pub mod rate_limit;

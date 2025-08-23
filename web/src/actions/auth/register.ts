@@ -1,4 +1,4 @@
-import { ServerFetch } from "@/actions/http";
+import { ServerFetch, type ApiEnvelope } from "@/actions/http";
 
 export type RegisterInput = {
   firstName: string;
@@ -8,14 +8,14 @@ export type RegisterInput = {
   password: string;
 };
 
-export type RegisterResponse = { id: string };
+export type RegisterResponseData = { id: string };
 
 /**
  * Register a new user. Does not login.
  * Returns the created user id.
  */
-export async function register(input: RegisterInput): Promise<RegisterResponse> {
-  const res = await ServerFetch<RegisterResponse>("/api/auth/register", {
+export async function register(input: RegisterInput): Promise<ApiEnvelope<RegisterResponseData>> {
+  const res = await ServerFetch<ApiEnvelope<RegisterResponseData>>("/api/auth/register", {
     method: "POST",
     body: JSON.stringify({
       first_name: input.firstName,

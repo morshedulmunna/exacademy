@@ -29,6 +29,13 @@ rand = "0.8"
 argon2 = "0.5.3"
 anyhow = "1.0.99"
 jsonwebtoken = "9.3.1"
+lettre = { version = "0.11", default-features = false, features = [
+    "builder",
+    "tokio1",
+    "smtp-transport",
+    "hostname",
+    "pool",
+] }
 
 uuid = { version = "1.18.0", features = ["v4", "serde"] }
 chrono = { version = "0.4.41", features = ["serde", "clock"] }

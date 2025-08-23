@@ -22,6 +22,11 @@ Request:
 
 Note: `first_name` and `last_name` are accepted during registration but are not persisted at create time. They can be updated later via the user update endpoint.
 
+Additional notes:
+
+- After successful registration, a 6-digit OTP is emailed to the provided address. Use the Verify endpoint below to activate the account.
+- New accounts are inactive by default and cannot log in until verified.
+
 Response 200:
 
 ```json
@@ -71,6 +76,10 @@ Response 200:
 }
 ```
 
+Notes:
+
+- Login requires an active (verified) account. Inactive accounts will receive a 403 Forbidden error.
+
 ## Refresh
 
 - POST `/api/auth/refresh`
@@ -98,6 +107,55 @@ Response 200:
 ```
 
 Note: The refresh endpoint returns a new `access_token` and echoes back the provided `refresh_token` unchanged.
+
+## Verify Email (OTP)
+
+- POST `/api/auth/verify`
+
+Request:
+
+```json
+{ "email": "alice@example.com", "code": "123456" }
+```
+
+Response 200:
+
+```json
+{
+  "message": "Verified",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "ok": true }
+}
+```
+
+Notes:
+
+- OTP codes expire in 10 minutes.
+- Verifying an already active account is treated as success (idempotent).
+
+## Resend OTP
+
+- POST `/api/auth/resend-otp`
+
+Request:
+
+```json
+{ "email": "alice@example.com" }
+```
+
+Response 200:
+
+```json
+{
+  "message": "Sent",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "ok": true }
+}
+```
+
+Note: This endpoint sends a fresh OTP only if the account is not yet verified.
 
 ## Logout
 
