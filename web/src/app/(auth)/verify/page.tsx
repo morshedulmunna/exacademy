@@ -16,22 +16,25 @@ export default function VerifyPage() {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   // Resend control
   const [attemptCount, setAttemptCount] = useState(0);
   const [resendDisabledUntil, setResendDisabledUntil] = useState<number>(0);
-  const now = Date.now();
-  const remainingMs = Math.max(0, resendDisabledUntil - now);
+  const [timerNow, setTimerNow] = useState<number>(Date.now());
+  const remainingMs = Math.max(0, resendDisabledUntil - timerNow);
   const remainingSec = Math.ceil(remainingMs / 1000);
 
   useEffect(() => {
-    if (remainingMs <= 0) return;
-    const t = setInterval(() => {
-      // Trigger re-render by updating a state dependent on time
-      setResendDisabledUntil((prev) => prev);
+    if (resendDisabledUntil === 0) return;
+    const id = setInterval(() => {
+      setTimerNow(Date.now());
+      if (Date.now() >= resendDisabledUntil) {
+        clearInterval(id);
+      }
     }, 1000);
-    return () => clearInterval(t);
-  }, [remainingMs]);
+    return () => clearInterval(id);
+  }, [resendDisabledUntil]);
 
   const onChangeDigit = useCallback(
     (index: number, value: string) => {
@@ -80,6 +83,7 @@ export default function VerifyPage() {
   };
 
   const handleResend = async () => {
+    if (isResending) return;
     setError("");
     setSuccess("");
     if (!email) {
@@ -90,6 +94,7 @@ export default function VerifyPage() {
     if (nowTs < resendDisabledUntil) return;
 
     try {
+      setIsResending(true);
       await resendOtp(email);
       setSuccess("A new code has been sent to your email.");
       const nextAttempt = attemptCount + 1;
@@ -98,6 +103,8 @@ export default function VerifyPage() {
       setResendDisabledUntil(Date.now() + cooldownMs);
     } catch (e: any) {
       setError(e?.message || "Failed to resend code.");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -136,8 +143,8 @@ export default function VerifyPage() {
           </button>
 
           <div className="mt-4 flex items-center justify-between text-xs sm:text-sm">
-            <button type="button" onClick={handleResend} disabled={Date.now() < resendDisabledUntil} className="text-purple-600 dark:text-purple-400 disabled:opacity-50">
-              {Date.now() < resendDisabledUntil ? `Resend in ${remainingSec}s` : "Resend code"}
+            <button type="button" onClick={handleResend} disabled={isResending || timerNow < resendDisabledUntil} className="text-purple-600 dark:text-purple-400 disabled:opacity-50">
+              {isResending ? "Sending..." : timerNow < resendDisabledUntil ? `Resend in ${remainingSec}s` : "Resend code"}
             </button>
             <Link href="/login" className="text-gray-600 dark:text-gray-300">
               Back to Sign in

@@ -18,7 +18,7 @@ impl UsersRepository for PostgresUsersRepository {
         .bind(email)
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+        .map_err(AppError::from)?;
 
         Ok(row.map(map_user_row))
     }
@@ -32,7 +32,7 @@ impl UsersRepository for PostgresUsersRepository {
         .bind(id)
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+        .map_err(AppError::from)?;
 
         Ok(row.map(map_user_row))
     }
@@ -49,7 +49,7 @@ impl UsersRepository for PostgresUsersRepository {
         .bind(&input.role)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+        .map_err(AppError::from)?;
         Ok(rec.get("id"))
     }
 
@@ -120,9 +120,18 @@ impl UsersRepository for PostgresUsersRepository {
         .bind(id)
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+        .map_err(AppError::from)?;
 
         Ok(row.map(map_user_row))
+    }
+
+    async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()> {
+        sqlx::query(r#"DELETE FROM users WHERE id = $1"#)
+            .bind(id)
+            .execute(&self.pool)
+            .await
+            .map_err(AppError::from)?;
+        Ok(())
     }
 }
 

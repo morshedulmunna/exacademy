@@ -48,10 +48,20 @@ pub mod smtp_sender {
             };
 
             let creds = Credentials::new(cfg.smtp_username.clone(), cfg.smtp_password.clone());
-            let transport = SmtpTransport::builder_dangerous(&cfg.smtp_host)
-                .port(cfg.smtp_port)
-                .credentials(creds)
-                .build();
+            // Prefer STARTTLS when enabled (e.g., Gmail on port 587). Use SMTPS/relay or dangerous only when disabled.
+            let transport = if cfg.use_starttls {
+                SmtpTransport::starttls_relay(&cfg.smtp_host)?
+                    .port(cfg.smtp_port)
+                    .credentials(creds)
+                    .build()
+            } else {
+                // If STARTTLS explicitly disabled, try secure relay first; if that doesn't suit, fallback to dangerous.
+                SmtpTransport::relay(&cfg.smtp_host)
+                    .unwrap_or_else(|_| SmtpTransport::builder_dangerous(&cfg.smtp_host))
+                    .port(cfg.smtp_port)
+                    .credentials(creds)
+                    .build()
+            };
 
             Ok(Self { transport, from })
         }

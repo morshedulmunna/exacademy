@@ -67,4 +67,5 @@ pub trait UsersRepository: Send + Sync {
         id: uuid::Uuid,
         input: UpdateUserRecord,
     ) -> AppResult<Option<UserRecord>>;
+    async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()>;
 }

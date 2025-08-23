@@ -46,9 +46,9 @@ pub async fn send_otp_email(ctx: &AppContext, email: &str, code: &str) -> AppRes
         cc: None,
         bcc: None,
     };
-    ctx.email_sender
-        .send(&msg)
-        .await
-        .map_err(|e| AppError::ServiceUnavailable(format!("Failed to send email: {}", e)))?;
+    ctx.email_sender.send(&msg).await.map_err(|_e| {
+        // Avoid leaking transport details; log full error internally
+        AppError::ServiceUnavailable("Email service is temporarily unavailable".into())
+    })?;
     Ok(())
 }

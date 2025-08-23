@@ -108,7 +108,7 @@ export default function RegisterPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
                       transition={{ duration: 0.2, ease: EASE }}
-                      className="bg-red-500/20 border border-red-500/30 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-300 text-xs sm:text-sm"
+                      className="bg-red-500/20 border  border-red-500/30 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-300 text-xs sm:text-sm"
                     >
                       {error}
                     </motion.div>

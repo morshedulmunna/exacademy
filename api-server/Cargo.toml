@@ -35,6 +35,8 @@ lettre = { version = "0.11", default-features = false, features = [
     "smtp-transport",
     "hostname",
     "pool",
+    "rustls-tls",
+    "tokio1-rustls",
 ] }
 
 uuid = { version = "1.18.0", features = ["v4", "serde"] }

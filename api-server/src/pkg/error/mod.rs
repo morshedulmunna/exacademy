@@ -69,8 +69,8 @@ impl AppError {
             | AppError::Conflict(m)
             | AppError::ServiceUnavailable(m)
             | AppError::Timeout(m)
-            | AppError::Internal(m)
             | AppError::RateLimitConflict(m) => m,
+            AppError::Internal(_) => "Internal server error",
             AppError::Validation { message, .. } => message,
         }
     }
@@ -147,8 +147,56 @@ impl From<serde_json::Error> for AppError {
 
 impl From<JsonRejection> for AppError {
     fn from(err: JsonRejection) -> Self {
-        // Map Axum's JSON extractor errors into a clean BadRequest
-        AppError::BadRequest(err.body_text())
+        // Map Axum's JSON extractor errors into a clean BadRequest, without leaking internals
+        // Return as a validation-style error with details for clients if needed.
+        let details = serde_json::json!({
+            "issues": [
+                { "field": "body", "message": err.body_text() }
+            ]
+        });
+        AppError::Validation {
+            message: "Invalid JSON body".into(),
+            details,
+        }
+    }
+}
+
+// Convert sqlx errors into sanitized AppError variants
+impl From<sqlx::Error> for AppError {
+    fn from(err: sqlx::Error) -> Self {
+        match err {
+            sqlx::Error::RowNotFound => AppError::NotFound("Resource not found".into()),
+            sqlx::Error::Database(db_err) => {
+                let code = db_err.code().map(|c| c.to_string());
+                if let Some(code_str) = code.as_deref() {
+                    match code_str {
+                        // unique_violation
+                        "23505" => {
+                            if let Some(constraint) = db_err.constraint() {
+                                match constraint {
+                                    "users_email_key" => {
+                                        return AppError::Conflict("Email already exists".into());
+                                    }
+                                    "users_username_key" => {
+                                        return AppError::Conflict(
+                                            "Username already exists".into(),
+                                        );
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            AppError::Conflict("Duplicate value".into())
+                        }
+                        // foreign_key_violation or other integrity issues
+                        "23503" => AppError::Conflict("Operation violates data constraints".into()),
+                        _ => AppError::Internal(db_err.to_string()),
+                    }
+                } else {
+                    AppError::Internal(db_err.to_string())
+                }
+            }
+            other => AppError::Internal(other.to_string()),
+        }
     }
 }
 
