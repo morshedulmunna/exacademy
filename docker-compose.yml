@@ -36,24 +36,24 @@ services:
       timeout: 5s
       retries: 10
 
-  # web:
-  #   build:
-  #     context: ./web
-  #     dockerfile: Dockerfile
-  #     args:
-  #       # Optional: bake API base URL into SSG assets if used
-  #       API_BASE_URL: "http://api:8080"
-  #   container_name: execute_academy-web
-  #   depends_on:
-  #     api:
-  #       condition: service_started
-  #   environment:
-  #     NODE_ENV: production
-  #     INTERNAL_API_BASE_URL: "http://api:8080"
-  #     PORT: 3000
-  #     HOSTNAME: 0.0.0.0
-  #   ports:
-  #     - "3000:3000"
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        # Optional: bake API base URL into SSG assets if used
+        API_BASE_URL: "http://api:8080"
+    container_name: execute_academy-web
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      INTERNAL_API_BASE_URL: "http://api:8080"
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3000:3000"
 
   postgres:
     image: postgres:16-alpine
@@ -87,33 +87,6 @@ services:
       timeout: 3s
       retries: 10
 
-  kafka:
-    image: bitnami/kafka:3.7
-    container_name: execute_academy-kafka
-    ports:
-      - "9092:9092"
-      - "9094:9094"
-    environment:
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=broker,controller
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:9094,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-      - ALLOW_PLAINTEXT_LISTENER=yes
-    volumes:
-      - kafka_data:/bitnami/kafka
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
-      interval: 10s
-      timeout: 10s
-      retries: 12
-      start_period: 30s
-
 volumes:
   postgres_data:
   redis_data:
-  kafka_data:
