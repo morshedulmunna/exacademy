@@ -5,6 +5,8 @@ pub fn router() -> Router {
     Router::new()
         .route("/api/auth/register", post(auth::register))
         .route("/api/auth/login", post(auth::login))
+        .route("/api/auth/google", post(auth::google_login))
+        .route("/api/auth/github", post(auth::github_login))
         .route("/api/auth/refresh", post(auth::refresh))
         .route("/api/auth/logout", post(auth::logout))
         .route("/api/auth/verify", post(auth::verify))

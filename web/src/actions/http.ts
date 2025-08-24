@@ -210,10 +210,11 @@ export async function setAuthCookies(params: { access_token: string; refresh_tok
   const cookieStore = await cookies();
   const oneHour = 60 * 60;
   const thirtyDays = 60 * 60 * 24 * 30;
+  const isProd = process.env.NODE_ENV === "production";
 
   cookieStore.set("access_token", params.access_token, {
     httpOnly: true,
-    secure: true,
+    secure: isProd,
     sameSite: "lax",
     path: "/",
     maxAge: typeof params.expires_in === "number" ? params.expires_in : oneHour,
@@ -221,7 +222,7 @@ export async function setAuthCookies(params: { access_token: string; refresh_tok
 
   cookieStore.set("refresh_token", params.refresh_token, {
     httpOnly: true,
-    secure: true,
+    secure: isProd,
     sameSite: "lax",
     path: "/",
     maxAge: thirtyDays,
@@ -230,7 +231,7 @@ export async function setAuthCookies(params: { access_token: string; refresh_tok
   if (params.token_type) {
     cookieStore.set("token_type", params.token_type, {
       httpOnly: true,
-      secure: true,
+      secure: isProd,
       sameSite: "lax",
       path: "/",
       maxAge: thirtyDays,

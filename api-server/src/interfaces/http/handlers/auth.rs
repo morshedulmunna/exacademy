@@ -7,9 +7,9 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
 use crate::types::user_types::{
-    ForgotPasswordRequest, LoginRequest, LoginResponse, OkResponse, RefreshRequest,
-    RegisterRequest, RegisterResponse, ResendOtpRequest, ResetPasswordRequest, TokenResponse,
-    VerifyOtpRequest,
+    ForgotPasswordRequest, GithubLoginRequest, GoogleLoginRequest, LoginRequest, LoginResponse,
+    OkResponse, RefreshRequest, RegisterRequest, RegisterResponse, ResendOtpRequest,
+    ResetPasswordRequest, TokenResponse, VerifyOtpRequest,
 };
 
 /// Register a new user account
@@ -140,5 +140,39 @@ pub async fn reset_password(
 ) -> AppResult<(StatusCode, Json<Response<OkResponse>>)> {
     auth_service::reset_password(&ctx, ctx.repos.users.as_ref(), input_data).await?;
     let body = Response::with_data("Ok", OkResponse { ok: true }, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
+}
+
+/// Google OAuth login
+#[utoipa::path(
+    post,
+    path = "/api/auth/google",
+    request_body = GoogleLoginRequest,
+    responses((status = 200, description = "Logged in", body = LoginResponse)),
+    tag = "Auth"
+)]
+pub async fn google_login(
+    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+    ValidatedJson(input_data): ValidatedJson<GoogleLoginRequest>,
+) -> AppResult<(StatusCode, Json<Response<LoginResponse>>)> {
+    let output = auth_service::google_login(&ctx, ctx.repos.users.as_ref(), input_data).await?;
+    let body = Response::with_data("Logged in", output, StatusCode::OK.as_u16());
+    Ok((StatusCode::OK, Json(body)))
+}
+
+/// GitHub OAuth login
+#[utoipa::path(
+    post,
+    path = "/api/auth/github",
+    request_body = GithubLoginRequest,
+    responses((status = 200, description = "Logged in", body = LoginResponse)),
+    tag = "Auth"
+)]
+pub async fn github_login(
+    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+    ValidatedJson(input_data): ValidatedJson<GithubLoginRequest>,
+) -> AppResult<(StatusCode, Json<Response<LoginResponse>>)> {
+    let output = auth_service::github_login(&ctx, ctx.repos.users.as_ref(), input_data).await?;
+    let body = Response::with_data("Logged in", output, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }

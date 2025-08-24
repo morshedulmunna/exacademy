@@ -1,6 +1,8 @@
 //! Auth application module split into focused files.
 //! Exports keep the same public API as before.
 
+mod github;
+mod google;
 mod login;
 mod refresh;
 mod register;
@@ -9,6 +11,8 @@ mod reset;
 mod utils;
 mod verify;
 
+pub use github::github_login;
+pub use google::google_login;
 pub use login::login;
 pub use refresh::refresh;
 pub use register::register;

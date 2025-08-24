@@ -80,6 +80,40 @@ Notes:
 
 - Login requires an active (verified) account. Inactive accounts will receive a 403 Forbidden error.
 
+## Login with Google
+
+- POST `/api/auth/google`
+
+Request:
+
+```json
+{ "id_token": "<google_id_token>" }
+```
+
+Response 200: identical to the regular Login response.
+
+Notes:
+
+- The server validates the Google ID token's audience against `GOOGLE_OAUTH_CLIENT_ID`.
+- The Google account email must be verified. If the email does not exist in our system, a user account is created and activated automatically.
+
+## Login with GitHub
+
+- POST `/api/auth/github`
+
+Request:
+
+```json
+{ "code": "<github_oauth_code>" }
+```
+
+Response 200: identical to the regular Login response.
+
+Notes:
+
+- The server exchanges the `code` for an access token using `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`.
+- We require a primary, verified email from GitHub. If the email does not exist in our system, a user account is created and activated automatically.
+
 ## Refresh
 
 - POST `/api/auth/refresh`

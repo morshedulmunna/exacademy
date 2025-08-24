@@ -16,14 +16,18 @@ export async function loginAction(payload: LoginPayload) {
     const response = await FetchAPI.post({
       endpoint: "/api/auth/login",
       body: payload,
-      contentType: "application/json",
     });
-
-    console.log(response);
-
+    const data = (response as any)?.data;
+    if (data?.access_token && data?.refresh_token) {
+      await setAuthCookies({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        token_type: data.token_type,
+        expires_in: data.expires_in,
+      });
+    }
     return response;
   } catch (error: any) {
-    console.log(error);
     throw new Error(error.message);
   }
 }

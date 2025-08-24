@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Github, Chrome } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 interface SocialLoginButtonsProps {
   isLoading?: boolean;
@@ -9,10 +11,79 @@ interface SocialLoginButtonsProps {
 
 export default function SocialLoginButtons({ isLoading = false }: SocialLoginButtonsProps) {
   const { theme } = useTheme();
+  const router = useRouter();
 
-  const handleGoogleSignIn = () => {};
+  // Google One-Tap or popup flow: expect global google accounts api if loaded.
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      // If using Google Identity Services, obtain ID token from the credential response.
+      // Fallback: check for URL param `credential` placed by Google One Tap
+      const url = new URL(window.location.href);
+      const oneTapToken = url.searchParams.get("credential");
+      let idToken: string | null = oneTapToken;
 
-  const handleGitHubSignIn = () => {};
+      // If not using One Tap, you can integrate the button flow and set idToken here.
+      if (!idToken) {
+        // TODO: integrate Google Identity Services button/popup if needed.
+        // For now, try to read from any global callback stash.
+        // You may replace this with your preferred Google client flow.
+      }
+
+      if (!idToken) {
+        // As a convenience, navigate to a dedicated /oauth/google page if implemented
+        router.push("/oauth/google");
+        return;
+      }
+
+      // Submit to our server action via fetch since this is a client component
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_token: idToken }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        try {
+          const user = (data as any)?.data?.user;
+          if (user) {
+            const minimalUser = {
+              id: user.id,
+              email: user.email,
+              username: user.username ?? null,
+              name: user.name ?? null,
+              role: user.role ?? null,
+              avatar: user.avatar ?? null,
+            };
+            localStorage.setItem("user", JSON.stringify({ user: minimalUser }));
+          }
+        } catch {}
+        // After successful login, reload to pick up cookies
+        router.push("/");
+        router.refresh();
+      } else {
+        console.error("Google login failed", data);
+      }
+    } catch (e) {
+      console.error("Google login error", e);
+    }
+  }, [router]);
+
+  const handleGitHubSignIn = useCallback(async () => {
+    try {
+      const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+      const redirectUri = `${window.location.origin}/oauth/github/callback`;
+      const state = Math.random().toString(36).slice(2);
+      const scope = "read:user user:email";
+
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId || "")}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(state)}`;
+
+      // Optionally persist state to validate on callback
+      sessionStorage.setItem("github_oauth_state", state);
+      window.location.href = authUrl;
+    } catch (e) {
+      console.error("GitHub login error", e);
+    }
+  }, []);
 
   return (
     <div className="space-y-3 mt-12">

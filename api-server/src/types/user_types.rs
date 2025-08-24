@@ -76,6 +76,24 @@ pub struct LoginResponse {
     pub expires_in: i64,
 }
 
+// ========================
+// Social login (OAuth)
+// ========================
+
+/// Google Sign-In using an ID token from Google.
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct GoogleLoginRequest {
+    #[validate(length(min = 10))]
+    pub id_token: String,
+}
+
+/// GitHub OAuth login using an authorization code.
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct GithubLoginRequest {
+    #[validate(length(min = 10))]
+    pub code: String,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct OkResponse {
     pub ok: bool,
