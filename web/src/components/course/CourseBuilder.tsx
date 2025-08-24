@@ -187,14 +187,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     setModules(newModules);
     setDraggedLesson(null);
 
-    // Update lesson in database
-    try {
-      for (const l of newModules[sourceModuleIndex].lessons) {
-        await apiUpdateLesson(l.id, { position: l.order });
-      }
-    } catch (error) {
-      console.error("Error updating lesson order:", error);
-    }
+    // Backend removed: local-only reorder (no API call)
   };
 
   const createModule = async () => {

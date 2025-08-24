@@ -1,5 +1,5 @@
-import React from 'react';
-import Image from 'next/image';
+import React from "react";
+import Image from "next/image";
 // Static helper removed
 
 interface OptimizedImageProps {
@@ -21,24 +21,10 @@ interface OptimizedImageProps {
 /**
  * Optimized image component with automatic WebP support and fallbacks
  */
-export default function OptimizedImage({
-  src,
-  alt,
-  width,
-  height,
-  fill = false,
-  className = '',
-  priority = false,
-  sizes,
-  quality = 85,
-  preferWebP = true,
-  fallbackSrc,
-  onError,
-  onLoad
-}: OptimizedImageProps) {
+export default function OptimizedImage({ src, alt, width, height, fill = false, className = "", priority = false, sizes, quality = 85, preferWebP = true, fallbackSrc, onError, onLoad }: OptimizedImageProps) {
   // Get optimized URL (WebP if available and preferred)
   const optimizedSrc = src;
-  
+
   // Get thumbnail URL for smaller images
   const thumbnailSrc = src;
 
@@ -60,7 +46,7 @@ export default function OptimizedImage({
     sizes,
     onError: handleError,
     onLoad,
-    ...(fill ? { fill } : { width, height })
+    ...(fill ? { fill } : { width, height }),
   };
 
   return (
@@ -75,27 +61,10 @@ export default function OptimizedImage({
 /**
  * Thumbnail image component for smaller previews
  */
-export function ThumbnailImage({
-  src,
-  alt,
-  width = 400,
-  height = 300,
-  className = '',
-  ...props
-}: Omit<OptimizedImageProps, 'fill' | 'sizes'>) {
-  const thumbnailSrc = ImageUploader.getThumbnailUrl(src, true);
-  
-  return (
-    <OptimizedImage
-      src={thumbnailSrc}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      {...props}
-    />
-  );
+export function ThumbnailImage({ src, alt, width = 400, height = 300, className = "", ...props }: Omit<OptimizedImageProps, "fill" | "sizes">) {
+  const thumbnailSrc = src;
+
+  return <OptimizedImage src={thumbnailSrc} alt={alt} width={width} height={height} className={className} sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" {...props} />;
 }
 
 /**
@@ -104,22 +73,15 @@ export function ThumbnailImage({
 export function ResponsiveImage({
   src,
   alt,
-  className = '',
-  aspectRatio = '16/9',
+  className = "",
+  aspectRatio = "16/9",
   ...props
-}: Omit<OptimizedImageProps, 'width' | 'height' | 'fill'> & {
+}: Omit<OptimizedImageProps, "width" | "height" | "fill"> & {
   aspectRatio?: string;
 }) {
   return (
     <div className={`relative ${className}`} style={{ aspectRatio }}>
-      <OptimizedImage
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        {...props}
-      />
+      <OptimizedImage src={src} alt={alt} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" {...props} />
     </div>
   );
 }

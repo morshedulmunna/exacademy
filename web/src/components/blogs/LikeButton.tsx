@@ -32,7 +32,7 @@ export default function LikeButton({ slug }: { slug: string }) {
     };
   }, [slug]);
 
-  const isAuthenticated = status === "authenticated";
+  const isAuthenticated = (status as any) === "authenticated";
 
   const ariaLabel = useMemo(() => (liked ? "Unlike this post" : "Like this post"), [liked]);
 

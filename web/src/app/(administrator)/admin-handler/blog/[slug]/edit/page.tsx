@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import BlockEditor from "@/components/ui/BlockEditor";
+const BlockEditor = dynamic(() => import("@/components/ui/BlockEditor"), { ssr: false });
 import { BlogEditorHeader } from "@/app/(administrator)/_@components";
 import ImageUpload from "@/components/ui/ImageUpload";
 

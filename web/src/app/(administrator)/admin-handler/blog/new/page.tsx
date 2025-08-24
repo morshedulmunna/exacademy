@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import BlockEditor from "@/components/ui/BlockEditor";
+import dynamic from "next/dynamic";
+const BlockEditor = dynamic(() => import("@/components/ui/BlockEditor"), { ssr: false });
 import { BlogEditorHeader } from "@/app/(administrator)/_@components";
 import { useRouter } from "next/navigation";
 import ImageUpload from "@/components/ui/ImageUpload";

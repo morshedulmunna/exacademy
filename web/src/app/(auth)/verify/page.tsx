@@ -1,12 +1,13 @@
 "use client";
+export const dynamic = "force-dynamic";
 
-import React, { useMemo, useRef, useState, useEffect, useCallback } from "react";
+import React, { useMemo, useRef, useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 // Backend removed
 
-export default function VerifyPage() {
+function VerifyPageInner() {
   const params = useSearchParams();
   const router = useRouter();
   const email = useMemo(() => params.get("email") || "", [params]);
@@ -151,5 +152,13 @@ export default function VerifyPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div className="mt-24 text-center text-sm text-gray-500">Loading…</div>}>
+      <VerifyPageInner />
+    </Suspense>
   );
 }

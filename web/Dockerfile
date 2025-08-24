@@ -28,7 +28,6 @@ RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
 
 # Copy only necessary build output and runtime files
 # Using standalone output includes the minimal server runtime in .next/standalone
-COPY --from=deps /app/public ./public
 COPY --from=deps /app/.next/standalone ./
 COPY --from=deps /app/.next/static ./.next/static
 
