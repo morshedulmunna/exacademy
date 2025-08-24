@@ -6,8 +6,11 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { Post } from "@/lib/types";
 
-async function fetchPosts(_params: Record<string, string | number>) {
-  return { posts: [], pagination: { page: 1, limit: 0, total: 0, pages: 0 } };
+async function fetchPosts(_params: Record<string, string | number>): Promise<{
+  posts: Post[];
+  pagination: { page: number; limit: number; total: number; pages: number };
+}> {
+  return { posts: [] as Post[], pagination: { page: 1, limit: 0, total: 0, pages: 0 } };
 }
 
 export default async function Blogs() {

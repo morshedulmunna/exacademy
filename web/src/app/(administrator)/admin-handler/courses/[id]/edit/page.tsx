@@ -125,7 +125,7 @@ export default function EditCoursePage() {
         return;
       }
       // Backend removed: simulate update success
-      {
+      const _payload = {
         title: formData.title.trim(),
         description: formData.description,
         excerpt: formData.excerpt || undefined,

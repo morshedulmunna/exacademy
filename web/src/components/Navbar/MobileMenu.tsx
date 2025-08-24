@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-import { User, Settings, ChevronDown, BookOpen, Code, Palette, Database, Globe } from "lucide-react";
+import { User, Settings, ChevronDown, BookOpen, Code, Palette, Database, Globe, LogOut } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
 import ThemeToggler from "@/themes/ThemeToggler";
 import { NAV_ITEMS } from "./constants";
@@ -30,7 +30,7 @@ interface MobileMenuProps {
  * Mobile menu component with navigation and authentication options
  */
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
-  const status = "unauthenticated";
+  const status: "authenticated" | "unauthenticated" | "loading" = "unauthenticated";
   const session: any = null;
   const { theme } = useTheme();
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -104,7 +104,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             <ThemeToggler />
           </div>
 
-          {status === "loading" ? (
+          {status === ("loading" as any) ? (
             <div className={`w-8 h-8 rounded-full animate-pulse ${theme === "dark" ? "bg-gray-600" : "bg-gray-300"}`}></div>
           ) : session ? (
             <div className="space-y-3">
