@@ -7,29 +7,23 @@ import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { getErrorMessage } from "@utils/error";
+import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
+import * as Yup from "yup";
+import { loginAction } from "@/actions/auth/login.action";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+  const validationSchema = Yup.object({
+    email: Yup.string().email("Invalid email address").required("Email is required"),
+    password: Yup.string().min(6, "Password must be at least 6 characters").max(72).required("Password is required"),
+  });
 
-    try {
-      // Backend removed: perform client-side navigation only
-      router.push("/");
-      router.refresh();
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, "Login failed"));
-    } finally {
-      setIsLoading(false);
-    }
+  const initialValues = {
+    email: "",
+    password: "",
   };
 
   const togglePasswordVisibility = () => {
@@ -49,69 +43,111 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            {error && <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 sm:p-4 text-red-600 dark:text-red-300 text-sm">{error}</div>}
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+              setError("");
+              try {
+                const res = await loginAction({
+                  email: values.email,
+                  password: values.password,
+                });
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
+                // Persist minimal user info on client for UX (not for auth)
+                if (typeof window !== "undefined") {
+                  try {
+                    const user = (res as any)?.data?.user;
+                    if (user) {
+                      localStorage.setItem("user", JSON.stringify({ user }));
+                    }
+                  } catch {}
+                }
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base pr-12"
-                  placeholder="Enter your password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-300 focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
+                router.push("/");
+                router.refresh();
+              } catch (err: unknown) {
+                setError(getErrorMessage(err, "Login failed"));
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({ isSubmitting }) => (
+              <>
+                {error && <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 sm:p-4 text-red-600 dark:text-red-300 text-sm">{error}</div>}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full gradient-bg text-white py-2.5 sm:py-3 px-4 rounded-lg font-semibold  transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
-            >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
+                <Form className="space-y-4 sm:space-y-6">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Email
+                    </label>
+                    <Field
+                      id="email"
+                      name="email"
+                      type="email"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+                      placeholder="Enter your email"
+                    />
+                    <ErrorMessage name="email" component="div" className="mt-1 text-xs text-red-600 dark:text-red-300" />
+                  </div>
 
-          {/* Social Login Buttons */}
-          <SocialLoginButtons isLoading={isLoading} />
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Field name="password">
+                        {({ field }: { field: FieldInputProps<string> }) => (
+                          <input
+                            {...field}
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-900 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base pr-12"
+                            placeholder="Enter your password"
+                          />
+                        )}
+                      </Field>
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-300 focus:outline-none"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                            />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                      <ErrorMessage name="password" component="div" className="mt-1 text-xs text-red-600 dark:text-red-300" />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full gradient-bg text-white py-2.5 sm:py-3 px-4 rounded-lg font-semibold  transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
+                  >
+                    {isSubmitting ? "Signing in..." : "Sign In"}
+                  </button>
+                </Form>
+
+                {/* Social Login Buttons */}
+                <SocialLoginButtons isLoading={isSubmitting} />
+              </>
+            )}
+          </Formik>
 
           {/* Footer */}
           <div className="mt-6 sm:mt-8 text-center">
