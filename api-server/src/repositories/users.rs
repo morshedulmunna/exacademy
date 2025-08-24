@@ -68,4 +68,7 @@ pub trait UsersRepository: Send + Sync {
         input: UpdateUserRecord,
     ) -> AppResult<Option<UserRecord>>;
     async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()>;
+
+    /// Update a user's password hash identified by email.
+    async fn update_password_hash_by_email(&self, email: &str, new_hash: &str) -> AppResult<()>;
 }

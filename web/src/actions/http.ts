@@ -85,7 +85,7 @@ class ApiInstanc {
     throw error;
   }
 
-  private async makeRequest(method: string, config: RequestConfig) {
+  private async makeRequest(method: string, config: RequestConfig, attempt: number = 0): Promise<any> {
     try {
       const token = await this.getToken();
       const interceptedConfig = await this.applyRequestInterceptors(config);
@@ -123,7 +123,32 @@ class ApiInstanc {
       const interceptedResponse = await this.applyResponseInterceptors(response);
 
       if (!interceptedResponse.ok) {
-        if (interceptedResponse.status === 401) {
+        if (interceptedResponse.status === 401 && attempt === 0) {
+          // Try refresh flow once
+          const cookieStore = await cookies();
+          const refreshTokenCookie = cookieStore.get("refresh_token");
+          if (refreshTokenCookie?.value) {
+            try {
+              const refreshRes = await fetch(`${this.baseURL}/api/auth/refresh`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refresh_token: refreshTokenCookie.value }),
+              });
+              if (refreshRes.ok) {
+                const tokenData = await refreshRes.json();
+                const data = tokenData?.data;
+                if (data?.access_token && data?.refresh_token) {
+                  await setAuthCookies({
+                    access_token: data.access_token,
+                    refresh_token: data.refresh_token,
+                    token_type: data.token_type,
+                    expires_in: data.expires_in,
+                  });
+                  return this.makeRequest(method, config, 1);
+                }
+              }
+            } catch {}
+          }
           redirect("/");
           return;
         }

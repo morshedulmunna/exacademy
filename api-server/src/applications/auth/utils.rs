@@ -27,6 +27,10 @@ pub async fn store_otp(ctx: &AppContext, email: &str, code: &str, ttl: Duration)
 
 /// Send OTP email using the configured email sender.
 pub async fn send_otp_email(ctx: &AppContext, email: &str, code: &str) -> AppResult<()> {
+    // In non-production environments, echo OTP to stdout for developer convenience
+    if ctx.system.app_env.to_lowercase() != "production" {
+        println!("[DEV] OTP for {}: {}", email, code);
+    }
     let subject = Some("Verify your email".to_string());
     let html = format!(
         "<h2>Verify your email</h2><p>Your code is: <strong>{}</strong></p><p>This code expires in 10 minutes.</p>",
@@ -46,9 +50,12 @@ pub async fn send_otp_email(ctx: &AppContext, email: &str, code: &str) -> AppRes
         cc: None,
         bcc: None,
     };
-    ctx.email_sender.send(&msg).await.map_err(|_e| {
-        // Avoid leaking transport details; log full error internally
-        AppError::ServiceUnavailable("Email service is temporarily unavailable".into())
-    })?;
+    if let Err(e) = ctx.email_sender.send(&msg).await {
+        // Log the underlying transport error to stderr for operators
+        eprintln!("[email] failed to send OTP to {}: {}", email, e);
+        return Err(AppError::ServiceUnavailable(
+            "Email service is temporarily unavailable".into(),
+        ));
+    }
     Ok(())
 }

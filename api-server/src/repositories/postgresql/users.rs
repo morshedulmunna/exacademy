@@ -133,6 +133,19 @@ impl UsersRepository for PostgresUsersRepository {
             .map_err(AppError::from)?;
         Ok(())
     }
+
+    async fn update_password_hash_by_email(&self, email: &str, new_hash: &str) -> AppResult<()> {
+        let res = sqlx::query(r#"UPDATE users SET password_hash = $1 WHERE email = $2"#)
+            .bind(new_hash)
+            .bind(email)
+            .execute(&self.pool)
+            .await
+            .map_err(AppError::from)?;
+        if res.rows_affected() == 0 {
+            return Err(AppError::NotFound("User not found".into()));
+        }
+        Ok(())
+    }
 }
 
 fn map_user_row(row: sqlx::postgres::PgRow) -> UserRecord {

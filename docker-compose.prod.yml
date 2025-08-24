@@ -1,0 +1,71 @@
+services:
+  nginx:
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - app
+
+  api:
+    env_file:
+      - .env.production
+    environment:
+      API_HOST: "0.0.0.0"
+      API_PORT: "9098"
+      DATABASE_URL: ${DATABASE_URL:-postgres://execute_academy:${POSTGRES_PASSWORD}@postgres:5432/execute_academy?sslmode=disable}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      JWT_SECRET: ${JWT_SECRET:?set in .env.production}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set in .env.production}
+      VIMEO_TOKEN: ${VIMEO_TOKEN:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@example.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Execute Academy}
+    volumes:
+      - uploads_data:/app/uploads
+    restart: unless-stopped
+    networks:
+      - app
+
+  web:
+    environment:
+      NODE_ENV: production
+      API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://api:9098}
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    restart: unless-stopped
+    networks:
+      - app
+
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env.production}
+      POSTGRES_HOST_AUTH_METHOD: ""
+    ports: []
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app
+
+  redis:
+    ports: []
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - app
+
+volumes:
+  uploads_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  app:
+    driver: bridge

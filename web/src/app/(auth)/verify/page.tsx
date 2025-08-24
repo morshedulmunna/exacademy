@@ -5,7 +5,7 @@ import React, { useMemo, useRef, useState, useEffect, useCallback, Suspense } fr
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
-// Backend removed
+import { resendOtpAction, verifyEmailAction } from "@/actions/auth/verify.action";
 
 function VerifyPageInner() {
   const params = useSearchParams();
@@ -73,6 +73,7 @@ function VerifyPageInner() {
     }
     setIsVerifying(true);
     try {
+      await verifyEmailAction({ email, code: joined });
       setSuccess("Email verified successfully.");
       router.push("/login");
     } catch (e: any) {
@@ -95,6 +96,7 @@ function VerifyPageInner() {
 
     try {
       setIsResending(true);
+      await resendOtpAction({ email });
       setSuccess("A new code has been sent to your email.");
       const nextAttempt = attemptCount + 1;
       setAttemptCount(nextAttempt);

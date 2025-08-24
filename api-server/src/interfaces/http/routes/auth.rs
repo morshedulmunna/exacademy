@@ -9,4 +9,6 @@ pub fn router() -> Router {
         .route("/api/auth/logout", post(auth::logout))
         .route("/api/auth/verify", post(auth::verify))
         .route("/api/auth/resend-otp", post(auth::resend_otp))
+        .route("/api/auth/forgot-password", post(auth::forgot_password))
+        .route("/api/auth/reset-password", post(auth::reset_password))
 }

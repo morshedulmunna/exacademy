@@ -167,6 +167,11 @@ export default function LoginPage() {
                 Sign up
               </Link>
             </p>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mt-2">
+              <Link href="/forgot-password" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors duration-300">
+                Forgot your password?
+              </Link>
+            </p>
           </div>
 
           {/* Back to Home */}

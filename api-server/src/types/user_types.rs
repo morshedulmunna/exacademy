@@ -100,6 +100,26 @@ pub struct ResendOtpRequest {
 }
 
 // ========================
+// Password reset (OTP)
+// ========================
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct ForgotPasswordRequest {
+    #[validate(email)]
+    pub email: String,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct ResetPasswordRequest {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 6, max = 6))]
+    pub code: String,
+    #[validate(length(min = 8))]
+    pub new_password: String,
+}
+
+// ========================
 // Users route types
 // ========================
 

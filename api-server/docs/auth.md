@@ -157,6 +157,58 @@ Response 200:
 
 Note: This endpoint sends a fresh OTP only if the account is not yet verified.
 
+## Forgot Password
+
+- POST `/api/auth/forgot-password`
+
+Request:
+
+```json
+{ "email": "alice@example.com" }
+```
+
+Response 200:
+
+```json
+{
+  "message": "Sent",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "ok": true }
+}
+```
+
+Notes:
+
+- Sends a 6-digit OTP to the email if the user exists and is not blocked.
+- The code expires in 10 minutes.
+
+## Reset Password
+
+- POST `/api/auth/reset-password`
+
+Request:
+
+```json
+{ "email": "alice@example.com", "code": "123456", "new_password": "StrongP@ssw0rd" }
+```
+
+Response 200:
+
+```json
+{
+  "message": "Ok",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": { "ok": true }
+}
+```
+
+Notes:
+
+- The reset code expires in 10 minutes.
+- On success, the user's password is updated immediately.
+
 ## Logout
 
 - POST `/api/auth/logout`
