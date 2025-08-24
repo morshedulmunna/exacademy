@@ -30,12 +30,18 @@ export default function UserMenu() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const rawCookie = document.cookie
-        .split(";")
-        .map((c) => c.trim())
-        .find((c) => c.startsWith("exacademy.user="));
-      const raw = rawCookie ? decodeURIComponent(rawCookie.split("=").slice(1).join("=")) : null;
-      setUser(raw ? JSON.parse(raw) : null);
+      // Read from localStorage only: structure { user: MinimalUser }
+      const ls = localStorage.getItem("user");
+      if (ls) {
+        try {
+          const parsed = JSON.parse(ls);
+          if (parsed && parsed.user) {
+            setUser(parsed.user as MinimalUser);
+            return;
+          }
+        } catch {}
+      }
+      setUser(null);
     } catch {
       setUser(null);
     }
@@ -44,19 +50,14 @@ export default function UserMenu() {
   const handleSignOut = async () => {
     if (typeof window !== "undefined") {
       try {
-        document.cookie = "exacademy.access_token=; Path=/; Max-Age=0; SameSite=Lax";
-        document.cookie = "exacademy.refresh_token=; Path=/; Max-Age=0; SameSite=Lax";
-        document.cookie = "exacademy.user=; Path=/; Max-Age=0; SameSite=Lax";
+        // Clear localStorage user info only
+        localStorage.removeItem("user");
       } catch {}
     }
     setShowUserMenu(false);
     // Soft refresh to update UI state
     if (typeof window !== "undefined") window.location.reload();
   };
-
-  if (false) {
-    return <div className={`w-8 h-8 rounded-full animate-pulse ${theme === "dark" ? "bg-gray-600" : "bg-gray-300"}`}></div>;
-  }
 
   if (!user) {
     return (

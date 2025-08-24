@@ -54,12 +54,22 @@ export default function LoginPage() {
                   password: values.password,
                 });
 
-                // Persist minimal user info on client for UX (not for auth)
+                // Persist minimal user info in localStorage for Navbar/UI (not for auth)
                 if (typeof window !== "undefined") {
                   try {
                     const user = (res as any)?.data?.user;
                     if (user) {
-                      localStorage.setItem("user", JSON.stringify({ user }));
+                      const minimalUser = {
+                        id: user.id,
+                        email: user.email,
+                        username: user.username ?? null,
+                        name: user.name ?? null,
+                        role: user.role ?? null,
+                        avatar: user.avatar ?? null,
+                      };
+
+                      // Store only in localStorage
+                      localStorage.setItem("user", JSON.stringify({ user: minimalUser }));
                     }
                   } catch {}
                 }
