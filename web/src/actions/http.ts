@@ -198,7 +198,8 @@ FetchAPI.setInterceptors({
     return response;
   },
   onError: async (error) => {
-    return error;
+    // Re-throw so callers can catch and handle API errors properly
+    throw error;
   },
 });
 

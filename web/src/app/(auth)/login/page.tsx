@@ -18,7 +18,7 @@ export default function LoginPage() {
 
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email address").required("Email is required"),
-    password: Yup.string().min(6, "Password must be at least 6 characters").max(72).required("Password is required"),
+    password: Yup.string().min(8, "Password must be at least 8 characters").max(72).required("Password is required"),
   });
 
   const initialValues = {
@@ -85,7 +85,7 @@ export default function LoginPage() {
           >
             {({ isSubmitting }) => (
               <>
-                {error && <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 sm:p-4 text-red-600 dark:text-red-300 text-sm">{error}</div>}
+                {error && <div className=" text-center rounded-lg p-3 sm:p-4 text-red-600 dark:text-red-300 text-sm">{error}</div>}
 
                 <Form className="space-y-4 sm:space-y-6">
                   <div>

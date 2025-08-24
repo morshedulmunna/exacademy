@@ -7,8 +7,9 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
 use crate::types::user_types::{
-    ForgotPasswordRequest, LoginRequest, LoginResponse, OkResponse, RefreshRequest, RegisterRequest, RegisterResponse,
-    ResendOtpRequest, ResetPasswordRequest, TokenResponse, VerifyOtpRequest,
+    ForgotPasswordRequest, LoginRequest, LoginResponse, OkResponse, RefreshRequest,
+    RegisterRequest, RegisterResponse, ResendOtpRequest, ResetPasswordRequest, TokenResponse,
+    VerifyOtpRequest,
 };
 
 /// Register a new user account
