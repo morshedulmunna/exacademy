@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
-import { login } from "@/actions/auth/login";
 import { getErrorMessage } from "@utils/error";
 
 export default function LoginPage() {
@@ -23,36 +22,11 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const res = await login({ email, password });
-      window.localStorage.setItem("exacademy.access_token", res.data.access_token);
-      try {
-        // Mirror access token into cookie so SSR requests can attach Authorization
-        document.cookie = `exacademy.access_token=${encodeURIComponent(res.data.access_token)}; Path=/; Max-Age=${Math.max(60, Number(res.data.expires_in || 900))}; SameSite=Lax`;
-      } catch {}
-      window.localStorage.setItem("exacademy.refresh_token", res.data.refresh_token);
-      try {
-        document.cookie = `exacademy.refresh_token=${encodeURIComponent(res.data.refresh_token)}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-      } catch {}
-      // Persist minimal user info for navbar rendering
-      window.localStorage.setItem(
-        "exacademy.user",
-        JSON.stringify({
-          id: res.data.user.id,
-          email: res.data.user.email,
-          username: res.data.user.username,
-          name: res.data.user.full_name || `${res.data.user.first_name ?? ""} ${res.data.user.last_name ?? ""}`.trim(),
-          role: res.data.user.role,
-          avatar: res.data.user.avatar_url,
-        })
-      );
+      // Backend removed: perform client-side navigation only
       router.push("/");
       router.refresh();
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Login failed"));
-      // Ensure any stale tokens are cleared on error
-      window.localStorage.removeItem("exacademy.access_token");
-      window.localStorage.removeItem("exacademy.refresh_token");
-      window.localStorage.removeItem("exacademy.user");
     } finally {
       setIsLoading(false);
     }

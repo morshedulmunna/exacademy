@@ -11,7 +11,8 @@ import NewsLatter from "@/components/NewsLatter/NewsLatter";
 import WorkExperiance from "@/components/work-experiance/WorkExperiance";
 import YoutubeSection from "@/components/Youtube/YoutubeSection";
 
-export default function Home({ searchParams }: { searchParams?: { page?: string; per_page?: string } }) {
+export default async function Home({ searchParams }: { searchParams?: Promise<{ page?: string; per_page?: string }> }) {
+  const sp = (await searchParams) ?? {};
   return (
     <MaxWidthWrapper className=" h-screen">
       <div className="flex flex-col h-full">
@@ -19,7 +20,7 @@ export default function Home({ searchParams }: { searchParams?: { page?: string;
         <Header />
         <main className="flex-1 pt-24">
           <Hero1 />
-          <Course page={Number(searchParams?.page ?? 1)} perPage={Number(searchParams?.per_page ?? 6)} />
+          <Course page={Number(sp.page ?? 1)} perPage={Number(sp.per_page ?? 6)} />
           <Blogs />
           <NewsLatter />
           <YoutubeSection />

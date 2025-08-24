@@ -7,7 +7,9 @@ import { CheckoutLayout, CheckoutGrid, CheckoutLoading, CheckoutHeader, Checkout
 export default function CourseCheckoutPage() {
   const params = useParams();
   const router = useRouter();
-  const status = "authenticated";
+  // Simulated auth status; integrate with real auth/session when available
+  const status: string = "authenticated";
+  const session: any = {};
 
   // Mock course data - in real app, fetch from API
   const courseData: CourseData = {
@@ -30,7 +32,6 @@ export default function CourseCheckoutPage() {
 
   useEffect(() => {
     if (status === "loading") return;
-
     if (!session) {
       router.push(`/login?callbackUrl=/course/checkout/${params.slug_course}`);
       return;

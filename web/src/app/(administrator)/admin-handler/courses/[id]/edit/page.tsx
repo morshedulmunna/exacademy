@@ -8,9 +8,7 @@ import { ArrowLeft, Save, Eye, EyeOff, Upload, X, Loader2, BookOpen } from "luci
 import Link from "next/link";
 import Image from "next/image";
 import CourseBuilder from "@/components/course/CourseBuilder";
-import getCourseById from "@/actions/courses/getById";
-import updateCourse from "@/actions/courses/update";
-import deleteCourse from "@/actions/courses/delete";
+// Backend removed
 import BlockEditor from "@/components/ui/BlockEditor";
 
 /**
@@ -49,7 +47,7 @@ export default function EditCoursePage() {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const course = await getCourseById(courseId);
+        const course: any = null;
         setFormData({
           title: course.title ?? "",
           slug: course.slug ?? "",
@@ -126,7 +124,8 @@ export default function EditCoursePage() {
         setIsLoading(false);
         return;
       }
-      await updateCourse(courseId, {
+      // Backend removed: simulate update success
+      {
         title: formData.title.trim(),
         description: formData.description,
         excerpt: formData.excerpt || undefined,
@@ -137,7 +136,7 @@ export default function EditCoursePage() {
         lessons: formData.lessons ? Number(formData.lessons) : undefined,
         published: formData.published,
         featured: formData.featured,
-      } as any);
+      } as any;
       router.push("/admin-handler/courses");
     } catch (error) {
       console.error("Error updating course:", error);
@@ -156,7 +155,7 @@ export default function EditCoursePage() {
     setError(null);
 
     try {
-      await deleteCourse(courseId);
+      // Backend removed: simulate delete success
       router.push("/admin-handler/courses");
     } catch (error) {
       console.error("Error deleting course:", error);

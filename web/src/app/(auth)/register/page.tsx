@@ -9,8 +9,7 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { type ApiError } from "@/actions/http";
-import { register as registerAction } from "@/actions/auth/register";
+// Backend removed
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
@@ -81,18 +80,11 @@ export default function RegisterPage() {
               setError("");
               setSuccess("");
               try {
-                const registerRes = await registerAction({
-                  firstName: values.firstName,
-                  lastName: values.lastName,
-                  email: values.email,
-                  username: values.username,
-                  password: values.password,
-                });
+                // Backend removed: simulate success
                 setSuccess("Registration successful! Please verify your email.");
                 router.push(`/verify?email=${encodeURIComponent(values.email)}`);
               } catch (err: unknown) {
-                const apiError = (err as ApiError) || undefined;
-                setError(apiError?.message || "Registration failed. Please try again.");
+                setError("Registration failed. Please try again.");
               } finally {
                 setSubmitting(false);
               }

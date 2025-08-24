@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import CourseCard from "./CourseCard";
-import listCoursesPaginated from "@/actions/courses/listPaginated";
+// Backend removed; display with no courses
 
 type Props = {
   page?: number;
@@ -9,7 +9,8 @@ type Props = {
 };
 
 export default async function Course({ page = 1, perPage = 6 }: Props) {
-  const { items: courses, meta } = await listCoursesPaginated(page, perPage);
+  const courses: any[] = [];
+  const meta: any = undefined;
 
   return (
     <>

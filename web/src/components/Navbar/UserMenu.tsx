@@ -30,7 +30,11 @@ export default function UserMenu() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const raw = window.localStorage.getItem("exacademy.user");
+      const rawCookie = document.cookie
+        .split(";")
+        .map((c) => c.trim())
+        .find((c) => c.startsWith("exacademy.user="));
+      const raw = rawCookie ? decodeURIComponent(rawCookie.split("=").slice(1).join("=")) : null;
       setUser(raw ? JSON.parse(raw) : null);
     } catch {
       setUser(null);
@@ -39,12 +43,10 @@ export default function UserMenu() {
 
   const handleSignOut = async () => {
     if (typeof window !== "undefined") {
-      window.localStorage.removeItem("exacademy.access_token");
-      window.localStorage.removeItem("exacademy.refresh_token");
-      window.localStorage.removeItem("exacademy.user");
       try {
         document.cookie = "exacademy.access_token=; Path=/; Max-Age=0; SameSite=Lax";
         document.cookie = "exacademy.refresh_token=; Path=/; Max-Age=0; SameSite=Lax";
+        document.cookie = "exacademy.user=; Path=/; Max-Age=0; SameSite=Lax";
       } catch {}
     }
     setShowUserMenu(false);

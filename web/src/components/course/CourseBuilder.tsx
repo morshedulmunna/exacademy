@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Eye, EyeOff, ChevronDown, ChevronRight, Upload, FileText, Video, Play, GripVertical } from "lucide-react";
 import CourseContentUpload from "@/components/ui/CourseContentUpload";
 import { FileUploadResult } from "@/hooks/useCourseContentUpload";
-import { listModules, createModule as apiCreateModule, updateModule as apiUpdateModule, deleteModule as apiDeleteModule, Module as ApiModule } from "@/actions/modules";
-import { listLessons, createLesson as apiCreateLesson, updateLesson as apiUpdateLesson, deleteLesson as apiDeleteLesson, Lesson as ApiLesson } from "@/actions/lessons";
+// Backend removed; operate purely on local state
 
 export interface Module {
   id: string;
@@ -61,35 +60,11 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
   }, [courseId]);
 
   const loadModules = async () => {
-    try {
-      setIsLoading(true);
-      const apiModules = await listModules(courseId);
-      const mapped: Module[] = apiModules.sort((a, b) => a.position - b.position).map((m) => ({ id: m.id, title: m.title, description: m.description || "", order: m.position, lessons: [] }));
-      // Load lessons per module
-      for (const m of mapped) {
-        const apiLessons = await listLessons(m.id);
-        m.lessons = apiLessons
-          .sort((a, b) => a.position - b.position)
-          .map((l) => ({
-            id: l.id,
-            title: l.title,
-            description: l.description || "",
-            content: l.content || "",
-            videoUrl: l.video_url || "",
-            duration: l.duration,
-            order: l.position,
-            isFree: l.is_free,
-            published: l.published,
-            contents: [],
-          }));
-      }
-      setModules(mapped);
-      onModulesChange?.(mapped);
-    } catch (error) {
-      console.error("Error loading modules:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(true);
+    const initial: Module[] = [];
+    setModules(initial);
+    onModulesChange?.(initial);
+    setIsLoading(false);
   };
 
   const toggleModuleExpansion = (moduleId: string) => {
@@ -149,14 +124,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     setDraggedModule(null);
 
     // Update orders in database
-    try {
-      // No dedicated reorder endpoint. Persist by updating positions one-by-one.
-      for (const m of updatedModules) {
-        await apiUpdateModule(m.id, { position: m.order });
-      }
-    } catch (error) {
-      console.error("Error updating module orders:", error);
-    }
+    // Backend removed: local-only reorder
   };
 
   // Drag and Drop Handlers for Lessons
@@ -231,7 +199,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const createModule = async () => {
     try {
-      const id = await apiCreateModule({ course_id: courseId, title: "New Module", position: modules.length + 1 });
+      const id = crypto.randomUUID();
       const newModule: Module = { id, title: "New Module", description: "", order: modules.length + 1, lessons: [] };
       const next = [...modules, newModule];
       setModules(next);
@@ -244,7 +212,6 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const updateModule = async (moduleId: string, data: Partial<Module>) => {
     try {
-      await apiUpdateModule(moduleId, { title: data.title, description: data.description, position: data.order } as any);
       const next = modules.map((m) => (m.id === moduleId ? { ...m, ...data } : m));
       setModules(next);
       onModulesChange?.(next);
@@ -260,7 +227,6 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     }
 
     try {
-      await apiDeleteModule(moduleId);
       const next = modules.filter((m) => m.id !== moduleId);
       setModules(next);
       onModulesChange?.(next);
@@ -273,7 +239,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     try {
       const module = modules.find((m) => m.id === moduleId);
       const lessonOrder = module ? module.lessons.length + 1 : 1;
-      const id = await apiCreateLesson({ module_id: moduleId, title: "New Lesson", duration: "0m", position: lessonOrder, is_free: false, published: false });
+      const id = crypto.randomUUID();
       const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", videoUrl: "", duration: "0m", order: lessonOrder, isFree: false, published: false, contents: [] };
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m));
       setModules(next);
@@ -286,16 +252,6 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
 
   const updateLesson = async (moduleId: string, lessonId: string, data: Partial<Lesson>) => {
     try {
-      await apiUpdateLesson(lessonId, {
-        title: data.title,
-        description: data.description,
-        content: data.content,
-        video_url: data.videoUrl,
-        duration: data.duration,
-        position: data.order,
-        is_free: data.isFree,
-        published: data.published,
-      } as any);
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m));
       setModules(next);
       onModulesChange?.(next);
@@ -311,7 +267,6 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     }
 
     try {
-      await apiDeleteLesson(lessonId);
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m));
       setModules(next);
       onModulesChange?.(next);

@@ -14,9 +14,6 @@ COPY . .
 
 # Ensure Next builds in production mode
 ENV NODE_ENV=production
-# Allow customizing API base URL at build-time for SSG assets if needed
-ARG API_BASE_URL
-ENV API_BASE_URL=${API_BASE_URL}
 
 RUN npm run build
 
@@ -38,10 +35,9 @@ COPY --from=deps /app/.next/static ./.next/static
 # Expose Next.js port
 EXPOSE 3000
 
-# Runtime env for API base URL; can be overridden by compose/k8s
+# Runtime env
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV INTERNAL_API_BASE_URL=http://api:8080
 
 USER nextjs
 

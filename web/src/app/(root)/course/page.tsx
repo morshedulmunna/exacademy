@@ -1,7 +1,7 @@
 import MaxWidthWrapper from "@/common/MaxWidthWrapper";
 import CourseCard from "@/components/course/CourseCard";
 import CourseFilters from "@/components/course/CourseFilters";
-import listCourses from "@/actions/courses/list";
+// Backend removed; render UI with no courses
 import Link from "next/link";
 
 type SearchParams = {
@@ -12,14 +12,16 @@ type SearchParams = {
   per_page?: string;
 };
 
-export default async function CoursesPage({ searchParams }: { searchParams?: SearchParams }) {
-  const q = (searchParams?.q ?? "").toString();
-  const category = (searchParams?.category ?? "").toString();
-  const priceType = (searchParams?.price_type ?? "").toString();
-  const page = Number(searchParams?.page ?? 1) || 1;
-  const perPage = Number(searchParams?.per_page ?? 12) || 12;
+export default async function CoursesPage({ searchParams }: { searchParams?: Promise<SearchParams> }) {
+  const sp = (await searchParams) ?? {};
+  const q = (sp.q ?? "").toString();
+  const category = (sp.category ?? "").toString();
+  const priceType = (sp.price_type ?? "").toString();
+  const page = Number(sp.page ?? 1) || 1;
+  const perPage = Number(sp.per_page ?? 12) || 12;
 
-  const all = await listCourses();
+  // Backend removed: no data available
+  const all: any[] = [];
 
   // Filter
   const normalizedQ = q.trim().toLowerCase();
@@ -66,7 +68,7 @@ export default async function CoursesPage({ searchParams }: { searchParams?: Sea
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Sidebar */}
           <aside className="md:col-span-1">
-            <CourseFilters searchParams={searchParams ?? {}} />
+            <CourseFilters searchParams={sp} />
           </aside>
 
           {/* Grid */}

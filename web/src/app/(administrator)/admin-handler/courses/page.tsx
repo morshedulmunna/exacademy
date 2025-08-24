@@ -4,14 +4,14 @@ import Link from "next/link";
 import { Plus, Edit, Eye, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
 import Image from "next/image";
 import DeleteCourseButton from "@/components/course/DeleteCourseButton";
-import listCourses from "@/actions/courses/list";
+// Backend removed
 
 /**
  * Course Management Page
  * Displays all courses with management options
  */
 export default async function CourseManagementPage() {
-  const courses = await listCourses();
+  const courses: any[] = [];
 
   return (
     <div className="space-y-6">

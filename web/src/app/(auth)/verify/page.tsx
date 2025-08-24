@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState, useEffect, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
-import { resendOtp, verifyOtp } from "@/actions/auth/otp";
+// Backend removed
 
 export default function VerifyPage() {
   const params = useSearchParams();
@@ -72,11 +72,10 @@ export default function VerifyPage() {
     }
     setIsVerifying(true);
     try {
-      await verifyOtp({ email, code: joined });
       setSuccess("Email verified successfully.");
       router.push("/login");
     } catch (e: any) {
-      setError(e?.message || "Invalid or expired code.");
+      setError("Invalid or expired code.");
     } finally {
       setIsVerifying(false);
     }
@@ -95,14 +94,13 @@ export default function VerifyPage() {
 
     try {
       setIsResending(true);
-      await resendOtp(email);
       setSuccess("A new code has been sent to your email.");
       const nextAttempt = attemptCount + 1;
       setAttemptCount(nextAttempt);
-      const cooldownMs = nextAttempt === 1 ? 60_000 : 120_000; // 1 min first, then 2 mins lock
+      const cooldownMs = nextAttempt === 1 ? 60_000 : 120_000;
       setResendDisabledUntil(Date.now() + cooldownMs);
     } catch (e: any) {
-      setError(e?.message || "Failed to resend code.");
+      setError("Failed to resend code.");
     } finally {
       setIsResending(false);
     }

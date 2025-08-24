@@ -9,7 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Tag } from "@/lib/types";
 import RichTextEditor from "@/components/rich-text-editor";
-import createCourse from "@/actions/courses/create";
+// Backend removed
 
 /**
  * Course Creation Page
@@ -130,7 +130,7 @@ export default function CreateCoursePage() {
         instructor_id: undefined,
       };
 
-      await createCourse(payload);
+      // Backend removed: simulate success and navigate back
       router.push(`/admin-handler/courses`);
     } catch (error) {
       console.error("Error creating course:", error);

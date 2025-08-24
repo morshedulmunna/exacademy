@@ -96,10 +96,7 @@ export default function Comments({ slug }: { slug: string }) {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/posts/${slug}/comments`, { cache: "no-store" });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!cancelled) setComments(data);
+        if (!cancelled) setComments([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -118,25 +115,12 @@ export default function Comments({ slug }: { slug: string }) {
     if (!isAuthenticated) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/posts/${slug}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: trimmed, parentId: null }),
-      });
-      if (!res.ok) {
-        if (res.status === 401) {
-          const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-          // Redirect to backend Google login
-          if (typeof window !== "undefined") {
-            const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
-            const url = new URL("/api/v1/auth/google/login", base);
-            url.searchParams.set("redirect", callbackUrl);
-            window.location.href = url.toString();
-          }
-        }
-        return;
-      }
-      const created = (await res.json()) as CommentItem;
+      const created: CommentItem = {
+        id: crypto.randomUUID(),
+        content: trimmed,
+        createdAt: new Date().toISOString(),
+        author: { id: "", name: "You", username: "you" },
+      } as any;
       setComments((prev) => [...prev, created]);
       setContent("");
     } finally {
@@ -152,24 +136,12 @@ export default function Comments({ slug }: { slug: string }) {
     if (!isAuthenticated) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/posts/${slug}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: trimmed, parentId: replyParentId }),
-      });
-      if (!res.ok) {
-        if (res.status === 401) {
-          const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-          if (typeof window !== "undefined") {
-            const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
-            const url = new URL("/api/v1/auth/google/login", base);
-            url.searchParams.set("redirect", callbackUrl);
-            window.location.href = url.toString();
-          }
-        }
-        return;
-      }
-      const created = (await res.json()) as CommentItem;
+      const created = {
+        id: crypto.randomUUID(),
+        content: trimmed,
+        createdAt: new Date().toISOString(),
+        author: { id: "", name: "You", username: "you" },
+      } as CommentItem;
       setComments((prev) =>
         prev.map((c) =>
           c.id === replyParentId
@@ -218,24 +190,7 @@ export default function Comments({ slug }: { slug: string }) {
     if (!isAuthenticated) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/posts/${slug}/comments`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingId, content: trimmed }),
-      });
-      if (!res.ok) {
-        if (res.status === 401) {
-          const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-          if (typeof window !== "undefined") {
-            const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
-            const url = new URL("/api/v1/auth/google/login", base);
-            url.searchParams.set("redirect", callbackUrl);
-            window.location.href = url.toString();
-          }
-        }
-        return;
-      }
-      const updated = (await res.json()) as CommentItem;
+      const updated = { id: editingId, content: trimmed } as any as CommentItem;
       setComments((prev) =>
         prev.map((c) => {
           if (c.id === updated.id) return { ...c, content: updated.content };
@@ -251,22 +206,11 @@ export default function Comments({ slug }: { slug: string }) {
   }
 
   async function onDelete(commentId: string, parentId?: string) {
-    if (!isAuthenticated) {
-      const callbackUrl = typeof window !== "undefined" ? window.location.pathname : `/blog/${slug}`;
-      if (typeof window !== "undefined") {
-        const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
-        const url = new URL("/api/v1/auth/google/login", base);
-        url.searchParams.set("redirect", callbackUrl);
-        window.location.href = url.toString();
-      }
-      return;
-    }
+    if (!isAuthenticated) return;
     const confirmed = typeof window !== "undefined" ? window.confirm("Delete this comment?") : true;
     if (!confirmed) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/posts/${slug}/comments?id=${encodeURIComponent(commentId)}`, { method: "DELETE" });
-      if (!res.ok) return;
       setComments((prev) => (parentId ? prev.map((c) => (c.id === parentId ? { ...c, replies: (c.replies || []).filter((r) => r.id !== commentId) } : c)) : prev.filter((c) => c.id !== commentId)));
     } finally {
       setSubmitting(false);
@@ -309,11 +253,7 @@ export default function Comments({ slug }: { slug: string }) {
                   <button
                     type="button"
                     onClick={() => {
-                      const callbackUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : `/blog/${slug}`;
-                      const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9090";
-                      const url = new URL("/api/v1/auth/google/login", base);
-                      url.searchParams.set("redirect", callbackUrl);
-                      window.location.href = url.toString();
+                      // Backend removed
                     }}
                     className="rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-200 hover:bg-gray-800/60"
                   >

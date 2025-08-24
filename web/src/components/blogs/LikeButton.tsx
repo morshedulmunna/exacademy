@@ -21,15 +21,10 @@ export default function LikeButton({ slug }: { slug: string }) {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      try {
-        const res = await fetch(`/api/posts/${slug}/like`, { cache: "no-store" });
-        if (!res.ok) return;
-        const data: LikeStateResponse = await res.json();
-        if (!cancelled) {
-          setLiked(Boolean(data.liked));
-          setLikes(Number(data.likes) || 0);
-        }
-      } catch (_) {}
+      if (!cancelled) {
+        setLiked(false);
+        setLikes(0);
+      }
     }
     load();
     return () => {
@@ -42,15 +37,12 @@ export default function LikeButton({ slug }: { slug: string }) {
   const ariaLabel = useMemo(() => (liked ? "Unlike this post" : "Like this post"), [liked]);
 
   async function onToggle() {
-    if (!isAuthenticated) return;
     if (loading) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/posts/${slug}/like`, { method: "POST" });
-      if (!res.ok) return;
-      const data: LikeStateResponse = await res.json();
-      setLiked(Boolean(data.liked));
-      setLikes(Number(data.likes) || 0);
+      const nextLiked = !liked;
+      setLiked(nextLiked);
+      setLikes((prev) => Math.max(0, prev + (nextLiked ? 1 : -1)));
     } finally {
       setLoading(false);
     }
