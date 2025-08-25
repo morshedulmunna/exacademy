@@ -8,6 +8,7 @@ import { useTheme } from "@/themes/ThemeProvider";
 import ThemeToggler from "@/themes/ThemeToggler";
 import { NAV_ITEMS } from "./constants";
 import SearchBar from "./SearchBar";
+import { logout } from "@/actions/auth/logout.action";
 
 /**
  * Category options with icons and descriptions
@@ -36,7 +37,23 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const handleSignOut = async () => {
-    onClose();
+    try {
+      await logout();
+    } catch {}
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("user");
+        const cookies = document.cookie.split(";");
+        for (const cookie of cookies) {
+          const eqPos = cookie.indexOf("=");
+          const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
+          if (!name) continue;
+          document.cookie = `${name}=; Max-Age=0; path=/`;
+        }
+      } catch {}
+      onClose();
+      window.location.href = "/";
+    }
   };
 
   if (!isOpen) return null;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { User, Settings, ChevronDown, Settings2, Shield, FileText, LogOut } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
+import { logout } from "@/actions/auth/logout.action";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 /**
@@ -48,15 +49,25 @@ export default function UserMenu() {
   }, []);
 
   const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch {}
     if (typeof window !== "undefined") {
       try {
-        // Clear localStorage user info only
+        // Clear any client-side cache/state
         localStorage.removeItem("user");
+        // Clear non-HttpOnly cookies that might exist
+        const cookies = document.cookie.split(";");
+        for (const cookie of cookies) {
+          const eqPos = cookie.indexOf("=");
+          const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
+          if (!name) continue;
+          document.cookie = `${name}=; Max-Age=0; path=/`;
+        }
       } catch {}
+      setShowUserMenu(false);
+      window.location.href = "/";
     }
-    setShowUserMenu(false);
-    // Soft refresh to update UI state
-    if (typeof window !== "undefined") window.location.reload();
   };
 
   if (!user) {

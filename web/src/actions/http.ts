@@ -123,10 +123,28 @@ FetchAPI.setInterceptors({
     return config;
   },
   onResponse: async (response) => {
-    // Add any default response modifications here
+    // If unauthorized, redirect to login (client-side only)
+    if (response.status === 401) {
+      if (typeof window !== "undefined") {
+        const current = window.location.pathname + window.location.search;
+        const isOnLogin = window.location.pathname.startsWith("/login");
+        if (!isOnLogin) {
+          window.location.href = `/login?redirectTo=${encodeURIComponent(current)}`;
+        }
+      }
+    }
     return response;
   },
   onError: async (error) => {
+    // If backend returned an unauthorized error payload, redirect (client-side only)
+    const status = error?.status ?? error?.statusCode;
+    if (status === 401 && typeof window !== "undefined") {
+      const current = window.location.pathname + window.location.search;
+      const isOnLogin = window.location.pathname.startsWith("/login");
+      if (!isOnLogin) {
+        window.location.href = `/login?redirectTo=${encodeURIComponent(current)}`;
+      }
+    }
     // Re-throw so callers can catch and handle API errors properly
     throw error;
   },
