@@ -16,13 +16,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch {}
-  }, []);
-
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email address").required("Email is required"),
     password: Yup.string().min(8, "Password must be at least 8 characters").max(72).required("Password is required"),
@@ -60,6 +53,29 @@ export default function LoginPage() {
                   email: values.email,
                   password: values.password,
                 });
+                // Store tokens in cookies only in development mode
+                // if (process.env.NODE_ENV === "development") {
+                try {
+                  const data: any = (res as any)?.data;
+                  const accessToken: string | undefined = data?.access_token;
+                  const refreshToken: string | undefined = data?.refresh_token;
+                  const expiresIn: number = typeof data?.expires_in === "number" ? data.expires_in : 900; // default 15m
+
+                  if (typeof window !== "undefined" && accessToken) {
+                    const isHttps = typeof window !== "undefined" && window.location?.protocol === "https:";
+                    const secureFlag = isHttps ? "; Secure" : ""; // Dev: only secure on https
+
+                    // Access token: short-lived
+                    document.cookie = `access_token=${accessToken}; Path=/; Max-Age=${expiresIn}; SameSite=Lax${secureFlag}`;
+
+                    // Refresh token: longer-lived (30 days in dev)
+                    if (refreshToken) {
+                      const thirtyDays = 60 * 60 * 24 * 30;
+                      document.cookie = `refresh_token=${refreshToken}; Path=/; Max-Age=${thirtyDays}; SameSite=Lax${secureFlag}`;
+                    }
+                  }
+                } catch {}
+                // }
 
                 // Persist minimal user info in localStorage for Navbar/UI (not for auth)
                 if (typeof window !== "undefined") {

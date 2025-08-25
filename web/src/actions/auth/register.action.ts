@@ -15,9 +15,5 @@ type RegisterPayload = {
  * Returns API response with `{ data: { id } }` on success.
  */
 export async function registerAction(payload: RegisterPayload) {
-  try {
-    return FetchAPI.post({ endpoint: "/api/auth/register", body: payload });
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
+  return FetchAPI.post({ endpoint: "/api/auth/register", body: payload });
 }

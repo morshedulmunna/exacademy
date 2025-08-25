@@ -37,7 +37,9 @@ pub async fn register(
         .await?
         .ok_or_else(|| AppError::Internal("User not found after create".into()))?;
     let code = generate_otp_code();
+
     store_otp(ctx, &user.email, &code, Duration::from_secs(10 * 60)).await?;
+
     if let Err(e) = send_otp_email(ctx, &user.email, &code).await {
         // Email failed to send; clean up the just-created user to avoid dangling accounts.
         let _ = repo.delete_by_id(id).await;
