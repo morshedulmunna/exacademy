@@ -15,55 +15,9 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
   const page = Number(sp.page ?? 1) || 1;
   const per_page = Number(sp.per_page ?? 10) || 10;
 
-  console.log(await listInstructorCourses());
-
-  const courses: any[] = [
-    {
-      id: "1",
-      slug: "react-basics",
-      title: "React Basics",
-      description: "Learn the fundamentals of React and component-driven development.",
-      excerpt: "Learn the fundamentals of React...",
-      thumbnail: "/placeholder-logo.png",
-      price: 49,
-      original_price: 99,
-      duration: "6h 30m",
-      lessons: 24,
-      students: 320,
-      published: true,
-      featured: true,
-      view_count: 1280,
-      instructor: { id: "u1", username: "jdoe", full_name: "John Doe", avatar_url: "/placeholder-user.jpg" },
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: "2",
-      slug: "typescript-for-beginners",
-      title: "TypeScript for Beginners",
-      description: "A practical guide to adding strong typing to your JavaScript projects.",
-      excerpt: "A practical guide to TypeScript...",
-      thumbnail: "/placeholder-logo.png",
-      price: 39,
-      original_price: null,
-      duration: "4h 10m",
-      lessons: 18,
-      students: 210,
-      published: false,
-      featured: false,
-      view_count: 670,
-      instructor: { id: "u2", username: "asmith", full_name: "Alice Smith", avatar_url: "/placeholder-user.jpg" },
-      created_at: new Date().toISOString(),
-    },
-  ];
-
-  const meta = {
-    page,
-    per_page,
-    total: courses.length,
-    total_pages: Math.max(1, Math.ceil(courses.length / per_page)),
-  };
-
-  const displayedCourses = courses.slice((page - 1) * per_page, page * per_page);
+  const resp = await listInstructorCourses({ page, per_page });
+  const courses: any[] = resp?.data?.items ?? [];
+  const meta = resp?.data?.meta ?? { page, per_page, total: 0, total_pages: 1 };
 
   return (
     <div className="space-y-6">
@@ -88,7 +42,7 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Courses</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{courses.length}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{meta.total}</p>
             </div>
           </div>
         </div>
@@ -170,7 +124,7 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {displayedCourses.map((course: any) => (
+              {courses.map((course: any) => (
                 <tr key={course.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">

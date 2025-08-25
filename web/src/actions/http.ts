@@ -12,6 +12,16 @@ type Interceptor = {
   onError?: (error: any) => any;
 };
 
+/**
+ * Reads a cookie value by name from document cookies in the browser.
+ * Returns null when executed in a non-browser environment or when missing.
+ */
+const getCookieValue = (name: string): string | null => {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^|; )" + name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") + "=([^;]*)"));
+  return match ? decodeURIComponent(match[2]) : null;
+};
+
 class ApiInstanc {
   private baseURL: string;
   private interceptors: Interceptor;
@@ -56,6 +66,33 @@ class ApiInstanc {
         // Ensure browser includes cookies set by backend
         credentials: "include",
       };
+
+      // Attach Authorization header from access_token cookie if present (browser only)
+      const accessToken = getCookieValue("access_token");
+      if (accessToken) {
+        fetchOptions.headers = {
+          ...fetchOptions.headers,
+          Authorization: `Bearer ${accessToken}`,
+        };
+      }
+
+      // When running on the server (server actions, RSC), read the cookie
+      // from the current request using next/headers and attach Authorization
+      if (typeof window === "undefined") {
+        try {
+          const { cookies } = await import("next/headers");
+          const cookieStore = await cookies();
+          const serverAccessToken = cookieStore.get("access_token")?.value;
+          if (serverAccessToken) {
+            fetchOptions.headers = {
+              ...fetchOptions.headers,
+              Authorization: `Bearer ${serverAccessToken}`,
+            };
+          }
+        } catch (_) {
+          // no-op: next/headers not available in this context
+        }
+      }
 
       // Handle FormData differently from JSON
       if (method !== "GET" && interceptedConfig.body) {
