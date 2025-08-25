@@ -1,6 +1,4 @@
 import { HOST } from "@/constant";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 type RequestConfig = {
   body?: any;
@@ -27,43 +25,6 @@ class ApiInstanc {
     this.interceptors = interceptors;
   }
 
-  private async getToken() {
-    try {
-      // Try to get from cookies (server-side)
-      const cookieStore = await cookies();
-      const token = cookieStore.get("access_token");
-      if (token?.value) {
-        return token.value;
-      }
-
-      // If running on client-side, try localStorage
-      if (typeof window !== "undefined") {
-        const user = localStorage.getItem("user");
-        if (user) {
-          const userData = JSON.parse(user);
-          if (userData.token) {
-            return userData.token;
-          }
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Error getting token:", error);
-      // If cookies() fails (client-side), try localStorage
-      if (typeof window !== "undefined") {
-        const user = localStorage.getItem("user");
-        if (user) {
-          const userData = JSON.parse(user);
-          if (userData.token) {
-            return userData.token;
-          }
-        }
-      }
-      return null;
-    }
-  }
-
   private async applyRequestInterceptors(config: RequestConfig): Promise<RequestConfig> {
     if (this.interceptors.onRequest) {
       return await this.interceptors.onRequest(config);
@@ -87,18 +48,14 @@ class ApiInstanc {
 
   private async makeRequest(method: string, config: RequestConfig, attempt: number = 0): Promise<any> {
     try {
-      const token = await this.getToken();
       const interceptedConfig = await this.applyRequestInterceptors(config);
 
       const fetchOptions: RequestInit = {
         method,
         headers: {},
+        // Ensure browser includes cookies set by backend
+        credentials: "include",
       };
-
-      // Attach Authorization header only when a valid token exists
-      if (token && typeof token === "string" && token.trim()) {
-        (fetchOptions.headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
-      }
 
       // Handle FormData differently from JSON
       if (method !== "GET" && interceptedConfig.body) {
@@ -123,43 +80,15 @@ class ApiInstanc {
       const interceptedResponse = await this.applyResponseInterceptors(response);
 
       if (!interceptedResponse.ok) {
-        if (interceptedResponse.status === 401 && attempt === 0) {
-          // Try refresh flow once
-          const cookieStore = await cookies();
-          const refreshTokenCookie = cookieStore.get("refresh_token");
-          if (refreshTokenCookie?.value) {
-            try {
-              const refreshRes = await fetch(`${this.baseURL}/api/auth/refresh`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refresh_token: refreshTokenCookie.value }),
-              });
-              if (refreshRes.ok) {
-                const tokenData = await refreshRes.json();
-                const data = tokenData?.data;
-                if (data?.access_token && data?.refresh_token) {
-                  await setAuthCookies({
-                    access_token: data.access_token,
-                    refresh_token: data.refresh_token,
-                    token_type: data.token_type,
-                    expires_in: data.expires_in,
-                  });
-                  return this.makeRequest(method, config, 1);
-                }
-              }
-            } catch {}
-          }
-          redirect("/");
-          return;
-        }
         const err = await interceptedResponse.json();
         throw err;
       }
 
       const data = await interceptedResponse.json();
       return data;
-    } catch (error) {
-      return this.applyErrorInterceptors(error);
+    } catch (error: any) {
+      await this.applyErrorInterceptors(error);
+      throw error;
     }
   }
 
@@ -204,37 +133,3 @@ FetchAPI.setInterceptors({
 });
 
 export default FetchAPI;
-
-// Helper to persist authentication tokens into secure cookies (server-side only)
-export async function setAuthCookies(params: { access_token: string; refresh_token: string; token_type?: string; expires_in?: number }) {
-  const cookieStore = await cookies();
-  const oneHour = 60 * 60;
-  const thirtyDays = 60 * 60 * 24 * 30;
-  const isProd = process.env.NODE_ENV === "production";
-
-  cookieStore.set("access_token", params.access_token, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax",
-    path: "/",
-    maxAge: typeof params.expires_in === "number" ? params.expires_in : oneHour,
-  });
-
-  cookieStore.set("refresh_token", params.refresh_token, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax",
-    path: "/",
-    maxAge: thirtyDays,
-  });
-
-  if (params.token_type) {
-    cookieStore.set("token_type", params.token_type, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      path: "/",
-      maxAge: thirtyDays,
-    });
-  }
-}

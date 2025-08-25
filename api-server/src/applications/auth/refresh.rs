@@ -23,5 +23,3 @@ pub async fn refresh(ctx: &AppContext, input: RefreshRequest) -> AppResult<Token
         expires_in: ctx.auth.access_ttl_seconds,
     })
 }
-
-

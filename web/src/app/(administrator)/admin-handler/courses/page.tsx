@@ -1,12 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import { listInstructorCourses } from "@/actions/courses/list.action";
 import { Plus, Edit, Eye, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
 import Image from "next/image";
-import DeleteCourseButton from "@/components/course/DeleteCourseButton";
 // Backend removed
 import Pagination from "@/common/Pagination";
-import { redirect } from "next/navigation";
+import { listInstructorCourses } from "@/actions/courses/list.action";
 
 /**
  * Course Management Page
@@ -17,20 +15,55 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
   const page = Number(sp.page ?? 1) || 1;
   const per_page = Number(sp.per_page ?? 10) || 10;
 
-  let courses: any[] = [];
-  let meta = { page, per_page, total: 0, total_pages: 1 };
-  try {
-    const res = await listInstructorCourses({ page, per_page });
-    console.log(res);
-    courses = res?.items ?? [];
-    if (res?.meta) meta = res.meta as any;
-    if (meta.page > meta.total_pages && meta.total_pages > 0) {
-      redirect(`/admin-handler/courses?page=${meta.total_pages}&per_page=${meta.per_page}`);
-    }
-  } catch (e) {
-    console.log(e);
-    courses = [];
-  }
+  console.log(await listInstructorCourses());
+
+  const courses: any[] = [
+    {
+      id: "1",
+      slug: "react-basics",
+      title: "React Basics",
+      description: "Learn the fundamentals of React and component-driven development.",
+      excerpt: "Learn the fundamentals of React...",
+      thumbnail: "/placeholder-logo.png",
+      price: 49,
+      original_price: 99,
+      duration: "6h 30m",
+      lessons: 24,
+      students: 320,
+      published: true,
+      featured: true,
+      view_count: 1280,
+      instructor: { id: "u1", username: "jdoe", full_name: "John Doe", avatar_url: "/placeholder-user.jpg" },
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "2",
+      slug: "typescript-for-beginners",
+      title: "TypeScript for Beginners",
+      description: "A practical guide to adding strong typing to your JavaScript projects.",
+      excerpt: "A practical guide to TypeScript...",
+      thumbnail: "/placeholder-logo.png",
+      price: 39,
+      original_price: null,
+      duration: "4h 10m",
+      lessons: 18,
+      students: 210,
+      published: false,
+      featured: false,
+      view_count: 670,
+      instructor: { id: "u2", username: "asmith", full_name: "Alice Smith", avatar_url: "/placeholder-user.jpg" },
+      created_at: new Date().toISOString(),
+    },
+  ];
+
+  const meta = {
+    page,
+    per_page,
+    total: courses.length,
+    total_pages: Math.max(1, Math.ceil(courses.length / per_page)),
+  };
+
+  const displayedCourses = courses.slice((page - 1) * per_page, page * per_page);
 
   return (
     <div className="space-y-6">
@@ -137,7 +170,7 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {courses.map((course: any) => (
+              {displayedCourses.map((course: any) => (
                 <tr key={course.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -213,7 +246,6 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
                       <Link href={`/admin-handler/courses/${course.id}/edit`} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" title="Edit Course">
                         <Edit className="w-4 h-4" />
                       </Link>
-                      <DeleteCourseButton courseId={course.id} courseTitle={course.title} />
                       <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300" title="More Options">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
