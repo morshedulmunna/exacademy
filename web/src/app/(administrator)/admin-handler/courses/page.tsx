@@ -12,20 +12,23 @@ import { redirect } from "next/navigation";
  * Course Management Page
  * Displays all courses with management options
  */
-export default async function CourseManagementPage({ searchParams }: { searchParams?: { page?: string; per_page?: string } }) {
-  const page = Number(searchParams?.page ?? 1) || 1;
-  const per_page = Number(searchParams?.per_page ?? 10) || 10;
+export default async function CourseManagementPage({ searchParams }: { searchParams?: Promise<{ page?: string; per_page?: string }> }) {
+  const sp = (await searchParams) ?? {};
+  const page = Number(sp.page ?? 1) || 1;
+  const per_page = Number(sp.per_page ?? 10) || 10;
 
   let courses: any[] = [];
   let meta = { page, per_page, total: 0, total_pages: 1 };
   try {
     const res = await listInstructorCourses({ page, per_page });
+    console.log(res);
     courses = res?.items ?? [];
     if (res?.meta) meta = res.meta as any;
     if (meta.page > meta.total_pages && meta.total_pages > 0) {
       redirect(`/admin-handler/courses?page=${meta.total_pages}&per_page=${meta.per_page}`);
     }
   } catch (e) {
+    console.log(e);
     courses = [];
   }
 

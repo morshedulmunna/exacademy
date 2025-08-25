@@ -33,10 +33,14 @@ export interface CourseListItem {
  * Backend endpoint: GET /api/v1/instructors/courses/list?page=&per_page=
  */
 export async function listInstructorCourses(params?: { page?: number; per_page?: number }) {
-  const page = params?.page ?? 1;
-  const per_page = params?.per_page ?? 10;
-  const endpoint = `/api/v1/instructors/courses/list?page=${page}&per_page=${per_page}`;
-  const res = await FetchAPI.get({ endpoint });
-  console.log(res?.data?.items);
-  return res?.data as Paginated<CourseListItem>;
+  try {
+    const page = params?.page ?? 1;
+    const per_page = params?.per_page ?? 10;
+    const endpoint = `/api/v1/instructors/courses/list?page=${page}&per_page=${per_page}`;
+    const res = await FetchAPI.get({ endpoint });
+
+    return res?.data as Paginated<CourseListItem>;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
 }

@@ -27,14 +27,10 @@ use utoipa::{Modify, OpenApi};
         crate::interfaces::http::handlers::users::update_user,
         // Courses
         crate::interfaces::http::handlers::courses::create_course,
-        crate::interfaces::http::handlers::courses::list_courses,
-        crate::interfaces::http::handlers::courses::list_courses_paginated,
         crate::interfaces::http::handlers::courses::get_course_by_id,
         crate::interfaces::http::handlers::courses::get_course_by_slug,
         crate::interfaces::http::handlers::courses::update_course,
         crate::interfaces::http::handlers::courses::delete_course,
-        crate::interfaces::http::handlers::courses::list_courses_by_instructor,
-        crate::interfaces::http::handlers::courses::list_courses_by_instructor_paginated,
         // Modules
         crate::interfaces::http::handlers::modules::list_modules,
         crate::interfaces::http::handlers::modules::create_module,

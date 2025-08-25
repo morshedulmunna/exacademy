@@ -2,15 +2,6 @@ use crate::pkg::error::AppResult;
 use crate::repositories::courses::CoursesRepository;
 use crate::types::course_types::{Course, Page, PageMeta};
 
-/// List all courses for an instructor.
-pub async fn list_courses(
-    repo: &dyn CoursesRepository,
-    instructor_id: uuid::Uuid,
-) -> AppResult<Vec<Course>> {
-    let records = repo.list_by_instructor(instructor_id).await?;
-    Ok(records.into_iter().map(Into::into).collect())
-}
-
 /// List instructor's courses with pagination.
 pub async fn list_courses_paginated_by_instructor(
     repo: &dyn CoursesRepository,

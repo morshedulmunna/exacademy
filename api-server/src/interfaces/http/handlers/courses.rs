@@ -32,39 +32,6 @@ pub async fn create_course(
 
 #[utoipa::path(
     get,
-    path = "/api/courses",
-    responses((status = 200, description = "Courses", body = [Course])),
-    tag = "Courses"
-)]
-pub async fn list_courses(
-    auth_user: AuthUser,
-    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
-) -> AppResult<(StatusCode, Json<Response<Vec<Course>>>)> {
-    let courses = service::list_courses(ctx.repos.courses.as_ref(), auth_user.user_id).await?;
-    let body = Response::with_data("Courses", courses, StatusCode::OK.as_u16());
-    Ok((StatusCode::OK, Json(body)))
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/courses/paginated",
-    params(("page" = Option<i64>, Query, description = "1-based page"), ("per_page" = Option<i64>, Query, description = "items per page")),
-    responses((status = 200, description = "Paginated courses", body = Page<Course>)),
-    tag = "Courses"
-)]
-pub async fn list_courses_paginated(
-    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
-    Query(q): Query<PaginationQuery>,
-) -> AppResult<(StatusCode, Json<Response<Page<Course>>>)> {
-    let page = q.page.unwrap_or(1);
-    let per_page = q.per_page.unwrap_or(10);
-    let data = service::list_courses_paginated(ctx.repos.courses.as_ref(), page, per_page).await?;
-    let body = Response::with_data("Courses", data, StatusCode::OK.as_u16());
-    Ok((StatusCode::OK, Json(body)))
-}
-
-#[utoipa::path(
-    get,
     path = "/api/courses/:id",
     responses((status = 200, description = "Course", body = Course)),
     tag = "Courses"
@@ -133,21 +100,6 @@ pub async fn delete_course(
 
 #[utoipa::path(
     get,
-    path = "/api/instructors/:id/courses",
-    responses((status = 200, description = "Courses by instructor", body = [Course])),
-    tag = "Courses"
-)]
-pub async fn list_courses_by_instructor(
-    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
-    Path(id): Path<uuid::Uuid>,
-) -> AppResult<(StatusCode, Json<Response<Vec<Course>>>)> {
-    let courses = service::list_courses(ctx.repos.courses.as_ref(), id).await?;
-    let body = Response::with_data("Courses", courses, StatusCode::OK.as_u16());
-    Ok((StatusCode::OK, Json(body)))
-}
-
-#[utoipa::path(
-    get,
     path = "/api/instructors/:id/courses/paginated",
     params(("page" = Option<i64>, Query, description = "1-based page"), ("per_page" = Option<i64>, Query, description = "items per page")),
     responses((status = 200, description = "Paginated courses by instructor", body = Page<Course>)),
@@ -160,6 +112,7 @@ pub async fn list_courses_by_instructor_paginated(
 ) -> AppResult<(StatusCode, Json<Response<Page<Course>>>)> {
     let page = q.page.unwrap_or(1);
     let per_page = q.per_page.unwrap_or(10);
+
     let data = service::list_courses_paginated_by_instructor(
         ctx.repos.courses.as_ref(),
         auth_user.user_id,

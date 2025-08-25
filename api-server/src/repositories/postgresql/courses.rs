@@ -36,84 +36,6 @@ impl CoursesRepository for PostgresCoursesRepository {
         Ok(rec.get("id"))
     }
 
-    async fn list_all(&self) -> AppResult<Vec<CourseRecord>> {
-        let rows = sqlx::query(
-            r#"SELECT id, slug, title, description, excerpt, thumbnail,
-                       price, original_price, duration, lessons, students,
-                       published, featured, view_count, instructor_id,
-                       published_at, created_at, updated_at
-               FROM courses
-               ORDER BY created_at DESC"#,
-        )
-        .fetch_all(&self.pool)
-        .await
-        .map_err(AppError::from)?;
-        Ok(rows
-            .into_iter()
-            .map(|row| CourseRecord {
-                id: row.get("id"),
-                slug: row.get("slug"),
-                title: row.get("title"),
-                description: row.get("description"),
-                excerpt: row.try_get("excerpt").ok(),
-                thumbnail: row.try_get("thumbnail").ok(),
-                price: row.get("price"),
-                original_price: row.try_get("original_price").ok(),
-                duration: row.get("duration"),
-                lessons: row.get("lessons"),
-                students: row.get("students"),
-                published: row.get("published"),
-                featured: row.get("featured"),
-                view_count: row.get("view_count"),
-                instructor_id: row.try_get("instructor_id").ok(),
-                instructor: None,
-                published_at: row.try_get("published_at").ok(),
-                created_at: row.get("created_at"),
-                updated_at: row.try_get("updated_at").ok(),
-            })
-            .collect())
-    }
-
-    async fn list_by_instructor(&self, instructor_id: uuid::Uuid) -> AppResult<Vec<CourseRecord>> {
-        let rows = sqlx::query(
-            r#"SELECT id, slug, title, description, excerpt, thumbnail,
-                       price, original_price, duration, lessons, students,
-                       published, featured, view_count, instructor_id,
-                       published_at, created_at, updated_at
-               FROM courses
-               WHERE instructor_id = $1
-               ORDER BY created_at DESC"#,
-        )
-        .bind(instructor_id)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(AppError::from)?;
-        Ok(rows
-            .into_iter()
-            .map(|row| CourseRecord {
-                id: row.get("id"),
-                slug: row.get("slug"),
-                title: row.get("title"),
-                description: row.get("description"),
-                excerpt: row.try_get("excerpt").ok(),
-                thumbnail: row.try_get("thumbnail").ok(),
-                price: row.get("price"),
-                original_price: row.try_get("original_price").ok(),
-                duration: row.get("duration"),
-                lessons: row.get("lessons"),
-                students: row.get("students"),
-                published: row.get("published"),
-                featured: row.get("featured"),
-                view_count: row.get("view_count"),
-                instructor_id: row.try_get("instructor_id").ok(),
-                instructor: None,
-                published_at: row.try_get("published_at").ok(),
-                created_at: row.get("created_at"),
-                updated_at: row.try_get("updated_at").ok(),
-            })
-            .collect())
-    }
-
     async fn list_by_instructor_paginated(
         &self,
         instructor_id: uuid::Uuid,
@@ -148,39 +70,6 @@ impl CoursesRepository for PostgresCoursesRepository {
                 .fetch_one(&self.pool)
                 .await
                 .map_err(AppError::from)?;
-
-        let items: Vec<CourseRecord> = rows
-            .into_iter()
-            .map(map_course_row_with_instructor)
-            .collect();
-        Ok((items, count_row.0))
-    }
-
-    async fn list_paginated(&self, offset: i64, limit: i64) -> AppResult<(Vec<CourseRecord>, i64)> {
-        // fetch items
-        let rows = sqlx::query(
-            r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
-                       c.price, c.original_price, c.duration, c.lessons, c.students,
-                       c.published, c.featured, c.view_count, c.instructor_id,
-                       c.published_at, c.created_at, c.updated_at,
-                       u.id as instructor_id_join, u.username as instructor_username,
-                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
-               FROM courses c
-               LEFT JOIN users u ON u.id = c.instructor_id
-               ORDER BY c.created_at DESC
-               OFFSET $1 LIMIT $2"#,
-        )
-        .bind(offset)
-        .bind(limit)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(AppError::from)?;
-
-        // fetch total count
-        let count_row: (i64,) = sqlx::query_as(r#"SELECT COUNT(*) as count FROM courses"#)
-            .fetch_one(&self.pool)
-            .await
-            .map_err(AppError::from)?;
 
         let items: Vec<CourseRecord> = rows
             .into_iter()
