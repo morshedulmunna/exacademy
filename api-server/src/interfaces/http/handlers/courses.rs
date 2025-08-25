@@ -155,14 +155,14 @@ pub async fn list_courses_by_instructor(
 )]
 pub async fn list_courses_by_instructor_paginated(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
-    Path(id): Path<uuid::Uuid>,
+    auth_user: AuthUser,
     Query(q): Query<PaginationQuery>,
 ) -> AppResult<(StatusCode, Json<Response<Page<Course>>>)> {
     let page = q.page.unwrap_or(1);
     let per_page = q.per_page.unwrap_or(10);
     let data = service::list_courses_paginated_by_instructor(
         ctx.repos.courses.as_ref(),
-        id,
+        auth_user.user_id,
         page,
         per_page,
     )

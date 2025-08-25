@@ -1,5 +1,14 @@
 use crate::pkg::error::AppResult;
 
+/// Summary of an instructor joined from users table for embedding in course records
+#[derive(Debug, Clone)]
+pub struct InstructorSummary {
+    pub id: uuid::Uuid,
+    pub username: String,
+    pub full_name: Option<String>,
+    pub avatar_url: Option<String>,
+}
+
 /// Domain model for a course as persisted in the database layer
 #[derive(Debug, Clone)]
 pub struct CourseRecord {
@@ -18,6 +27,8 @@ pub struct CourseRecord {
     pub featured: bool,
     pub view_count: i32,
     pub instructor_id: Option<uuid::Uuid>,
+    /// Joined instructor summary when available
+    pub instructor: Option<InstructorSummary>,
     pub published_at: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -33,7 +44,6 @@ pub struct CreateCourseRecord {
     pub price: f64,
     pub original_price: Option<f64>,
     pub duration: String,
-    pub lessons: i32,
     pub featured: bool,
     pub instructor_id: Option<uuid::Uuid>,
 }

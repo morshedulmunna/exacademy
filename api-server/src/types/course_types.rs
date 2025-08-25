@@ -21,9 +21,18 @@ pub struct Course {
     pub featured: bool,
     pub view_count: i32,
     pub instructor_id: Option<Uuid>,
+    pub instructor: Option<Instructor>,
     pub published_at: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct Instructor {
+    pub id: Uuid,
+    pub username: String,
+    pub full_name: Option<String>,
+    pub avatar_url: Option<String>,
 }
 
 /// Pagination query for list endpoints
@@ -100,9 +109,7 @@ pub struct CreateCourseRequest {
     pub original_price: Option<f64>,
     #[validate(length(min = 1))]
     pub duration: String,
-    pub lessons: i32,
     pub featured: bool,
-    pub instructor_id: Option<Uuid>,
 }
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]

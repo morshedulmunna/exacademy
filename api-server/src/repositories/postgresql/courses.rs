@@ -2,7 +2,7 @@ use sqlx::Row;
 
 use crate::pkg::error::{AppError, AppResult};
 use crate::repositories::courses::{
-    CourseRecord, CoursesRepository, CreateCourseRecord, UpdateCourseRecord,
+    CourseRecord, CoursesRepository, CreateCourseRecord, InstructorSummary, UpdateCourseRecord,
 };
 
 pub struct PostgresCoursesRepository {
@@ -15,9 +15,9 @@ impl CoursesRepository for PostgresCoursesRepository {
         let rec = sqlx::query(
             r#"INSERT INTO courses (
                     slug, title, description, excerpt, thumbnail,
-                    price, original_price, duration, lessons, featured, instructor_id
+                    price, original_price, duration, featured, instructor_id
                 ) VALUES (
-                    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+                    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10
                 ) RETURNING id"#,
         )
         .bind(&input.slug)
@@ -28,7 +28,6 @@ impl CoursesRepository for PostgresCoursesRepository {
         .bind(input.price)
         .bind(&input.original_price)
         .bind(&input.duration)
-        .bind(input.lessons)
         .bind(input.featured)
         .bind(&input.instructor_id)
         .fetch_one(&self.pool)
@@ -49,7 +48,30 @@ impl CoursesRepository for PostgresCoursesRepository {
         .fetch_all(&self.pool)
         .await
         .map_err(AppError::from)?;
-        Ok(rows.into_iter().map(map_course_row).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| CourseRecord {
+                id: row.get("id"),
+                slug: row.get("slug"),
+                title: row.get("title"),
+                description: row.get("description"),
+                excerpt: row.try_get("excerpt").ok(),
+                thumbnail: row.try_get("thumbnail").ok(),
+                price: row.get("price"),
+                original_price: row.try_get("original_price").ok(),
+                duration: row.get("duration"),
+                lessons: row.get("lessons"),
+                students: row.get("students"),
+                published: row.get("published"),
+                featured: row.get("featured"),
+                view_count: row.get("view_count"),
+                instructor_id: row.try_get("instructor_id").ok(),
+                instructor: None,
+                published_at: row.try_get("published_at").ok(),
+                created_at: row.get("created_at"),
+                updated_at: row.try_get("updated_at").ok(),
+            })
+            .collect())
     }
 
     async fn list_by_instructor(&self, instructor_id: uuid::Uuid) -> AppResult<Vec<CourseRecord>> {
@@ -66,7 +88,30 @@ impl CoursesRepository for PostgresCoursesRepository {
         .fetch_all(&self.pool)
         .await
         .map_err(AppError::from)?;
-        Ok(rows.into_iter().map(map_course_row).collect())
+        Ok(rows
+            .into_iter()
+            .map(|row| CourseRecord {
+                id: row.get("id"),
+                slug: row.get("slug"),
+                title: row.get("title"),
+                description: row.get("description"),
+                excerpt: row.try_get("excerpt").ok(),
+                thumbnail: row.try_get("thumbnail").ok(),
+                price: row.get("price"),
+                original_price: row.try_get("original_price").ok(),
+                duration: row.get("duration"),
+                lessons: row.get("lessons"),
+                students: row.get("students"),
+                published: row.get("published"),
+                featured: row.get("featured"),
+                view_count: row.get("view_count"),
+                instructor_id: row.try_get("instructor_id").ok(),
+                instructor: None,
+                published_at: row.try_get("published_at").ok(),
+                created_at: row.get("created_at"),
+                updated_at: row.try_get("updated_at").ok(),
+            })
+            .collect())
     }
 
     async fn list_by_instructor_paginated(
@@ -77,13 +122,16 @@ impl CoursesRepository for PostgresCoursesRepository {
     ) -> AppResult<(Vec<CourseRecord>, i64)> {
         // fetch items
         let rows = sqlx::query(
-            r#"SELECT id, slug, title, description, excerpt, thumbnail,
-                       price, original_price, duration, lessons, students,
-                       published, featured, view_count, instructor_id,
-                       published_at, created_at, updated_at
-               FROM courses
-               WHERE instructor_id = $1
-               ORDER BY created_at DESC
+            r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
+                       c.price, c.original_price, c.duration, c.lessons, c.students,
+                       c.published, c.featured, c.view_count, c.instructor_id,
+                       c.published_at, c.created_at, c.updated_at,
+                       u.id as instructor_id_join, u.username as instructor_username,
+                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
+               FROM courses c
+               LEFT JOIN users u ON u.id = c.instructor_id
+               WHERE c.instructor_id = $1
+               ORDER BY c.created_at DESC
                OFFSET $2 LIMIT $3"#,
         )
         .bind(instructor_id)
@@ -101,19 +149,25 @@ impl CoursesRepository for PostgresCoursesRepository {
                 .await
                 .map_err(AppError::from)?;
 
-        let items: Vec<CourseRecord> = rows.into_iter().map(map_course_row).collect();
+        let items: Vec<CourseRecord> = rows
+            .into_iter()
+            .map(map_course_row_with_instructor)
+            .collect();
         Ok((items, count_row.0))
     }
 
     async fn list_paginated(&self, offset: i64, limit: i64) -> AppResult<(Vec<CourseRecord>, i64)> {
         // fetch items
         let rows = sqlx::query(
-            r#"SELECT id, slug, title, description, excerpt, thumbnail,
-                       price, original_price, duration, lessons, students,
-                       published, featured, view_count, instructor_id,
-                       published_at, created_at, updated_at
-               FROM courses
-               ORDER BY created_at DESC
+            r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
+                       c.price, c.original_price, c.duration, c.lessons, c.students,
+                       c.published, c.featured, c.view_count, c.instructor_id,
+                       c.published_at, c.created_at, c.updated_at,
+                       u.id as instructor_id_join, u.username as instructor_username,
+                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
+               FROM courses c
+               LEFT JOIN users u ON u.id = c.instructor_id
+               ORDER BY c.created_at DESC
                OFFSET $1 LIMIT $2"#,
         )
         .bind(offset)
@@ -128,38 +182,49 @@ impl CoursesRepository for PostgresCoursesRepository {
             .await
             .map_err(AppError::from)?;
 
-        let items: Vec<CourseRecord> = rows.into_iter().map(map_course_row).collect();
+        let items: Vec<CourseRecord> = rows
+            .into_iter()
+            .map(map_course_row_with_instructor)
+            .collect();
         Ok((items, count_row.0))
     }
 
     async fn find_by_id(&self, id: uuid::Uuid) -> AppResult<Option<CourseRecord>> {
         let row = sqlx::query(
-            r#"SELECT id, slug, title, description, excerpt, thumbnail,
-                       price, original_price, duration, lessons, students,
-                       published, featured, view_count, instructor_id,
-                       published_at, created_at, updated_at
-               FROM courses WHERE id = $1"#,
+            r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
+                       c.price, c.original_price, c.duration, c.lessons, c.students,
+                       c.published, c.featured, c.view_count, c.instructor_id,
+                       c.published_at, c.created_at, c.updated_at,
+                       u.id as instructor_id_join, u.username as instructor_username,
+                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
+               FROM courses c
+               LEFT JOIN users u ON u.id = c.instructor_id
+               WHERE c.id = $1"#,
         )
         .bind(id)
         .fetch_optional(&self.pool)
         .await
         .map_err(AppError::from)?;
-        Ok(row.map(map_course_row))
+        Ok(row.map(map_course_row_with_instructor))
     }
 
     async fn find_by_slug(&self, slug: &str) -> AppResult<Option<CourseRecord>> {
         let row = sqlx::query(
-            r#"SELECT id, slug, title, description, excerpt, thumbnail,
-                       price, original_price, duration, lessons, students,
-                       published, featured, view_count, instructor_id,
-                       published_at, created_at, updated_at
-               FROM courses WHERE slug = $1"#,
+            r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
+                       c.price, c.original_price, c.duration, c.lessons, c.students,
+                       c.published, c.featured, c.view_count, c.instructor_id,
+                       c.published_at, c.created_at, c.updated_at,
+                       u.id as instructor_id_join, u.username as instructor_username,
+                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
+               FROM courses c
+               LEFT JOIN users u ON u.id = c.instructor_id
+               WHERE c.slug = $1"#,
         )
         .bind(slug)
         .fetch_optional(&self.pool)
         .await
         .map_err(AppError::from)?;
-        Ok(row.map(map_course_row))
+        Ok(row.map(map_course_row_with_instructor))
     }
 
     async fn update_partial(
@@ -202,7 +267,27 @@ impl CoursesRepository for PostgresCoursesRepository {
         .await
         .map_err(AppError::from)?;
 
-        Ok(row.map(map_course_row))
+        Ok(row.map(|row| CourseRecord {
+            id: row.get("id"),
+            slug: row.get("slug"),
+            title: row.get("title"),
+            description: row.get("description"),
+            excerpt: row.try_get("excerpt").ok(),
+            thumbnail: row.try_get("thumbnail").ok(),
+            price: row.get("price"),
+            original_price: row.try_get("original_price").ok(),
+            duration: row.get("duration"),
+            lessons: row.get("lessons"),
+            students: row.get("students"),
+            published: row.get("published"),
+            featured: row.get("featured"),
+            view_count: row.get("view_count"),
+            instructor_id: row.try_get("instructor_id").ok(),
+            instructor: None,
+            published_at: row.try_get("published_at").ok(),
+            created_at: row.get("created_at"),
+            updated_at: row.try_get("updated_at").ok(),
+        }))
     }
 
     async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()> {
@@ -215,7 +300,17 @@ impl CoursesRepository for PostgresCoursesRepository {
     }
 }
 
-fn map_course_row(row: sqlx::postgres::PgRow) -> CourseRecord {
+fn map_course_row_with_instructor(row: sqlx::postgres::PgRow) -> CourseRecord {
+    let instructor: Option<InstructorSummary> = row
+        .try_get::<uuid::Uuid, _>("instructor_id_join")
+        .ok()
+        .map(|id| InstructorSummary {
+            id,
+            username: row.try_get("instructor_username").ok().unwrap_or_default(),
+            full_name: row.try_get("instructor_full_name").ok(),
+            avatar_url: row.try_get("instructor_avatar_url").ok(),
+        });
+
     CourseRecord {
         id: row.get("id"),
         slug: row.get("slug"),
@@ -232,6 +327,7 @@ fn map_course_row(row: sqlx::postgres::PgRow) -> CourseRecord {
         featured: row.get("featured"),
         view_count: row.get("view_count"),
         instructor_id: row.try_get("instructor_id").ok(),
+        instructor,
         published_at: row.try_get("published_at").ok(),
         created_at: row.get("created_at"),
         updated_at: row.try_get("updated_at").ok(),

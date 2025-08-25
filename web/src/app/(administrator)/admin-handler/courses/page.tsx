@@ -1,17 +1,33 @@
 import React from "react";
 import Link from "next/link";
-// Backend removed; keep static admin UI only
+import { listInstructorCourses } from "@/actions/courses/list.action";
 import { Plus, Edit, Eye, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
 import Image from "next/image";
 import DeleteCourseButton from "@/components/course/DeleteCourseButton";
 // Backend removed
+import Pagination from "@/common/Pagination";
+import { redirect } from "next/navigation";
 
 /**
  * Course Management Page
  * Displays all courses with management options
  */
-export default async function CourseManagementPage() {
-  const courses: any[] = [];
+export default async function CourseManagementPage({ searchParams }: { searchParams?: { page?: string; per_page?: string } }) {
+  const page = Number(searchParams?.page ?? 1) || 1;
+  const per_page = Number(searchParams?.per_page ?? 10) || 10;
+
+  let courses: any[] = [];
+  let meta = { page, per_page, total: 0, total_pages: 1 };
+  try {
+    const res = await listInstructorCourses({ page, per_page });
+    courses = res?.items ?? [];
+    if (res?.meta) meta = res.meta as any;
+    if (meta.page > meta.total_pages && meta.total_pages > 0) {
+      redirect(`/admin-handler/courses?page=${meta.total_pages}&per_page=${meta.per_page}`);
+    }
+  } catch (e) {
+    courses = [];
+  }
 
   return (
     <div className="space-y-6">
@@ -147,11 +163,11 @@ export default async function CourseManagementPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-8 w-8">
-                        <Image src={"/placeholder-user.jpg"} alt={"Instructor"} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+                        <Image src={course.instructor?.avatar_url || "/placeholder-user.jpg"} alt={course.instructor?.username || "Instructor"} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
                       </div>
                       <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">Instructor</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">—</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{course.instructor?.full_name || course.instructor?.username || "—"}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{course.instructor?.username || "—"}</div>
                       </div>
                     </div>
                   </td>
@@ -222,6 +238,22 @@ export default async function CourseManagementPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="mt-6">
+        <Pagination numberOfData={meta.total} limits={meta.per_page} activePage={meta.page} />
+        <div className="mt-3 flex items-center gap-2">
+          <Link href={`/admin-handler/courses?page=${Math.max(1, meta.page - 1)}&per_page=${meta.per_page}`} className="px-3 py-1.5 border rounded-md">
+            Prev
+          </Link>
+          <Link href={`/admin-handler/courses?page=${Math.min(meta.total_pages, meta.page + 1)}&per_page=${meta.per_page}`} className="px-3 py-1.5 border rounded-md">
+            Next
+          </Link>
+          <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">
+            Page {meta.page} of {Math.max(1, meta.total_pages)}
+          </div>
+        </div>
       </div>
     </div>
   );

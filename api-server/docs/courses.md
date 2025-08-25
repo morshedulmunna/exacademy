@@ -2,7 +2,7 @@
 
 Base URL: `http://127.0.0.1:8080`
 
-All responses are wrapped in the standard envelope documented in `./index.mdx`.
+All responses are wrapped in the standard envelope documented in `./index.md`.
 
 Authentication:
 
@@ -132,7 +132,62 @@ Response 200 (data truncated):
 Example:
 
 ```bash
-curl http://127.0.0.1:8080/api/instructors/<instructor_uuid>/courses
+curl http://127.0.0.1:8080/api/v1/instructors/courses/list
+```
+
+## List Courses by Instructor ID (Paginated)
+
+- GET `/api/v1/instructors/courses/list`
+
+Query params:
+
+- `page` (optional, default: 1) — 1-based page number
+- `per_page` (optional, default: 10, max: 100) — items per page
+
+Response 200:
+
+```json
+{
+  "message": "Courses",
+  "timestamp": "2024-01-01T12:34:56.789Z",
+  "status_code": 200,
+  "data": {
+    "items": [
+      {
+        "id": "<uuid>",
+        "slug": "rust-for-beginners",
+        "title": "Rust for Beginners",
+        "description": "...",
+        "excerpt": null,
+        "thumbnail": null,
+        "price": 99.0,
+        "original_price": null,
+        "duration": "5h",
+        "lessons": 20,
+        "students": 0,
+        "published": false,
+        "featured": false,
+        "view_count": 0,
+        "instructor_id": "<uuid>",
+        "published_at": null,
+        "created_at": "...",
+        "updated_at": null
+      }
+    ],
+    "meta": {
+      "page": 1,
+      "per_page": 10,
+      "total": 42,
+      "total_pages": 5
+    }
+  }
+}
+```
+
+Example:
+
+```bash
+curl "http://127.0.0.1:8080/api/instructors/<instructor_uuid>/courses/paginated?page=1&per_page=10"
 ```
 
 ## List Courses (Paginated)

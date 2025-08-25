@@ -17,8 +17,8 @@ pub use list::list_courses_paginated_by_instructor;
 pub use list_paginated::list_courses_paginated;
 pub use update_by_id::update_course_by_id;
 
-use crate::repositories::courses::CourseRecord;
-use crate::types::course_types::Course;
+use crate::repositories::courses::{CourseRecord, InstructorSummary};
+use crate::types::course_types::{Course, Instructor};
 
 impl From<CourseRecord> for Course {
     fn from(record: CourseRecord) -> Self {
@@ -38,6 +38,12 @@ impl From<CourseRecord> for Course {
             featured: record.featured,
             view_count: record.view_count,
             instructor_id: record.instructor_id,
+            instructor: record.instructor.map(|ins: InstructorSummary| Instructor {
+                id: ins.id,
+                username: ins.username,
+                full_name: ins.full_name,
+                avatar_url: ins.avatar_url,
+            }),
             published_at: record.published_at,
             created_at: record.created_at,
             updated_at: record.updated_at,

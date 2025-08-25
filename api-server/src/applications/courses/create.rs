@@ -18,7 +18,6 @@ pub async fn create_course(
             price: input.price,
             original_price: input.original_price,
             duration: input.duration,
-            lessons: input.lessons,
             featured: input.featured,
             instructor_id: Some(instructor_id),
         })

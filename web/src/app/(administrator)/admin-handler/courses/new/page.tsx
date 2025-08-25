@@ -10,6 +10,7 @@ import Image from "next/image";
 import type { Tag } from "@/lib/types";
 import RichTextEditor from "@/components/rich-text-editor";
 // Backend removed
+import { createCourse } from "@/actions/courses/create.action";
 
 /**
  * Course Creation Page
@@ -124,14 +125,13 @@ export default function CreateCoursePage() {
         thumbnail: formData.thumbnail || undefined,
         price: Number(formData.price || 0),
         original_price: formData.originalPrice ? Number(formData.originalPrice) : undefined,
-        duration: formData.duration || "",
-        lessons: Number(formData.lessons || 0),
+        duration: formData.duration,
         featured: !!formData.featured,
-        instructor_id: undefined,
       };
 
-      // Backend removed: simulate success and navigate back
+      await createCourse(payload);
       router.push(`/admin-handler/courses`);
+      router.refresh();
     } catch (error) {
       console.error("Error creating course:", error);
       // Handle error (show toast notification)
