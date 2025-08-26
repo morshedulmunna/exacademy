@@ -1,10 +1,10 @@
 use axum::{Extension, Json, http::StatusCode};
 
+use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::auth::AuthUser;
 use crate::pkg::error::AppResult;
 use crate::{applications::users as users_service, types::user_types::UserProfile};
-use crate::configs::app_context::AppContext;
 
 /// Get a user profile by id
 #[utoipa::path(
@@ -13,7 +13,7 @@ use crate::configs::app_context::AppContext;
     security(("bearerAuth" = [])),
     responses(
         (status = 200, description = "User profile", body = UserProfile),
-        (status = 404, description = "Not found", body = crate::pkg::response::ApiErrorResponse)
+        (status = 404, description = "Not found", body = ApiErrorResponse)
     ),
     tag = "Users"
 )]
@@ -26,5 +26,3 @@ pub async fn get_user(
     let body = Response::with_data("User profile", user, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
-
-

@@ -328,7 +328,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/crate.pkg.response.ApiErrorResponse'
+                $ref: '#/components/schemas/ApiErrorResponse'
       security:
       - bearerAuth: []
   /api/users/me:
@@ -565,6 +565,23 @@ components:
           format: int32
         title:
           type: string
+    Instructor:
+      type: object
+      required:
+      - id
+      - username
+      properties:
+        avatar_url:
+          type: string
+          nullable: true
+        full_name:
+          type: string
+          nullable: true
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
     Lesson:
       type: object
       required:
@@ -721,6 +738,13 @@ components:
         id:
           type: string
           format: uuid
+    ResendOtpRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
     TokenResponse:
       type: object
       required:
@@ -971,6 +995,16 @@ components:
         role:
           type: string
         username:
+          type: string
+    VerifyOtpRequest:
+      type: object
+      required:
+      - email
+      - code
+      properties:
+        code:
+          type: string
+        email:
           type: string
   securitySchemes:
     bearerAuth:

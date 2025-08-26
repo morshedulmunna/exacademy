@@ -57,8 +57,11 @@ use utoipa::{Modify, OpenApi};
             crate::types::user_types::UserResponse,
             crate::types::user_types::UserProfile,
             crate::types::user_types::UpdateUserRequest,
+            crate::types::user_types::ResendOtpRequest,
+            crate::types::user_types::VerifyOtpRequest,
             // Courses & content
             crate::types::course_types::Course,
+            crate::types::course_types::Instructor,
             crate::types::course_types::PaginationQuery,
             crate::types::course_types::PageMeta,
             crate::types::course_types::CreateCourseRequest,

@@ -12,7 +12,7 @@ pub fn openapi_command() -> Result<(), Box<dyn std::error::Error>> {
     let yaml = serde_yaml::to_string(&openapi)?;
 
     // Write to file
-    let output_path = "swagger.yml";
+    let output_path = "openapi.yml";
     fs::write(output_path, yaml)?;
 
     println!("✅ OpenAPI documentation generated successfully!");
