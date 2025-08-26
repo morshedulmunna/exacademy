@@ -1,5 +1,5 @@
 import React from "react";
-import { AdminSidebar, AdminTopBar, SidebarProvider } from "./_@components";
+import { AdminSidebar, AdminTopBar, SidebarProvider } from "./admin/_@components";
 
 type Props = {
   children: React.ReactNode;
