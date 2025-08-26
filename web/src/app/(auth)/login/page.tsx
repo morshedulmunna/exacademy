@@ -16,6 +16,27 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
+  // Clear user info and cookies when component mounts
+  useEffect(() => {
+    // Clear user info from localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+    }
+
+    // Clear cookies
+    if (typeof document !== "undefined") {
+      // Remove access token cookie
+      document.cookie = "access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+
+      // Remove refresh token cookie
+      document.cookie = "refresh_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+
+      // Also try to remove with secure flag for HTTPS
+      document.cookie = "access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure";
+      document.cookie = "refresh_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure";
+    }
+  }, []);
+
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email address").required("Email is required"),
     password: Yup.string().min(8, "Password must be at least 8 characters").max(72).required("Password is required"),
