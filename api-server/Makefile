@@ -15,7 +15,7 @@ BIN ?= execute_academy
 # Default subcommand for `cargo run -- <CMD>`
 CMD ?= execute_academy-apis
 
-.PHONY: help dev run build build-release test fmt fmt-check clippy check clean migrate migrate-down sqlx-install seed
+.PHONY: help dev run build build-release test fmt fmt-check clippy check clean migrate migrate-down sqlx-install seed openapi
 
 help:
 	@echo "Available targets:"
@@ -34,6 +34,7 @@ help:
 	@echo "  sqlx-install    - Install sqlx-cli (rustls, postgres)"
 	@echo "  docs            - Build rustdoc and open in browser"
 	@echo "  seed            - Seed default admin user (idempotent)"
+	@echo "  openapi         - Generate OpenAPI YAML documentation"
 
 # Hot-reload dev server (requires cargo-watch: cargo install cargo-watch)
 dev:
@@ -58,6 +59,10 @@ sqlx-install:
 # Seed default admin user (idempotent; reads env or uses defaults)
 seed:
 	cargo run -- seed
+
+# Generate OpenAPI YAML documentation
+openapi:
+	cargo run -- openapi
 
 build:
 	cargo build

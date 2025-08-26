@@ -3,6 +3,7 @@ pub mod users;
 pub mod courses;
 pub mod modules;
 pub mod lessons;
+pub mod media;
 pub use crate::interfaces::http::handlers::root::handler;
 
 use crate::interfaces::http::handlers::health;
@@ -18,4 +19,5 @@ pub fn router() -> Router {
         .merge(courses::router())
         .merge(modules::router())
         .merge(lessons::router())
+        .merge(media::router())
 }

@@ -35,6 +35,9 @@ impl RootCommand {
                 let rt = tokio::runtime::Runtime::new()?;
                 rt.block_on(crate::cmd::seed::seed_command())?;
             }
+            "openapi" => {
+                crate::cmd::openapi::openapi_command()?;
+            }
             "--help" | "-h" | "help" => {
                 self.print_help();
             }
@@ -58,6 +61,7 @@ impl RootCommand {
         println!("  grpc    - Run gRPC server");
         println!("  migrate - Run SQLx database migrations (Postgres)");
         println!("  seed    - Seed default admin user (idempotent)");
+        println!("  openapi - Generate OpenAPI YAML documentation");
         println!();
         println!("Options:");
         println!("  --help, -h, help  - Show this help message");

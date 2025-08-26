@@ -1,15 +1,15 @@
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
+pub mod courses;
+pub mod lessons;
+pub mod modules;
 pub mod postgresql;
 pub mod users;
-pub mod courses;
-pub mod modules;
-pub mod lessons;
 
-use users::UsersRepository;
 use courses::CoursesRepository;
-use modules::ModulesRepository;
 use lessons::LessonsRepository;
+use modules::ModulesRepository;
+use users::UsersRepository;
 
 /// Central registry for all repositories.
 ///
@@ -30,15 +30,23 @@ impl Repositories {
             crate::repositories::postgresql::users::PostgresUsersRepository { pool: pool.clone() },
         );
         let courses: Arc<dyn CoursesRepository> = Arc::new(
-            crate::repositories::postgresql::courses::PostgresCoursesRepository { pool: pool.clone() },
+            crate::repositories::postgresql::courses::PostgresCoursesRepository {
+                pool: pool.clone(),
+            },
         );
         let modules: Arc<dyn ModulesRepository> = Arc::new(
-            crate::repositories::postgresql::modules::PostgresModulesRepository { pool: pool.clone() },
+            crate::repositories::postgresql::modules::PostgresModulesRepository {
+                pool: pool.clone(),
+            },
         );
-        let lessons: Arc<dyn LessonsRepository> = Arc::new(
-            crate::repositories::postgresql::lessons::PostgresLessonsRepository { pool },
-        );
+        let lessons: Arc<dyn LessonsRepository> =
+            Arc::new(crate::repositories::postgresql::lessons::PostgresLessonsRepository { pool });
 
-        Self { users, courses, modules, lessons }
+        Self {
+            users,
+            courses,
+            modules,
+            lessons,
+        }
     }
 }

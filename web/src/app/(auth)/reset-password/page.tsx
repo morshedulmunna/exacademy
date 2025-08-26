@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { resetPasswordAction } from "@/actions/auth/password.action";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const params = useSearchParams();
   const email = useMemo(() => params.get("email") || "", [params]);
   const router = useRouter();
@@ -111,5 +111,36 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full mt-24 max-w-sm sm:max-w-md md:max-w-lg mx-auto">
+          <div className="bg-white/80 dark:bg-black/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-gray-900 shadow-sm">
+            <div className="text-center mb-4 sm:mb-6">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">Reset password</h1>
+              <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">Loading...</p>
+            </div>
+            <div className="animate-pulse">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="w-10 h-12 sm:w-12 sm:h-14 bg-gray-300 dark:bg-gray-700 rounded-lg"></div>
+                ))}
+              </div>
+              <div className="mb-3">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-1"></div>
+                <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded"></div>
+              </div>
+              <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

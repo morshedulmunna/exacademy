@@ -1,10 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import { Plus, Edit, Eye, Calendar, User, BookOpen, DollarSign, Users, Clock, Search, Filter, MoreHorizontal, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
+import { Plus, BookOpen, DollarSign, Users, Search, Filter, Calendar, Clock, Star, EyeOff, Eye as EyeIcon } from "lucide-react";
 import Image from "next/image";
-// Backend removed
 import Pagination from "@/common/Pagination";
 import { listInstructorCourses } from "@/actions/courses/list.action";
+import CourseActions from "@/components/course/CourseActions";
 
 /**
  * Course Management Page
@@ -193,17 +193,7 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
-                      <Link href={`/course/${course.slug}`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="View Course">
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                      <Link href={`/admin-handler/courses/${course.id}/edit`} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" title="Edit Course">
-                        <Edit className="w-4 h-4" />
-                      </Link>
-                      <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300" title="More Options">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <CourseActions courseId={course.id} courseTitle={course.title} courseSlug={course.slug} />
                   </td>
                 </tr>
               ))}

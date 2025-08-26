@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function GithubCallbackPage() {
+function GithubCallbackForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -64,5 +64,24 @@ export default function GithubCallbackPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GithubCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full mt-24 max-w-sm sm:max-w-md md:max-w-lg mx-auto">
+          <div className="bg-white/80 dark:bg-black/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-900 shadow-sm">
+            <div className="text-center mb-6 sm:mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Loading...</h1>
+              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">Initializing GitHub login</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <GithubCallbackForm />
+    </Suspense>
   );
 }

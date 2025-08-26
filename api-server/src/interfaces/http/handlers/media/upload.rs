@@ -1,5 +1,6 @@
 use axum::{Extension, Json, http::StatusCode};
 use axum_extra::extract::Multipart;
+use serde::{Deserialize, Serialize};
 
 use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
@@ -72,8 +73,8 @@ pub async fn upload_media(
     // Save the file to uploads directory
     let file_path = upload::save_bytes(&bytes, file_name.as_deref()).await?;
     
-    // Construct the full URL
-    let base_url = &ctx.system.base_url;
+    // Construct the full URL using the API host and port
+    let base_url = format!("http://{}:{}", ctx.system.api_host, ctx.system.api_port);
     let full_url = format!("{}{}", base_url, file_path);
 
     let response = UploadResponse {

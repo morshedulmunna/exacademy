@@ -10,6 +10,7 @@ import Image from "next/image";
 import CourseBuilder from "@/components/course/CourseBuilder";
 // Backend removed
 import BlockEditor from "@/components/ui/BlockEditor";
+import { uploadMediaAndGetUrl } from "@/actions/media/upload.action";
 
 /**
  * Course Edit Page
@@ -95,15 +96,31 @@ export default function EditCoursePage() {
     }
   };
 
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setThumbnailPreview(e.target?.result as string);
-        setFormData((prev) => ({ ...prev, thumbnail: e.target?.result as string }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Show loading state
+        setIsLoading(true);
+
+        // Create FormData and upload the file
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Upload the file and get the URL
+        const uploadedUrl = await uploadMediaAndGetUrl(formData);
+
+        // Update the form data with the uploaded URL
+        setFormData((prev) => ({ ...prev, thumbnail: uploadedUrl }));
+
+        // Show preview
+        setThumbnailPreview(uploadedUrl);
+      } catch (error) {
+        console.error("Failed to upload thumbnail:", error);
+        setError("Failed to upload thumbnail");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
