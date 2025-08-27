@@ -1,7 +1,36 @@
+"use client";
+
 import React from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import Link from "next/link";
+
+// Separate button components for client-side interactivity
+const AddToCartButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-blue-700"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick();
+    }}
+  >
+    Add to Cart
+  </button>
+);
+
+const ViewCourseButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-blue-700"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick();
+    }}
+  >
+    View Course
+  </button>
+);
 
 export interface CourseCardProps {
   title: string;
@@ -13,9 +42,18 @@ export interface CourseCardProps {
   lessons?: number;
   instructorName?: string;
   instructorAvatar?: string;
+  instructorTitle?: string;
+  instructorBio?: string;
   price: number;
   originalPrice?: number | null;
-  tags?: { name: string; slug?: string }[];
+  rating?: number;
+  reviews?: number;
+  isBestseller?: boolean;
+  lastUpdated?: string;
+  studentsEnrolled?: number;
+  courseCategory?: string;
+  difficultyLevel?: string;
+  learningOutcomes?: string[];
 }
 
 export default function CourseCard({
@@ -27,74 +65,115 @@ export default function CourseCard({
   duration,
   lessons,
   instructorName,
-  // instructorAvatar, // reserved for future use in card footer if needed
+  instructorAvatar,
+  instructorTitle,
+  instructorBio,
   price,
   originalPrice,
-  tags = [],
+  rating,
+  reviews,
+  isBestseller,
+  lastUpdated,
+  studentsEnrolled,
+  courseCategory,
+  difficultyLevel,
+  learningOutcomes,
 }: CourseCardProps) {
+  const handleAddToCart = () => {
+    // Add to cart functionality here
+    console.log("Adding to cart:", title);
+  };
+
+  const handleViewCourse = () => {
+    // View course functionality here
+    console.log("Viewing course:", title);
+  };
+
   return (
     <>
-      <div className="h-fit bg-card rounded-xl overflow-hidden group hover:bg-accent transition-colors mb-4 relative border border-border">
-        {/* Image */}
-        <Link href={`/course/${slug}`} className="block relative h-40 lg:h-48">
-          <Image src={thumbnail || "/placeholder-logo.png"} alt={title} fill className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </Link>
-        <div className="p-2">
-          {/* Meta Info */}
-          <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground flex-wrap">
-            <span className="flex items-center gap-1">📚 Course</span>
-            {duration && (
-              <>
-                <span>•</span>
-                <span className="flex items-center gap-1">⏱️ {duration}</span>
-              </>
-            )}
-            {typeof lessons === "number" && (
-              <>
-                <span>•</span>
-                <span className="flex items-center gap-1">{lessons} lessons</span>
-              </>
-            )}
-          </div>
-          {/* Title */}
-          <h3 className="text-2xl font-bold mb-4 group-hover:text-cyan-400 transition-colors line-clamp-2 text-foreground">
-            <Link href={`/course/${slug}`}>{title}</Link>
-          </h3>
-          {/* Description */}
-          {(excerpt || description) && <p className="text-muted-foreground text-sm mb-2 line-clamp-3">{excerpt || description}</p>}
-          {/* Tags */}
-          {tags.length > 0 && (
-            <div className="flex items-center gap-2 mb-6 flex-wrap">
-              {tags.slice(0, 4).map((tag) => (
-                <span key={tag.slug ?? tag.name} className="bg-secondary px-3 py-1 rounded-full text-xs text-secondary-foreground hover:bg-secondary/80 transition-colors">
-                  #{tag.name}
-                </span>
-              ))}
-            </div>
-          )}
-          {/* Price and Action */}
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-3">
-              <div>
-                {instructorName && <span className="text-sm font-medium text-foreground block">{instructorName}</span>}
-                <span className="text-xs text-muted-foreground">Instructor</span>
+      <Link href={`/course/${slug}`} className="block">
+        <div className="group relative bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-all duration-300 cursor-pointer">
+          {/* Course Thumbnail */}
+          <div className="relative h-48 overflow-hidden">
+            <Image src={thumbnail || "/placeholder-logo.png"} alt={title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+            {/* Bestseller Badge */}
+            {isBestseller && <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">Bestseller</div>}
+            {/* Course Category Badge */}
+            <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded">{courseCategory}</div>
+            {/* Hover Overlay with Quick Info */}
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div className="text-white text-center p-4">
+                <div className="text-sm mb-2">
+                  ⭐ {rating || 4.8} ({reviews?.toLocaleString() || "2,847"} reviews)
+                </div>
+                <div className="text-xs mb-2">
+                  {duration} • {lessons} lessons • {difficultyLevel}
+                </div>
+                <div className="text-xs">{excerpt || description?.substring(0, 80)}...</div>
               </div>
             </div>
-            {/* Price */}
-            <div className="text-right">
-              <p className="text-card-foreground text-xl font-medium">${price}</p>
-              {originalPrice && originalPrice > price ? <p className="text-xs text-muted-foreground line-through">${originalPrice}</p> : null}
+          </div>
+
+          {/* Course Content */}
+          <div className="p-4">
+            {/* Course Title */}
+            <h3 className="font-bold text-lg mb-2 line-clamp-1 text-foreground group-hover:text-blue-600 transition-colors">{title}</h3>
+
+            {/* Instructor Info */}
+            <div className="flex items-center gap-2 mb-2">
+              {instructorAvatar && (
+                <div className="relative w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                  <Image src={instructorAvatar} alt={instructorName || "Instructor"} fill className="object-cover" />
+                </div>
+              )}
+              <div className="text-sm text-muted-foreground truncate">
+                {instructorName}
+                {instructorTitle && <span className="text-xs"> • {instructorTitle}</span>}
+              </div>
+            </div>
+
+            {/* Rating and Reviews */}
+            <div className="flex items-center gap-1 mb-2">
+              <span className="text-yellow-500 text-sm">⭐</span>
+              <span className="text-sm font-medium">{rating || 4.8}</span>
+              <span className="text-xs text-muted-foreground">({reviews?.toLocaleString() || "2,847"})</span>
+            </div>
+
+            {/* Course Meta Info */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+              <span>{duration}</span>
+              <span>•</span>
+              <span>{lessons} lessons</span>
+              <span>•</span>
+              <span>{difficultyLevel}</span>
+            </div>
+
+            {/* Price Section */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-foreground">${price}</span>
+                {originalPrice && originalPrice > price && <span className="text-sm text-muted-foreground line-through">${originalPrice}</span>}
+              </div>
             </div>
           </div>
-          {/* View Course Button */}
-          <div className="mt-4 flex justify-end">
-            <Button variant="ghost" size="sm" className="font-medium text-foreground hover:underline hover:text-blue-600 dark:hover:text-blue-400" asChild>
-              <Link href={`/course/${slug}`}>View Course →</Link>
-            </Button>
+
+          {/* Hover Details Panel - Slides up from bottom */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 p-4 border-t border-border">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm">What you'll learn:</h4>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                {learningOutcomes?.map((outcome: string, index: number) => (
+                  <li key={index}>• {outcome}</li>
+                ))}
+              </ul>
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-muted-foreground">{lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleDateString("en-US", { month: "long", year: "numeric" })}` : `Updated ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}`}</span>
+                <ViewCourseButton onClick={handleViewCourse} />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
     </>
   );
 }

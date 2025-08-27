@@ -22,7 +22,7 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({ description }) => {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+    <div className="bg-white mt-6 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
       {/* Enhanced Tabs Navigation */}
       <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
         <nav className="flex overflow-x-auto scrollbar-hide">

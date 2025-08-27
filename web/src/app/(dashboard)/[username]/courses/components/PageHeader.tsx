@@ -9,6 +9,18 @@ export const PageHeader: React.FC = () => (
     {/* Main Header */}
     <div>
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My learning</h1>
+
+      {/* Tab Navigation */}
+      <nav className="border-b border-gray-200 dark:border-gray-700">
+        <div className="flex space-x-8">
+          <button className="py-2 px-1 border-b-2 border-purple-600 text-purple-600 dark:text-purple-400 font-medium text-sm">All courses</button>
+          <button className="py-2 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium text-sm">My Lists</button>
+          <button className="py-2 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium text-sm">Wishlist</button>
+          <button className="py-2 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium text-sm">Certifications</button>
+          <button className="py-2 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium text-sm">Archived</button>
+          <button className="py-2 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium text-sm">Learning tools</button>
+        </div>
+      </nav>
     </div>
 
     {/* Weekly Streak Section */}

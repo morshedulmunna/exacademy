@@ -60,9 +60,11 @@ export const LessonItem: React.FC<LessonItemProps> = ({ lesson, onLessonClick, i
         <div className="flex-shrink-0">{getStatusIcon(lesson.status, lesson.isLocked)}</div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-w-0">
             {getTypeIcon(lesson.type)}
-            <span className={`text-sm truncate ${lesson.isLocked ? "text-gray-400 dark:text-gray-500" : "text-gray-700 dark:text-gray-300"}`}>{lesson.title}</span>
+            <span className={`text-sm truncate ${lesson.isLocked ? "text-gray-400 dark:text-gray-500" : "text-gray-700 dark:text-gray-300"}`} title={lesson.title}>
+              {lesson.title}
+            </span>
           </div>
         </div>
 

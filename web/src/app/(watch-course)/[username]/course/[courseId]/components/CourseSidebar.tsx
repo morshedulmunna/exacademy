@@ -54,8 +54,12 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, onLessonC
   };
 
   return (
-    <div className="xl:col-span-1">
-      <div ref={sidebarRef} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden" style={{ height: sidebarHeight }}>
+    <div className="lg:col-span-3">
+      <div
+        ref={sidebarRef}
+        className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transform transition-all duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-[1.02] hover:shadow-xl"
+        style={{ height: sidebarHeight }}
+      >
         {/* Enhanced Header */}
         <CourseSidebarHeader
           totalLessons={modules.reduce((total, module) => total + module.lessons.length, 0)}
@@ -64,7 +68,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({ modules, onLessonC
         />
 
         {/* Enhanced Course Content List */}
-        <div className="overflow-y-auto h-full" style={{ height: `calc(${sidebarHeight}px - 120px)` }}>
+        <div className="overflow-y-auto h-full transition-all duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] delay-1200" style={{ height: `calc(${sidebarHeight}px - 120px)` }}>
           <ModuleList modules={modules} onLessonClick={onLessonClick} onModuleToggle={onModuleToggle} currentLesson={currentLesson} />
         </div>
       </div>

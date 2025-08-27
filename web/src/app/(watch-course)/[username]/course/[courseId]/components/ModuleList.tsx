@@ -1,6 +1,6 @@
 import React from "react";
-import { ModuleItem } from "./ModuleItem";
 import { Lesson, Module } from "./types";
+import { ModuleItem } from "./ModuleItem";
 
 interface ModuleListProps {
   modules: Module[];
