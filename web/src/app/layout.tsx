@@ -47,7 +47,7 @@ export default function RootLayout({
         <SessionProvider>
           <LoadingProvider>
             <ThemeProvider>
-              <AnimatedGridBackground gridSize={250} gridOpacity={0.3} waveFrequency={1000} waveIntensity={0.55} waveSpeed={0.5} />
+              {/* <AnimatedGridBackground gridSize={250} gridOpacity={0.3} waveFrequency={1000} waveIntensity={0.55} waveSpeed={0.5} /> */}
               <CursorGlow />
               <TechLogosBackground />
               <main className="flex-1 relative z-10"> {children}</main>
