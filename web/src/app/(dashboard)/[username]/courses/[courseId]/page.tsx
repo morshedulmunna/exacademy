@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LessonsList } from "./components";
+import "./components/course-styles.css";
 
 /**
- * Course Detail Page - Udemy Style Design
+ * Enhanced Course Detail Page with improved UI/UX
  * Page for learners to view course content and track progress
  */
 export default function CourseDetailPage({ params }: { params: { courseId: string } }) {
   const [expandedModules, setExpandedModules] = useState<string[]>(["m1"]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentLesson, setCurrentLesson] = useState<string | null>(null);
 
   // Mock data for demonstration
   const modules = [
@@ -142,7 +145,17 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     },
   ];
 
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleLessonClick = (lessonId: string) => {
+    setCurrentLesson(lessonId);
     console.log(`Navigating to lesson: ${lessonId}`);
     // Navigate to lesson page or open lesson content
   };
@@ -156,9 +169,40 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     isExpanded: expandedModules.includes(module.id),
   }));
 
+  if (isLoading) {
+    return (
+      <div className="animate-fadeIn">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8">
+          {/* Loading skeleton for main content */}
+          <div className="xl:col-span-3 space-y-6">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-xl aspect-video skeleton"></div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded skeleton mb-4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded skeleton mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded skeleton mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded skeleton w-3/4"></div>
+            </div>
+          </div>
+
+          {/* Loading skeleton for sidebar */}
+          <div className="xl:col-span-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4">
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded skeleton mb-4"></div>
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded skeleton"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-fadeIn">
-      <LessonsList modules={updatedModules} onLessonClick={handleLessonClick} onModuleToggle={handleModuleToggle} />
+    <div className="animate-fadeIn ">
+      <LessonsList modules={updatedModules} onLessonClick={handleLessonClick} onModuleToggle={handleModuleToggle} currentLesson={currentLesson} />
     </div>
   );
 }
