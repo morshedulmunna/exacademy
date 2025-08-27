@@ -9,6 +9,7 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { login, register } from "@/actions/auth";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
@@ -76,11 +77,21 @@ export default function RegisterPage() {
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
-              setError("");
-              setSuccess("");
               try {
-              } catch (err: unknown) {
+                setSubmitting(true);
+                setError(""); // Clear any previous errors
+                setSuccess(""); // Clear any previous success messages
+
+                const res = await register(values);
+                console.log(res);
+
+                // This should be a success response since errors are thrown as ResponseError
+                setSuccess("Registration successful! Please check your email to verify your account.");
+                // You might want to redirect here or clear the form
+              } catch (error: any) {
+                setError(error.message || "An unexpected error occurred");
               } finally {
+                setSubmitting(false);
               }
             }}
           >

@@ -1,7 +1,7 @@
 "use server";
 
 import { VerifyOtpRequest, OkResponse } from "@/api";
-import { AUTH_API } from "@/configs/API_CLIENT";
+import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
 
 /**
  * Server action to verify email with OTP code
@@ -18,14 +18,7 @@ export async function verifyOtp(data: VerifyOtpRequest): Promise<OkResponse> {
 
     return response;
   } catch (error) {
-    // Log the error for debugging
-    console.error("OTP verification failed:", error);
-
-    // Re-throw with a user-friendly message
-    if (error instanceof Error) {
-      throw new Error(`OTP verification failed: ${error.message}`);
-    }
-
-    throw new Error("OTP verification failed. Please check your code and try again.");
+    const errorMessage = await ErrorResponse(error);
+    throw new Error(errorMessage);
   }
 }

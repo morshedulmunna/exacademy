@@ -1,7 +1,7 @@
 "use server";
 
 import { LoginRequest, LoginResponse } from "@/api";
-import { AUTH_API } from "@/configs/API_CLIENT";
+import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
 
 /**
  * Server action to log in a user and receive access/refresh tokens
@@ -18,14 +18,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
 
     return response;
   } catch (error) {
-    // Log the error for debugging
-    console.error("Login failed:", error);
-
-    // Re-throw with a user-friendly message
-    if (error instanceof Error) {
-      throw new Error(`Login failed: ${error.message}`);
-    }
-
-    throw new Error("Login failed. Please check your credentials and try again.");
+    const errorMessage = await ErrorResponse(error);
+    throw new Error(errorMessage);
   }
 }

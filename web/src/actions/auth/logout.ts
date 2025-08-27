@@ -1,7 +1,7 @@
 "use server";
 
 import { OkResponse } from "@/api";
-import { AUTH_API } from "@/configs/API_CLIENT";
+import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
 
 /**
  * Server action to log out a user (stateless)
@@ -15,14 +15,7 @@ export async function logout(): Promise<OkResponse> {
 
     return response;
   } catch (error) {
-    // Log the error for debugging
-    console.error("Logout failed:", error);
-
-    // Re-throw with a user-friendly message
-    if (error instanceof Error) {
-      throw new Error(`Logout failed: ${error.message}`);
-    }
-
-    throw new Error("Logout failed. Please try again later.");
+    const errorMessage = await ErrorResponse(error);
+    throw new Error(errorMessage);
   }
 }

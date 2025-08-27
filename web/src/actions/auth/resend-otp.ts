@@ -1,7 +1,7 @@
 "use server";
 
 import { ResendOtpRequest, OkResponse } from "@/api";
-import { AUTH_API } from "@/configs/API_CLIENT";
+import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
 
 /**
  * Server action to resend OTP email to a user
@@ -18,14 +18,7 @@ export async function resendOtp(data: ResendOtpRequest): Promise<OkResponse> {
 
     return response;
   } catch (error) {
-    // Log the error for debugging
-    console.error("OTP resend failed:", error);
-
-    // Re-throw with a user-friendly message
-    if (error instanceof Error) {
-      throw new Error(`OTP resend failed: ${error.message}`);
-    }
-
-    throw new Error("OTP resend failed. Please try again later.");
+    const errorMessage = await ErrorResponse(error);
+    throw new Error(errorMessage);
   }
 }
