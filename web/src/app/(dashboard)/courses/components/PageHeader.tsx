@@ -23,56 +23,6 @@ export const PageHeader: React.FC = () => (
       </nav>
     </div>
 
-    {/* Weekly Streak Section */}
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">Weekly streak</h2>
-            <p className="text-gray-600 dark:text-gray-400">One ring down, one to go. Keep it up!</p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
-              <Flame className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">1 week</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Current streak</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="text-center">
-              <div className="w-16 h-16 relative">
-                <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#374151" strokeWidth="2" />
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10B981" strokeWidth="2" strokeDasharray="3.33, 30" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs text-gray-900 dark:text-white font-medium">1/30</span>
-                </div>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">course min</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">1</span>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">visit</p>
-            </div>
-
-            <div className="text-center">
-              <p className="text-sm text-gray-900 dark:text-white font-medium">Aug 24 - 31</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     {/* Filter and Search Section */}
     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
       <div className="flex flex-wrap items-center space-x-4">

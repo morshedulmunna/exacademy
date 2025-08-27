@@ -1,17 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { LessonsList } from "./components";
 import "./components/course-styles.css";
+import { LessonsList } from "../components";
 
 /**
  * Enhanced Course Detail Page with improved UI/UX
  * Page for learners to view course content and track progress
  */
-export default function CourseDetailPage({ params }: { params: { courseId: string } }) {
+export default function CourseDetailPage({ params }: { params: { slug: string } }) {
   const [expandedModules, setExpandedModules] = useState<string[]>(["m1"]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentLesson, setCurrentLesson] = useState<string | null>(null);
+  const { slug } = params;
 
   // Mock data for demonstration
   const modules = [

@@ -1,9 +1,22 @@
 import React from "react";
+import DetailsHeader from "./course/components/DetailsHeader";
 
-type Props = {
+interface CourseLayoutProps {
   children: React.ReactNode;
-};
+}
 
-export default function CourseWatchLayout({ children }: Props) {
-  return <>{children}</>;
+/**
+ * Course Detail Layout - Separate from main dashboard layout
+ * Matches Udemy course page design with top navigation
+ */
+export default function CourseLayout({ children }: CourseLayoutProps) {
+  return (
+    <div className="min-h-screen bg-gray-50 rounded-md dark:bg-gray-900">
+      {/* Top Navigation Bar - Udemy Style */}
+      <DetailsHeader />
+
+      {/* Main Content Area */}
+      <main className="px-4 sm:px-6 lg:px-8 py-6">{children}</main>
+    </div>
+  );
 }
