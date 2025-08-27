@@ -1,8 +1,10 @@
+"use client";
+
 import React, { useState } from "react";
 import { CourseHeader, LessonsList } from "./components";
 
 /**
- * Course Detail Page
+ * Course Detail Page - Udemy Style Design
  * Page for learners to view course content and track progress
  */
 export default function CourseDetailPage({ params }: { params: { courseId: string } }) {
@@ -11,114 +13,146 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   // Mock data for demonstration
   const course = {
     id: params.courseId,
-    title: "Complete Web Development Bootcamp",
-    instructor: "Sarah Wilson",
+    title: "DevOps Beginners to Advanced with Projects",
+    instructor: "Imran Teli",
     thumbnail: "/api/placeholder/300/200",
-    progress: 65,
-    totalLessons: 24,
-    completedLessons: 16,
-    totalDuration: 18,
-    rating: 4.8,
-    category: "Web Development"
+    progress: 18,
+    totalLessons: 56,
+    completedLessons: 10,
+    totalDuration: 56,
+    rating: 4.6,
+    category: "DevOps",
   };
 
   const modules = [
     {
       id: "m1",
-      title: "Getting Started with Web Development",
-      description: "Learn the basics of HTML, CSS, and JavaScript",
+      title: "Getting Started with DevOps",
+      description: "Learn the basics of DevOps practices and tools",
       isExpanded: expandedModules.includes("m1"),
       lessons: [
         {
           id: "l1",
-          title: "Introduction to HTML",
+          title: "Introduction to DevOps",
           duration: 15,
           type: "video" as const,
           status: "completed" as const,
-          isLocked: false
+          isLocked: false,
         },
         {
           id: "l2",
-          title: "HTML Structure and Elements",
+          title: "DevOps Culture and Principles",
           duration: 20,
           type: "video" as const,
           status: "completed" as const,
-          isLocked: false
+          isLocked: false,
         },
         {
           id: "l3",
-          title: "HTML Forms and Inputs",
+          title: "DevOps Tools Overview",
           duration: 25,
           type: "video" as const,
           status: "in-progress" as const,
-          isLocked: false
+          isLocked: false,
         },
         {
           id: "l4",
-          title: "HTML Quiz",
+          title: "DevOps Quiz",
           duration: 10,
           type: "quiz" as const,
           status: "not-started" as const,
-          isLocked: false
-        }
-      ]
+          isLocked: false,
+        },
+      ],
     },
     {
       id: "m2",
-      title: "CSS Fundamentals",
-      description: "Master CSS styling and layout techniques",
+      title: "Linux Fundamentals",
+      description: "Master Linux commands and system administration",
       isExpanded: expandedModules.includes("m2"),
       lessons: [
         {
           id: "l5",
-          title: "CSS Basics and Selectors",
+          title: "Linux Basics and Commands",
           duration: 18,
           type: "video" as const,
           status: "not-started" as const,
-          isLocked: false
+          isLocked: false,
         },
         {
           id: "l6",
-          title: "CSS Box Model",
+          title: "File System Management",
           duration: 22,
           type: "video" as const,
           status: "not-started" as const,
-          isLocked: false
+          isLocked: false,
         },
         {
           id: "l7",
-          title: "CSS Flexbox Layout",
+          title: "User and Permission Management",
           duration: 30,
           type: "video" as const,
           status: "not-started" as const,
-          isLocked: true
-        }
-      ]
+          isLocked: true,
+        },
+      ],
     },
     {
       id: "m3",
-      title: "JavaScript Essentials",
-      description: "Learn JavaScript programming fundamentals",
+      title: "Docker and Containerization",
+      description: "Learn Docker fundamentals and container orchestration",
       isExpanded: expandedModules.includes("m3"),
       lessons: [
         {
           id: "l8",
-          title: "JavaScript Variables and Data Types",
+          title: "Docker Basics",
           duration: 20,
           type: "video" as const,
           status: "not-started" as const,
-          isLocked: true
+          isLocked: true,
         },
         {
           id: "l9",
-          title: "JavaScript Functions",
+          title: "Docker Images and Containers",
           duration: 25,
           type: "video" as const,
           status: "not-started" as const,
-          isLocked: true
-        }
-      ]
-    }
+          isLocked: true,
+        },
+        {
+          id: "l10",
+          title: "Docker Compose",
+          duration: 35,
+          type: "video" as const,
+          status: "not-started" as const,
+          isLocked: true,
+        },
+      ],
+    },
+    {
+      id: "m4",
+      title: "Kubernetes Orchestration",
+      description: "Master Kubernetes deployment and management",
+      isExpanded: expandedModules.includes("m4"),
+      lessons: [
+        {
+          id: "l11",
+          title: "Kubernetes Architecture",
+          duration: 28,
+          type: "video" as const,
+          status: "not-started" as const,
+          isLocked: true,
+        },
+        {
+          id: "l12",
+          title: "Pods and Services",
+          duration: 32,
+          type: "video" as const,
+          status: "not-started" as const,
+          isLocked: true,
+        },
+      ],
+    },
   ];
 
   const handleLessonClick = (lessonId: string) => {
@@ -127,26 +161,18 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   };
 
   const handleModuleToggle = (moduleId: string) => {
-    setExpandedModules(prev => 
-      prev.includes(moduleId) 
-        ? prev.filter(id => id !== moduleId)
-        : [...prev, moduleId]
-    );
+    setExpandedModules((prev) => (prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]));
   };
 
-  const updatedModules = modules.map(module => ({
+  const updatedModules = modules.map((module) => ({
     ...module,
-    isExpanded: expandedModules.includes(module.id)
+    isExpanded: expandedModules.includes(module.id),
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       <CourseHeader course={course} />
-      <LessonsList 
-        modules={updatedModules}
-        onLessonClick={handleLessonClick}
-        onModuleToggle={handleModuleToggle}
-      />
+      <LessonsList modules={updatedModules} onLessonClick={handleLessonClick} onModuleToggle={handleModuleToggle} />
     </div>
   );
 }

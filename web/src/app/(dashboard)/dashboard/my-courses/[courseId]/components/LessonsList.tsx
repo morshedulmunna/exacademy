@@ -1,12 +1,12 @@
 import React from "react";
-import { Play, CheckCircle, Lock, Clock, FileText } from "lucide-react";
+import { ChevronDown, ChevronRight, Play, Lock, CheckCircle, Clock, FileText, MessageSquare, Star, Share, MoreVertical } from "lucide-react";
 
 interface Lesson {
   id: string;
   title: string;
   duration: number;
-  type: "video" | "text" | "quiz";
-  status: "not-started" | "in-progress" | "completed";
+  type: "video" | "quiz" | "assignment";
+  status: "completed" | "in-progress" | "not-started";
   isLocked: boolean;
 }
 
@@ -14,8 +14,8 @@ interface Module {
   id: string;
   title: string;
   description: string;
-  lessons: Lesson[];
   isExpanded: boolean;
+  lessons: Lesson[];
 }
 
 interface LessonsListProps {
@@ -25,96 +25,184 @@ interface LessonsListProps {
 }
 
 /**
- * Lessons list component for course detail page
+ * Lessons list component matching Udemy course content design
  */
-export const LessonsList: React.FC<LessonsListProps> = ({ 
-  modules, 
-  onLessonClick, 
-  onModuleToggle 
-}) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Course Content</h2>
-    
-    <div className="space-y-4">
-      {modules.map((module) => (
-        <div key={module.id} className="border border-gray-200 dark:border-gray-700 rounded-lg">
-          <button
-            onClick={() => onModuleToggle(module.id)}
-            className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-          >
-            <div>
-              <h3 className="font-medium text-gray-900 dark:text-white">{module.title}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{module.description}</p>
+export const LessonsList: React.FC<LessonsListProps> = ({ modules, onLessonClick, onModuleToggle }) => {
+  const getStatusIcon = (status: string, isLocked: boolean) => {
+    if (isLocked) {
+      return <Lock className="w-4 h-4 text-gray-400" />;
+    }
+
+    switch (status) {
+      case "completed":
+        return <CheckCircle className="w-4 h-4 text-green-500 fill-current" />;
+      case "in-progress":
+        return <div className="w-4 h-4 border-2 border-blue-500 rounded-full bg-blue-500"></div>;
+      default:
+        return <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full"></div>;
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "video":
+        return <Play className="w-3 h-3 text-gray-500 dark:text-gray-400" />;
+      case "quiz":
+        return <FileText className="w-3 h-3 text-gray-500 dark:text-gray-400" />;
+      case "assignment":
+        return <FileText className="w-3 h-3 text-gray-500 dark:text-gray-400" />;
+      default:
+        return <Play className="w-3 h-3 text-gray-500 dark:text-gray-400" />;
+    }
+  };
+
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes}min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}hr ${remainingMinutes}min` : `${hours}hr`;
+  };
+
+  const getTotalModuleDuration = (lessons: Lesson[]) => {
+    return lessons.reduce((total, lesson) => total + lesson.duration, 0);
+  };
+
+  const getCompletedLessons = (lessons: Lesson[]) => {
+    return lessons.filter((lesson) => lesson.status === "completed").length;
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Content Area - Video Player Placeholder */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Video Player */}
+        <div className="bg-gray-900 dark:bg-black rounded-lg aspect-video flex items-center justify-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-900 dark:to-black"></div>
+          <div className="relative z-10 text-center">
+            <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+              <Play className="w-10 h-10 text-white ml-1" />
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {module.lessons.filter(l => l.status === "completed").length}/{module.lessons.length} lessons
-              </span>
-              <svg 
-                className={`w-5 h-5 text-gray-400 transform transition-transform ${module.isExpanded ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+            <p className="text-white text-lg font-medium">Video Player</p>
+            <p className="text-gray-300 text-sm">Click to start learning</p>
+          </div>
+        </div>
+
+        {/* Tabs Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <nav className="flex space-x-8 px-6">
+              {["Overview", "Q&A", "Notes", "Announcements", "Reviews", "Learning tools"].map((tab, index) => (
+                <button
+                  key={tab}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
+                    index === 0 ? "border-purple-500 text-purple-600 dark:text-purple-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Course Description</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Begin Your DevOps Career As a Newbie | AWS, Linux, Scripting, Jenkins, Ansible, GitOps, Docker, Kubernetes, & Terraform.</p>
+
+            {/* Course Stats */}
+            <div className="grid grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-1 mb-2">
+                  <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                  <span className="text-2xl font-bold text-gray-900 dark:text-white">4.6</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">from 41,018 ratings</p>
+              </div>
+
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">241,805</div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Students</p>
+              </div>
+
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">56 hours</div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
+              </div>
             </div>
-          </button>
-          
-          {module.isExpanded && (
-            <div className="border-t border-gray-200 dark:border-gray-700">
-              {module.lessons.map((lesson) => (
-                <div key={lesson.id} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <button
-                    onClick={() => !lesson.isLocked && onLessonClick(lesson.id)}
-                    disabled={lesson.isLocked}
-                    className={`w-full flex items-center justify-between text-left ${
-                      lesson.isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-                    }`}
-                  >
+          </div>
+        </div>
+      </div>
+
+      {/* Right Sidebar - Course Content */}
+      <div className="lg:col-span-1">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 sticky top-6">
+          {/* Header */}
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Course content</h3>
+              <div className="flex items-center space-x-2">
+                <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                  <MessageSquare className="w-4 h-4" />
+                </button>
+                <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {modules.reduce((total, module) => total + module.lessons.length, 0)} lectures • {formatDuration(modules.reduce((total, module) => total + getTotalModuleDuration(module.lessons), 0))}
+            </p>
+          </div>
+
+          {/* Course Content List */}
+          <div className="max-h-96 overflow-y-auto">
+            {modules.map((module) => (
+              <div key={module.id} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                {/* Module Header */}
+                <button onClick={() => onModuleToggle(module.id)} className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center">
-                        {lesson.status === "completed" ? (
-                          <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        ) : lesson.isLocked ? (
-                          <Lock className="w-5 h-5 text-gray-400" />
-                        ) : lesson.type === "video" ? (
-                          <Play className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        ) : lesson.type === "quiz" ? (
-                          <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                        ) : (
-                          <FileText className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{lesson.title}</p>
-                        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                          <Clock className="w-3 h-3" />
-                          <span>{lesson.duration} min</span>
-                          <span>•</span>
-                          <span className="capitalize">{lesson.type}</span>
-                        </div>
+                      {module.isExpanded ? <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200" /> : <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200" />}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 dark:text-white text-sm truncate">{module.title}</h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {getCompletedLessons(module.lessons)}/{module.lessons.length} • {formatDuration(getTotalModuleDuration(module.lessons))}
+                        </p>
                       </div>
                     </div>
-                    
-                    {!lesson.isLocked && (
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        lesson.status === "completed" 
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : lesson.status === "in-progress"
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
-                      }`}>
-                        {lesson.status === "completed" ? "Completed" : lesson.status === "in-progress" ? "In Progress" : "Not Started"}
-                      </span>
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                  </div>
+                </button>
+
+                {/* Lessons List */}
+                {module.isExpanded && (
+                  <div className="bg-gray-50 dark:bg-gray-900/50">
+                    {module.lessons.map((lesson) => (
+                      <div key={lesson.id} className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer" onClick={() => !lesson.isLocked && onLessonClick(lesson.id)}>
+                        <div className="flex items-center space-x-3">
+                          {getStatusIcon(lesson.status, lesson.isLocked)}
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2">
+                              {getTypeIcon(lesson.type)}
+                              <span className={`text-sm truncate ${lesson.isLocked ? "text-gray-400 dark:text-gray-500" : "text-gray-700 dark:text-gray-300"}`}>{lesson.title}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{formatDuration(lesson.duration)}</span>
+                            {lesson.type === "video" && <button className="px-2 py-1 text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/40 transition-colors">Resources</button>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};

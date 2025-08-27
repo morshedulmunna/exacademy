@@ -1,2 +1,2 @@
-export { CourseHeader } from './CourseHeader';
-export { LessonsList } from './LessonsList';
+export { CourseHeader } from "./CourseHeader";
+export { LessonsList } from "./LessonsList";
