@@ -74,23 +74,23 @@ export const LessonsList: React.FC<LessonsListProps> = ({ modules, onLessonClick
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Main Content Area - Video Player Placeholder */}
-      <div className="lg:col-span-2 space-y-6">
+    <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+      {/* Main Content Area - Video Player and Tabs */}
+      <div className="xl:col-span-3 space-y-6">
         {/* Video Player */}
-        <div className="bg-gray-900 dark:bg-black rounded-lg aspect-video flex items-center justify-center relative overflow-hidden">
+        <div className="bg-gray-900 dark:bg-black rounded-lg aspect-video flex items-center justify-center relative overflow-hidden shadow-lg">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-900 dark:to-black"></div>
           <div className="relative z-10 text-center">
-            <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-              <Play className="w-10 h-10 text-white ml-1" />
+            <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6 backdrop-blur-sm hover:bg-opacity-30 transition-all duration-300 cursor-pointer group">
+              <Play className="w-12 h-12 text-white ml-1 group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <p className="text-white text-lg font-medium">Video Player</p>
-            <p className="text-gray-300 text-sm">Click to start learning</p>
+            <h2 className="text-white text-2xl font-bold mb-2">DevOps Beginners to Advanced</h2>
+            <p className="text-gray-300 text-lg">Click to start learning</p>
           </div>
         </div>
 
         {/* Tabs Navigation */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex space-x-8 px-6">
               {["Overview", "Q&A", "Notes", "Announcements", "Reviews", "Learning tools"].map((tab, index) => (
@@ -135,8 +135,8 @@ export const LessonsList: React.FC<LessonsListProps> = ({ modules, onLessonClick
       </div>
 
       {/* Right Sidebar - Course Content */}
-      <div className="lg:col-span-1">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 sticky top-6">
+      <div className="xl:col-span-1">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 sticky top-24 shadow-sm">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2">
@@ -156,7 +156,7 @@ export const LessonsList: React.FC<LessonsListProps> = ({ modules, onLessonClick
           </div>
 
           {/* Course Content List */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto custom-scrollbar">
             {modules.map((module) => (
               <div key={module.id} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                 {/* Module Header */}

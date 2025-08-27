@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CourseHeader, LessonsList } from "./components";
+import { LessonsList } from "./components";
 
 /**
  * Course Detail Page - Udemy Style Design
@@ -11,19 +11,6 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   const [expandedModules, setExpandedModules] = useState<string[]>(["m1"]);
 
   // Mock data for demonstration
-  const course = {
-    id: params.courseId,
-    title: "DevOps Beginners to Advanced with Projects",
-    instructor: "Imran Teli",
-    thumbnail: "/api/placeholder/300/200",
-    progress: 18,
-    totalLessons: 56,
-    completedLessons: 10,
-    totalDuration: 56,
-    rating: 4.6,
-    category: "DevOps",
-  };
-
   const modules = [
     {
       id: "m1",
@@ -170,8 +157,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   }));
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      <CourseHeader course={course} />
+    <div className="animate-fadeIn">
       <LessonsList modules={updatedModules} onLessonClick={handleLessonClick} onModuleToggle={handleModuleToggle} />
     </div>
   );
