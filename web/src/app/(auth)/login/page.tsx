@@ -6,10 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/ui/social-login-buttons";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
-import { getErrorMessage } from "@utils/error";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
-import { loginAction } from "@/actions/auth/login.action";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -56,37 +54,8 @@ export default function LoginPage() {
             onSubmit={async (values, { setSubmitting }) => {
               setError("");
               try {
-                const res = await loginAction({
-                  email: values.email,
-                  password: values.password,
-                });
-
-                // Persist minimal user info in localStorage for Navbar/UI (not for auth)
-                if (typeof window !== "undefined") {
-                  try {
-                    const user = (res as any)?.data?.user;
-                    if (user) {
-                      const minimalUser = {
-                        id: user.id,
-                        email: user.email,
-                        username: user.username ?? null,
-                        name: user.name ?? null,
-                        role: user.role ?? null,
-                        avatar: user.avatar ?? null,
-                      };
-
-                      // Store only in localStorage
-                      localStorage.setItem("user", JSON.stringify({ user: minimalUser }));
-                    }
-                  } catch {}
-                }
-
-                router.push("/");
-                router.refresh();
               } catch (err: unknown) {
-                setError(getErrorMessage(err, "Login failed"));
               } finally {
-                setSubmitting(false);
               }
             }}
           >

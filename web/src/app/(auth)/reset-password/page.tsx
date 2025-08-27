@@ -3,7 +3,6 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
-import { resetPasswordAction } from "@/actions/auth/password.action";
 
 export default function ResetPasswordPage() {
   const params = useSearchParams();
@@ -51,13 +50,8 @@ export default function ResetPasswordPage() {
     }
     setSubmitting(true);
     try {
-      await resetPasswordAction({ email, code: joined, new_password: password });
-      setSuccess("Password reset successfully. Please sign in.");
-      router.push("/login");
     } catch (e: any) {
-      setError("Invalid code or request.");
     } finally {
-      setSubmitting(false);
     }
   };
 

@@ -5,7 +5,6 @@ import React, { useMemo, useRef, useState, useEffect, useCallback, Suspense } fr
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
-import { resendOtpAction, verifyEmailAction } from "@/actions/auth/verify.action";
 
 function VerifyPageInner() {
   const params = useSearchParams();
@@ -73,9 +72,9 @@ function VerifyPageInner() {
     }
     setIsVerifying(true);
     try {
-      await verifyEmailAction({ email, code: joined });
-      setSuccess("Email verified successfully.");
-      router.push("/login");
+      // await verifyEmailAction({ email, code: joined });
+      // setSuccess("Email verified successfully.");
+      // router.push("/login");
     } catch (e: any) {
       setError("Invalid or expired code.");
     } finally {
@@ -95,13 +94,7 @@ function VerifyPageInner() {
     if (nowTs < resendDisabledUntil) return;
 
     try {
-      setIsResending(true);
-      await resendOtpAction({ email });
-      setSuccess("A new code has been sent to your email.");
-      const nextAttempt = attemptCount + 1;
-      setAttemptCount(nextAttempt);
-      const cooldownMs = nextAttempt === 1 ? 60_000 : 120_000;
-      setResendDisabledUntil(Date.now() + cooldownMs);
+      // setIsResending(true);
     } catch (e: any) {
       setError("Failed to resend code.");
     } finally {
