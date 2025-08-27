@@ -34,7 +34,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900/80 rounded-md">
+    <div className="min-h-screen  rounded-md">
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Page Header */}
         <div className="mb-8">
@@ -50,7 +50,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Personal Information Card */}
               <div className="lg:col-span-2">
-                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
                   <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-lg font-medium text-gray-900 dark:text-white">Personal Information</h2>
                   </div>

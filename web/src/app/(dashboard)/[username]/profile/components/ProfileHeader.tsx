@@ -16,7 +16,7 @@ interface ProfileHeaderProps {
  * Profile header component for learner profile page
  */
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => (
-  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
     <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
       {/* Avatar Section */}
       <div className="relative">

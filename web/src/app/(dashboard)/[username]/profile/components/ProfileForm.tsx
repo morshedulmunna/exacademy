@@ -32,12 +32,12 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
       {/* Form Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white">Edit Personal Information</h2>
-          <button onClick={() => onSave({})} className="inline-flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors text-sm">
+          <button onClick={() => onSave({})} className="inline-flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-md transition-colors text-sm">
             <X className="w-4 h-4" />
             <span>Cancel</span>
           </button>
@@ -50,10 +50,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
           {/* Avatar Section */}
           <div className="text-center mb-6">
             <div className="relative inline-block">
-              <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center mx-auto mb-3">
+              <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center mx-auto mb-3">
                 <User className="w-10 h-10 text-gray-400 dark:text-gray-500" />
               </div>
-              <button type="button" className="absolute bottom-0 right-0 w-6 h-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+              <button type="button" className="absolute bottom-0 right-0 w-6 h-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors shadow-sm">
                 <Camera className="w-3 h-3 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
@@ -68,7 +68,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
                 type="text"
                 name="name"
                 defaultValue={user.name}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white transition-colors"
                 required
               />
             </div>
@@ -79,7 +79,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
                 type="email"
                 name="email"
                 defaultValue={user.email}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white transition-colors"
                 required
               />
             </div>
@@ -90,7 +90,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
                 type="tel"
                 name="phone"
                 defaultValue={user.phone || ""}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white transition-colors"
                 placeholder="+1 (555) 123-4567"
               />
             </div>
@@ -101,7 +101,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
                 type="text"
                 name="location"
                 defaultValue={user.location || ""}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white transition-colors"
                 placeholder="City, State"
               />
             </div>
@@ -112,7 +112,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
                 type="url"
                 name="website"
                 defaultValue={user.website || ""}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white transition-colors"
                 placeholder="https://example.com"
               />
             </div>
@@ -123,7 +123,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave }) => {
                 name="bio"
                 rows={4}
                 defaultValue={user.bio || ""}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors resize-none"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white transition-colors resize-none"
                 placeholder="Tell us about yourself, your interests, and what you're learning..."
               />
             </div>
