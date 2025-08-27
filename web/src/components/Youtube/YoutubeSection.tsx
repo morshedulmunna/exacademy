@@ -11,18 +11,21 @@ export default function YoutubeSection({}: Props) {
       date: "17 May 2025",
       description: "Hey everyone, in this video, we are going to discuss System Design for Beginners and all components of a scalable system...",
       url: "https://www.youtube.com/watch?v=example1",
+      thumbnail: "https://img.youtube.com/vi/example1/maxresdefault.jpg",
     },
     {
       title: "I Built my AI Girlfriend - Finally!",
       date: "08 May 2025",
       description: "Hi Everyone, in this video, we are going to see how you can build your own AI Girlfriend using OpenAI and Google Gemini AI LLM...",
       url: "https://www.youtube.com/watch?v=example2",
+      thumbnail: "https://img.youtube.com/vi/example2/maxresdefault.jpg",
     },
     {
       title: "Master Role-Based Access Control Patterns",
       date: "03 May 2025",
       description: "Hey everyone, In this video, we are going to see various role-based access control authorization patterns such as RBAC, PBAC, ...",
       url: "https://www.youtube.com/watch?v=example3",
+      thumbnail: "https://img.youtube.com/vi/example3/maxresdefault.jpg",
     },
   ];
 
