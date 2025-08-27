@@ -43,11 +43,11 @@ impl AppContext {
     /// Initialize the application context from environment variables and
     /// establish the database connection pool.
     pub async fn initialize() -> Result<Self, Box<dyn Error>> {
+        // Load email configuration
         let system = SystemConfig::load_from_env()?;
         let database = DatabaseConfig::load_from_env()?;
         let redis_cfg = RedisConfig::load_from_env()?;
         let auth = AuthConfig::load_from_env()?;
-        // Load email configuration
         let email_cfg = EmailConfig::load_from_env()?;
         let vimeo_cfg = VimeoConfig::load_from_env()?;
 
@@ -58,11 +58,12 @@ impl AppContext {
 
         println!("Connected to Postgres");
 
+        let repos = Repositories::new(db_pool.clone());
+
         // Initialize Redis manager and verify connectivity once
         let redis_manager = Arc::new(RedisManager::from_config(&redis_cfg)?);
         redis_manager.ping().await?;
         println!("Redis server conncet!!");
-        let repos = Repositories::new(db_pool.clone());
 
         // Build security services (concrete implementations) and box behind traits
         let password_hasher: Arc<dyn PasswordHasher> = Arc::new(Argon2PasswordHasher);
