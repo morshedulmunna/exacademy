@@ -10,8 +10,8 @@ export default function SettingsPage({}: Props) {
   const router = useRouter();
 
   useEffect(() => {
-    if (path === "/settings") {
-      router.push("/settings/account");
+    if (path === "/username/settings") {
+      router.push("/username/settings/account");
     }
   }, [path, router]);
 
