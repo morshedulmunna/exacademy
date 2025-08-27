@@ -55,6 +55,7 @@ export default function FeaturedBlogsSection({ featuredBlogs, smallBlogs }: Feat
             smallBlogs.map((post: Post) => (
               <div key={post.id} className={`transition-all duration-300 hover:scale-[1.02] ${smallBlogs.length === 1 ? "sm:col-span-2 lg:col-span-1" : ""}`}>
                 <SmallArticleCard
+                  isNoCover={true}
                   title={post.title}
                   description={post.excerpt || ""}
                   excerpt={post.excerpt}

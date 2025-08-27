@@ -8,9 +8,10 @@ import SmallArticleCard from "./SmallArticleCard";
  */
 interface RecentBlogsSectionProps {
   smallBlogs: Post[];
+  isNoCover?: boolean;
 }
 
-export default function RecentBlogsSection({ smallBlogs }: RecentBlogsSectionProps) {
+export default function RecentBlogsSection({ smallBlogs, isNoCover }: RecentBlogsSectionProps) {
   return (
     <div className="xl:col-span-4 lg:col-span-5">
       <div className="sticky top-6">
@@ -22,6 +23,7 @@ export default function RecentBlogsSection({ smallBlogs }: RecentBlogsSectionPro
             smallBlogs.map((post: Post) => (
               <div key={post.id} className={`transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${smallBlogs.length === 1 ? "sm:col-span-2 lg:col-span-1" : ""}`}>
                 <SmallArticleCard
+                  isNoCover={isNoCover}
                   title={post.title}
                   description={post.excerpt || ""}
                   excerpt={post.excerpt}

@@ -24,15 +24,17 @@ interface SmallArticleCardProps {
   imageUrl?: string;
   featured?: boolean;
   status?: string;
+  isNoCover?: boolean;
 }
 
-export default function SmallArticleCard({ title, description, excerpt, date, readTime, tags, url, likes, comments, views, category, author, authorImage, imageUrl, featured, status }: SmallArticleCardProps) {
+export default function SmallArticleCard({ title, isNoCover, description, excerpt, date, readTime, tags, url, likes, comments, views, category, author, authorImage, imageUrl, featured, status }: SmallArticleCardProps) {
   return (
     <>
-      <article className="bg-card rounded-xl overflow-hidden group hover:bg-accent transition-colors border border-border h-60">
+      <article className="bg-card rounded-xl overflow-hidden group hover:bg-accent transition-colors border border-border ">
         {/* Featured Badge */}
         {featured && <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black text-xs font-bold px-3 py-1 text-center">FEATURED</div>}
 
+        {isNoCover && <div className="h-44 bg-gray-700"> </div>}
         <div className="p-4 flex flex-col justify-between h-full">
           <div>
             {/* Meta Info */}
