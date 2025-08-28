@@ -24,7 +24,7 @@ export interface UserResponse {
      * @type {string}
      * @memberof UserResponse
      */
-    avatarUrl?: string | null;
+    avatar_url?: string | null;
     /**
      * 
      * @type {string}
@@ -36,13 +36,13 @@ export interface UserResponse {
      * @type {string}
      * @memberof UserResponse
      */
-    firstName?: string | null;
+    first_name?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UserResponse
      */
-    fullName?: string | null;
+    full_name?: string | null;
     /**
      * 
      * @type {string}
@@ -54,19 +54,19 @@ export interface UserResponse {
      * @type {boolean}
      * @memberof UserResponse
      */
-    isActive: boolean;
+    is_active: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof UserResponse
      */
-    isBlocked: boolean;
+    is_blocked: boolean;
     /**
      * 
      * @type {string}
      * @memberof UserResponse
      */
-    lastName?: string | null;
+    last_name?: string | null;
     /**
      * 
      * @type {string}
@@ -87,8 +87,8 @@ export interface UserResponse {
 export function instanceOfUserResponse(value: object): value is UserResponse {
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('isActive' in value) || value['isActive'] === undefined) return false;
-    if (!('isBlocked' in value) || value['isBlocked'] === undefined) return false;
+    if (!('is_active' in value) || value['is_active'] === undefined) return false;
+    if (!('is_blocked' in value) || value['is_blocked'] === undefined) return false;
     if (!('role' in value) || value['role'] === undefined) return false;
     if (!('username' in value) || value['username'] === undefined) return false;
     return true;
@@ -104,14 +104,14 @@ export function UserResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
     }
     return {
         
-        'avatarUrl': json['avatar_url'] == null ? undefined : json['avatar_url'],
+        'avatar_url': json['avatar_url'] == null ? undefined : json['avatar_url'],
         'email': json['email'],
-        'firstName': json['first_name'] == null ? undefined : json['first_name'],
-        'fullName': json['full_name'] == null ? undefined : json['full_name'],
+        'first_name': json['first_name'] == null ? undefined : json['first_name'],
+        'full_name': json['full_name'] == null ? undefined : json['full_name'],
         'id': json['id'],
-        'isActive': json['is_active'],
-        'isBlocked': json['is_blocked'],
-        'lastName': json['last_name'] == null ? undefined : json['last_name'],
+        'is_active': json['is_active'],
+        'is_blocked': json['is_blocked'],
+        'last_name': json['last_name'] == null ? undefined : json['last_name'],
         'role': json['role'],
         'username': json['username'],
     };
@@ -128,14 +128,14 @@ export function UserResponseToJSONTyped(value?: UserResponse | null, ignoreDiscr
 
     return {
         
-        'avatar_url': value['avatarUrl'],
+        'avatar_url': value['avatar_url'],
         'email': value['email'],
-        'first_name': value['firstName'],
-        'full_name': value['fullName'],
+        'first_name': value['first_name'],
+        'full_name': value['full_name'],
         'id': value['id'],
-        'is_active': value['isActive'],
-        'is_blocked': value['isBlocked'],
-        'last_name': value['lastName'],
+        'is_active': value['is_active'],
+        'is_blocked': value['is_blocked'],
+        'last_name': value['last_name'],
         'role': value['role'],
         'username': value['username'],
     };

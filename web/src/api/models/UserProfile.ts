@@ -24,13 +24,13 @@ export interface UserProfile {
      * @type {string}
      * @memberof UserProfile
      */
-    avatarUrl?: string | null;
+    avatar_url?: string | null;
     /**
      * 
      * @type {Date}
      * @memberof UserProfile
      */
-    createdAt: Date;
+    created_at: Date;
     /**
      * 
      * @type {string}
@@ -42,13 +42,13 @@ export interface UserProfile {
      * @type {string}
      * @memberof UserProfile
      */
-    firstName?: string | null;
+    first_name?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UserProfile
      */
-    fullName?: string | null;
+    full_name?: string | null;
     /**
      * 
      * @type {string}
@@ -60,19 +60,19 @@ export interface UserProfile {
      * @type {boolean}
      * @memberof UserProfile
      */
-    isActive: boolean;
+    is_active: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof UserProfile
      */
-    isBlocked: boolean;
+    is_blocked: boolean;
     /**
      * 
      * @type {string}
      * @memberof UserProfile
      */
-    lastName?: string | null;
+    last_name?: string | null;
     /**
      * 
      * @type {string}
@@ -91,11 +91,11 @@ export interface UserProfile {
  * Check if a given object implements the UserProfile interface.
  */
 export function instanceOfUserProfile(value: object): value is UserProfile {
-    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
+    if (!('created_at' in value) || value['created_at'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('isActive' in value) || value['isActive'] === undefined) return false;
-    if (!('isBlocked' in value) || value['isBlocked'] === undefined) return false;
+    if (!('is_active' in value) || value['is_active'] === undefined) return false;
+    if (!('is_blocked' in value) || value['is_blocked'] === undefined) return false;
     if (!('role' in value) || value['role'] === undefined) return false;
     if (!('username' in value) || value['username'] === undefined) return false;
     return true;
@@ -111,15 +111,15 @@ export function UserProfileFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
         
-        'avatarUrl': json['avatar_url'] == null ? undefined : json['avatar_url'],
-        'createdAt': (new Date(json['created_at'])),
+        'avatar_url': json['avatar_url'] == null ? undefined : json['avatar_url'],
+        'created_at': (new Date(json['created_at'])),
         'email': json['email'],
-        'firstName': json['first_name'] == null ? undefined : json['first_name'],
-        'fullName': json['full_name'] == null ? undefined : json['full_name'],
+        'first_name': json['first_name'] == null ? undefined : json['first_name'],
+        'full_name': json['full_name'] == null ? undefined : json['full_name'],
         'id': json['id'],
-        'isActive': json['is_active'],
-        'isBlocked': json['is_blocked'],
-        'lastName': json['last_name'] == null ? undefined : json['last_name'],
+        'is_active': json['is_active'],
+        'is_blocked': json['is_blocked'],
+        'last_name': json['last_name'] == null ? undefined : json['last_name'],
         'role': json['role'],
         'username': json['username'],
     };
@@ -136,15 +136,15 @@ export function UserProfileToJSONTyped(value?: UserProfile | null, ignoreDiscrim
 
     return {
         
-        'avatar_url': value['avatarUrl'],
-        'created_at': ((value['createdAt']).toISOString()),
+        'avatar_url': value['avatar_url'],
+        'created_at': ((value['created_at']).toISOString()),
         'email': value['email'],
-        'first_name': value['firstName'],
-        'full_name': value['fullName'],
+        'first_name': value['first_name'],
+        'full_name': value['full_name'],
         'id': value['id'],
-        'is_active': value['isActive'],
-        'is_blocked': value['isBlocked'],
-        'last_name': value['lastName'],
+        'is_active': value['is_active'],
+        'is_blocked': value['is_blocked'],
+        'last_name': value['last_name'],
         'role': value['role'],
         'username': value['username'],
     };

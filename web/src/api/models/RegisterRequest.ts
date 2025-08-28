@@ -33,13 +33,13 @@ export interface RegisterRequest {
      * @type {string}
      * @memberof RegisterRequest
      */
-    firstName: string;
+    first_name: string;
     /**
      * 
      * @type {string}
      * @memberof RegisterRequest
      */
-    lastName: string;
+    last_name: string;
     /**
      * 
      * @type {string}
@@ -59,8 +59,8 @@ export interface RegisterRequest {
  */
 export function instanceOfRegisterRequest(value: object): value is RegisterRequest {
     if (!('email' in value) || value['email'] === undefined) return false;
-    if (!('firstName' in value) || value['firstName'] === undefined) return false;
-    if (!('lastName' in value) || value['lastName'] === undefined) return false;
+    if (!('first_name' in value) || value['first_name'] === undefined) return false;
+    if (!('last_name' in value) || value['last_name'] === undefined) return false;
     if (!('password' in value) || value['password'] === undefined) return false;
     if (!('username' in value) || value['username'] === undefined) return false;
     return true;
@@ -77,8 +77,8 @@ export function RegisterRequestFromJSONTyped(json: any, ignoreDiscriminator: boo
     return {
         
         'email': json['email'],
-        'firstName': json['first_name'],
-        'lastName': json['last_name'],
+        'first_name': json['first_name'],
+        'last_name': json['last_name'],
         'password': json['password'],
         'username': json['username'],
     };
@@ -96,8 +96,8 @@ export function RegisterRequestToJSONTyped(value?: RegisterRequest | null, ignor
     return {
         
         'email': value['email'],
-        'first_name': value['firstName'],
-        'last_name': value['lastName'],
+        'first_name': value['first_name'],
+        'last_name': value['last_name'],
         'password': value['password'],
         'username': value['username'],
     };

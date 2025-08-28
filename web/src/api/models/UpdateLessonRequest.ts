@@ -42,7 +42,7 @@ export interface UpdateLessonRequest {
      * @type {boolean}
      * @memberof UpdateLessonRequest
      */
-    isFree?: boolean | null;
+    is_free?: boolean | null;
     /**
      * 
      * @type {number}
@@ -66,7 +66,7 @@ export interface UpdateLessonRequest {
      * @type {string}
      * @memberof UpdateLessonRequest
      */
-    videoUrl?: string | null;
+    video_url?: string | null;
 }
 
 /**
@@ -89,11 +89,11 @@ export function UpdateLessonRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'content': json['content'] == null ? undefined : json['content'],
         'description': json['description'] == null ? undefined : json['description'],
         'duration': json['duration'] == null ? undefined : json['duration'],
-        'isFree': json['is_free'] == null ? undefined : json['is_free'],
+        'is_free': json['is_free'] == null ? undefined : json['is_free'],
         'position': json['position'] == null ? undefined : json['position'],
         'published': json['published'] == null ? undefined : json['published'],
         'title': json['title'] == null ? undefined : json['title'],
-        'videoUrl': json['video_url'] == null ? undefined : json['video_url'],
+        'video_url': json['video_url'] == null ? undefined : json['video_url'],
     };
 }
 
@@ -111,11 +111,11 @@ export function UpdateLessonRequestToJSONTyped(value?: UpdateLessonRequest | nul
         'content': value['content'],
         'description': value['description'],
         'duration': value['duration'],
-        'is_free': value['isFree'],
+        'is_free': value['is_free'],
         'position': value['position'],
         'published': value['published'],
         'title': value['title'],
-        'video_url': value['videoUrl'],
+        'video_url': value['video_url'],
     };
 }
 

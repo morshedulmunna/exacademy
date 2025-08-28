@@ -1,17 +1,16 @@
+use super::utils::{generate_otp_code, send_otp_email, store_otp};
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::repositories::users::{CreateUserRecord, UsersRepository};
-use crate::types::user_types::RegisterRequest;
+use crate::types::user_types::{RegisterRequest, RegisterResponse};
 use std::time::Duration;
-
-use super::utils::{generate_otp_code, send_otp_email, store_otp};
 
 /// Register a new user and send an email verification OTP.
 pub async fn register(
     ctx: &AppContext,
     repo: &dyn UsersRepository,
     input: RegisterRequest,
-) -> AppResult<crate::types::user_types::RegisterResponse> {
+) -> AppResult<RegisterResponse> {
     let existing = repo.find_by_email(&input.email).await?;
     if existing.is_some() {
         return Err(AppError::Conflict("Email already exists".into()));
@@ -45,6 +44,7 @@ pub async fn register(
         let _ = repo.delete_by_id(id).await;
         return Err(e);
     }
+    dbg!(id);
 
-    Ok(crate::types::user_types::RegisterResponse { id })
+    Ok(RegisterResponse { id })
 }

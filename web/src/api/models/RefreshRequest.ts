@@ -24,14 +24,14 @@ export interface RefreshRequest {
      * @type {string}
      * @memberof RefreshRequest
      */
-    refreshToken: string;
+    refresh_token: string;
 }
 
 /**
  * Check if a given object implements the RefreshRequest interface.
  */
 export function instanceOfRefreshRequest(value: object): value is RefreshRequest {
-    if (!('refreshToken' in value) || value['refreshToken'] === undefined) return false;
+    if (!('refresh_token' in value) || value['refresh_token'] === undefined) return false;
     return true;
 }
 
@@ -45,7 +45,7 @@ export function RefreshRequestFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'refreshToken': json['refresh_token'],
+        'refresh_token': json['refresh_token'],
     };
 }
 
@@ -60,7 +60,7 @@ export function RefreshRequestToJSONTyped(value?: RefreshRequest | null, ignoreD
 
     return {
         
-        'refresh_token': value['refreshToken'],
+        'refresh_token': value['refresh_token'],
     };
 }
 

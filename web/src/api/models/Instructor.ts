@@ -24,13 +24,13 @@ export interface Instructor {
      * @type {string}
      * @memberof Instructor
      */
-    avatarUrl?: string | null;
+    avatar_url?: string | null;
     /**
      * 
      * @type {string}
      * @memberof Instructor
      */
-    fullName?: string | null;
+    full_name?: string | null;
     /**
      * 
      * @type {string}
@@ -64,8 +64,8 @@ export function InstructorFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     }
     return {
         
-        'avatarUrl': json['avatar_url'] == null ? undefined : json['avatar_url'],
-        'fullName': json['full_name'] == null ? undefined : json['full_name'],
+        'avatar_url': json['avatar_url'] == null ? undefined : json['avatar_url'],
+        'full_name': json['full_name'] == null ? undefined : json['full_name'],
         'id': json['id'],
         'username': json['username'],
     };
@@ -82,8 +82,8 @@ export function InstructorToJSONTyped(value?: Instructor | null, ignoreDiscrimin
 
     return {
         
-        'avatar_url': value['avatarUrl'],
-        'full_name': value['fullName'],
+        'avatar_url': value['avatar_url'],
+        'full_name': value['full_name'],
         'id': value['id'],
         'username': value['username'],
     };

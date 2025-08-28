@@ -1,7 +1,8 @@
 "use server";
 
 import { LoginRequest, LoginResponse } from "@/api";
-import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
+import { AUTH_API } from "@/configs/API_CLIENT";
+import { ErrorResponse } from "@/configs/error";
 
 /**
  * Server action to log in a user and receive access/refresh tokens
@@ -15,6 +16,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     const response = await AUTH_API.login({
       loginRequest: data,
     });
+    console.log(response);
 
     return response;
   } catch (error) {

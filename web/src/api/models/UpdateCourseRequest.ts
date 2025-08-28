@@ -54,7 +54,7 @@ export interface UpdateCourseRequest {
      * @type {number}
      * @memberof UpdateCourseRequest
      */
-    originalPrice?: number | null;
+    original_price?: number | null;
     /**
      * 
      * @type {number}
@@ -109,7 +109,7 @@ export function UpdateCourseRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'excerpt': json['excerpt'] == null ? undefined : json['excerpt'],
         'featured': json['featured'] == null ? undefined : json['featured'],
         'lessons': json['lessons'] == null ? undefined : json['lessons'],
-        'originalPrice': json['original_price'] == null ? undefined : json['original_price'],
+        'original_price': json['original_price'] == null ? undefined : json['original_price'],
         'price': json['price'] == null ? undefined : json['price'],
         'published': json['published'] == null ? undefined : json['published'],
         'students': json['students'] == null ? undefined : json['students'],
@@ -134,7 +134,7 @@ export function UpdateCourseRequestToJSONTyped(value?: UpdateCourseRequest | nul
         'excerpt': value['excerpt'],
         'featured': value['featured'],
         'lessons': value['lessons'],
-        'original_price': value['originalPrice'],
+        'original_price': value['original_price'],
         'price': value['price'],
         'published': value['published'],
         'students': value['students'],

@@ -24,7 +24,7 @@ export interface CreateModuleRequest {
      * @type {string}
      * @memberof CreateModuleRequest
      */
-    courseId: string;
+    course_id: string;
     /**
      * 
      * @type {string}
@@ -49,7 +49,7 @@ export interface CreateModuleRequest {
  * Check if a given object implements the CreateModuleRequest interface.
  */
 export function instanceOfCreateModuleRequest(value: object): value is CreateModuleRequest {
-    if (!('courseId' in value) || value['courseId'] === undefined) return false;
+    if (!('course_id' in value) || value['course_id'] === undefined) return false;
     if (!('position' in value) || value['position'] === undefined) return false;
     if (!('title' in value) || value['title'] === undefined) return false;
     return true;
@@ -65,7 +65,7 @@ export function CreateModuleRequestFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
-        'courseId': json['course_id'],
+        'course_id': json['course_id'],
         'description': json['description'] == null ? undefined : json['description'],
         'position': json['position'],
         'title': json['title'],
@@ -83,7 +83,7 @@ export function CreateModuleRequestToJSONTyped(value?: CreateModuleRequest | nul
 
     return {
         
-        'course_id': value['courseId'],
+        'course_id': value['course_id'],
         'description': value['description'],
         'position': value['position'],
         'title': value['title'],

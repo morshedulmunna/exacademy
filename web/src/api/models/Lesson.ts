@@ -30,7 +30,7 @@ export interface Lesson {
      * @type {Date}
      * @memberof Lesson
      */
-    createdAt: Date;
+    created_at: Date;
     /**
      * 
      * @type {string}
@@ -54,13 +54,13 @@ export interface Lesson {
      * @type {boolean}
      * @memberof Lesson
      */
-    isFree: boolean;
+    is_free: boolean;
     /**
      * 
      * @type {string}
      * @memberof Lesson
      */
-    moduleId: string;
+    module_id: string;
     /**
      * 
      * @type {number}
@@ -84,24 +84,24 @@ export interface Lesson {
      * @type {Date}
      * @memberof Lesson
      */
-    updatedAt?: Date | null;
+    updated_at?: Date | null;
     /**
      * 
      * @type {string}
      * @memberof Lesson
      */
-    videoUrl?: string | null;
+    video_url?: string | null;
 }
 
 /**
  * Check if a given object implements the Lesson interface.
  */
 export function instanceOfLesson(value: object): value is Lesson {
-    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
+    if (!('created_at' in value) || value['created_at'] === undefined) return false;
     if (!('duration' in value) || value['duration'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('isFree' in value) || value['isFree'] === undefined) return false;
-    if (!('moduleId' in value) || value['moduleId'] === undefined) return false;
+    if (!('is_free' in value) || value['is_free'] === undefined) return false;
+    if (!('module_id' in value) || value['module_id'] === undefined) return false;
     if (!('position' in value) || value['position'] === undefined) return false;
     if (!('published' in value) || value['published'] === undefined) return false;
     if (!('title' in value) || value['title'] === undefined) return false;
@@ -119,17 +119,17 @@ export function LessonFromJSONTyped(json: any, ignoreDiscriminator: boolean): Le
     return {
         
         'content': json['content'] == null ? undefined : json['content'],
-        'createdAt': (new Date(json['created_at'])),
+        'created_at': (new Date(json['created_at'])),
         'description': json['description'] == null ? undefined : json['description'],
         'duration': json['duration'],
         'id': json['id'],
-        'isFree': json['is_free'],
-        'moduleId': json['module_id'],
+        'is_free': json['is_free'],
+        'module_id': json['module_id'],
         'position': json['position'],
         'published': json['published'],
         'title': json['title'],
-        'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
-        'videoUrl': json['video_url'] == null ? undefined : json['video_url'],
+        'updated_at': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
+        'video_url': json['video_url'] == null ? undefined : json['video_url'],
     };
 }
 
@@ -145,17 +145,17 @@ export function LessonToJSONTyped(value?: Lesson | null, ignoreDiscriminator: bo
     return {
         
         'content': value['content'],
-        'created_at': ((value['createdAt']).toISOString()),
+        'created_at': ((value['created_at']).toISOString()),
         'description': value['description'],
         'duration': value['duration'],
         'id': value['id'],
-        'is_free': value['isFree'],
-        'module_id': value['moduleId'],
+        'is_free': value['is_free'],
+        'module_id': value['module_id'],
         'position': value['position'],
         'published': value['published'],
         'title': value['title'],
-        'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
-        'video_url': value['videoUrl'],
+        'updated_at': value['updated_at'] == null ? undefined : ((value['updated_at'] as any).toISOString()),
+        'video_url': value['video_url'],
     };
 }
 

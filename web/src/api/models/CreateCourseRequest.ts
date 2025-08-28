@@ -48,7 +48,7 @@ export interface CreateCourseRequest {
      * @type {number}
      * @memberof CreateCourseRequest
      */
-    originalPrice?: number | null;
+    original_price?: number | null;
     /**
      * 
      * @type {number}
@@ -102,7 +102,7 @@ export function CreateCourseRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'duration': json['duration'],
         'excerpt': json['excerpt'] == null ? undefined : json['excerpt'],
         'featured': json['featured'],
-        'originalPrice': json['original_price'] == null ? undefined : json['original_price'],
+        'original_price': json['original_price'] == null ? undefined : json['original_price'],
         'price': json['price'],
         'slug': json['slug'],
         'thumbnail': json['thumbnail'] == null ? undefined : json['thumbnail'],
@@ -125,7 +125,7 @@ export function CreateCourseRequestToJSONTyped(value?: CreateCourseRequest | nul
         'duration': value['duration'],
         'excerpt': value['excerpt'],
         'featured': value['featured'],
-        'original_price': value['originalPrice'],
+        'original_price': value['original_price'],
         'price': value['price'],
         'slug': value['slug'],
         'thumbnail': value['thumbnail'],

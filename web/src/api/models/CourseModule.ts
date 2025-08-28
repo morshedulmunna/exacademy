@@ -24,13 +24,13 @@ export interface CourseModule {
      * @type {string}
      * @memberof CourseModule
      */
-    courseId: string;
+    course_id: string;
     /**
      * 
      * @type {Date}
      * @memberof CourseModule
      */
-    createdAt: Date;
+    created_at: Date;
     /**
      * 
      * @type {string}
@@ -60,15 +60,15 @@ export interface CourseModule {
      * @type {Date}
      * @memberof CourseModule
      */
-    updatedAt?: Date | null;
+    updated_at?: Date | null;
 }
 
 /**
  * Check if a given object implements the CourseModule interface.
  */
 export function instanceOfCourseModule(value: object): value is CourseModule {
-    if (!('courseId' in value) || value['courseId'] === undefined) return false;
-    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
+    if (!('course_id' in value) || value['course_id'] === undefined) return false;
+    if (!('created_at' in value) || value['created_at'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('position' in value) || value['position'] === undefined) return false;
     if (!('title' in value) || value['title'] === undefined) return false;
@@ -85,13 +85,13 @@ export function CourseModuleFromJSONTyped(json: any, ignoreDiscriminator: boolea
     }
     return {
         
-        'courseId': json['course_id'],
-        'createdAt': (new Date(json['created_at'])),
+        'course_id': json['course_id'],
+        'created_at': (new Date(json['created_at'])),
         'description': json['description'] == null ? undefined : json['description'],
         'id': json['id'],
         'position': json['position'],
         'title': json['title'],
-        'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
+        'updated_at': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
     };
 }
 
@@ -106,13 +106,13 @@ export function CourseModuleToJSONTyped(value?: CourseModule | null, ignoreDiscr
 
     return {
         
-        'course_id': value['courseId'],
-        'created_at': ((value['createdAt']).toISOString()),
+        'course_id': value['course_id'],
+        'created_at': ((value['created_at']).toISOString()),
         'description': value['description'],
         'id': value['id'],
         'position': value['position'],
         'title': value['title'],
-        'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
+        'updated_at': value['updated_at'] == null ? undefined : ((value['updated_at'] as any).toISOString()),
     };
 }
 

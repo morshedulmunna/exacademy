@@ -24,19 +24,19 @@ export interface UpdateUserRequest {
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    addressLine1?: string | null;
+    address_line1?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    addressLine2?: string | null;
+    address_line2?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    avatarUrl?: string | null;
+    avatar_url?: string | null;
     /**
      * 
      * @type {string}
@@ -60,19 +60,19 @@ export interface UpdateUserRequest {
      * @type {Date}
      * @memberof UpdateUserRequest
      */
-    dateOfBirth?: Date | null;
+    date_of_birth?: Date | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    facebookUrl?: string | null;
+    facebook_url?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    firstName?: string | null;
+    first_name?: string | null;
     /**
      * 
      * @type {string}
@@ -84,25 +84,25 @@ export interface UpdateUserRequest {
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    githubUrl?: string | null;
+    github_url?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    instagramUrl?: string | null;
+    instagram_url?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    lastName?: string | null;
+    last_name?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    linkedinUrl?: string | null;
+    linkedin_url?: string | null;
     /**
      * 
      * @type {string}
@@ -114,7 +114,7 @@ export interface UpdateUserRequest {
      * @type {boolean}
      * @memberof UpdateUserRequest
      */
-    marketingOptIn?: boolean | null;
+    marketing_opt_in?: boolean | null;
     /**
      * 
      * @type {string}
@@ -126,13 +126,13 @@ export interface UpdateUserRequest {
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    postalCode?: string | null;
+    postal_code?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    secondaryEmail?: string | null;
+    secondary_email?: string | null;
     /**
      * 
      * @type {string}
@@ -150,7 +150,7 @@ export interface UpdateUserRequest {
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    twitterUrl?: string | null;
+    twitter_url?: string | null;
     /**
      * 
      * @type {string}
@@ -162,13 +162,13 @@ export interface UpdateUserRequest {
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    websiteUrl?: string | null;
+    website_url?: string | null;
     /**
      * 
      * @type {string}
      * @memberof UpdateUserRequest
      */
-    youtubeUrl?: string | null;
+    youtube_url?: string | null;
 }
 
 /**
@@ -188,31 +188,31 @@ export function UpdateUserRequestFromJSONTyped(json: any, ignoreDiscriminator: b
     }
     return {
         
-        'addressLine1': json['address_line1'] == null ? undefined : json['address_line1'],
-        'addressLine2': json['address_line2'] == null ? undefined : json['address_line2'],
-        'avatarUrl': json['avatar_url'] == null ? undefined : json['avatar_url'],
+        'address_line1': json['address_line1'] == null ? undefined : json['address_line1'],
+        'address_line2': json['address_line2'] == null ? undefined : json['address_line2'],
+        'avatar_url': json['avatar_url'] == null ? undefined : json['avatar_url'],
         'bio': json['bio'] == null ? undefined : json['bio'],
         'city': json['city'] == null ? undefined : json['city'],
         'country': json['country'] == null ? undefined : json['country'],
-        'dateOfBirth': json['date_of_birth'] == null ? undefined : (new Date(json['date_of_birth'])),
-        'facebookUrl': json['facebook_url'] == null ? undefined : json['facebook_url'],
-        'firstName': json['first_name'] == null ? undefined : json['first_name'],
+        'date_of_birth': json['date_of_birth'] == null ? undefined : (new Date(json['date_of_birth'])),
+        'facebook_url': json['facebook_url'] == null ? undefined : json['facebook_url'],
+        'first_name': json['first_name'] == null ? undefined : json['first_name'],
         'gender': json['gender'] == null ? undefined : json['gender'],
-        'githubUrl': json['github_url'] == null ? undefined : json['github_url'],
-        'instagramUrl': json['instagram_url'] == null ? undefined : json['instagram_url'],
-        'lastName': json['last_name'] == null ? undefined : json['last_name'],
-        'linkedinUrl': json['linkedin_url'] == null ? undefined : json['linkedin_url'],
+        'github_url': json['github_url'] == null ? undefined : json['github_url'],
+        'instagram_url': json['instagram_url'] == null ? undefined : json['instagram_url'],
+        'last_name': json['last_name'] == null ? undefined : json['last_name'],
+        'linkedin_url': json['linkedin_url'] == null ? undefined : json['linkedin_url'],
         'locale': json['locale'] == null ? undefined : json['locale'],
-        'marketingOptIn': json['marketing_opt_in'] == null ? undefined : json['marketing_opt_in'],
+        'marketing_opt_in': json['marketing_opt_in'] == null ? undefined : json['marketing_opt_in'],
         'phone': json['phone'] == null ? undefined : json['phone'],
-        'postalCode': json['postal_code'] == null ? undefined : json['postal_code'],
-        'secondaryEmail': json['secondary_email'] == null ? undefined : json['secondary_email'],
+        'postal_code': json['postal_code'] == null ? undefined : json['postal_code'],
+        'secondary_email': json['secondary_email'] == null ? undefined : json['secondary_email'],
         'state': json['state'] == null ? undefined : json['state'],
         'timezone': json['timezone'] == null ? undefined : json['timezone'],
-        'twitterUrl': json['twitter_url'] == null ? undefined : json['twitter_url'],
+        'twitter_url': json['twitter_url'] == null ? undefined : json['twitter_url'],
         'username': json['username'] == null ? undefined : json['username'],
-        'websiteUrl': json['website_url'] == null ? undefined : json['website_url'],
-        'youtubeUrl': json['youtube_url'] == null ? undefined : json['youtube_url'],
+        'website_url': json['website_url'] == null ? undefined : json['website_url'],
+        'youtube_url': json['youtube_url'] == null ? undefined : json['youtube_url'],
     };
 }
 
@@ -227,31 +227,31 @@ export function UpdateUserRequestToJSONTyped(value?: UpdateUserRequest | null, i
 
     return {
         
-        'address_line1': value['addressLine1'],
-        'address_line2': value['addressLine2'],
-        'avatar_url': value['avatarUrl'],
+        'address_line1': value['address_line1'],
+        'address_line2': value['address_line2'],
+        'avatar_url': value['avatar_url'],
         'bio': value['bio'],
         'city': value['city'],
         'country': value['country'],
-        'date_of_birth': value['dateOfBirth'] == null ? undefined : ((value['dateOfBirth'] as any).toISOString().substring(0,10)),
-        'facebook_url': value['facebookUrl'],
-        'first_name': value['firstName'],
+        'date_of_birth': value['date_of_birth'] == null ? undefined : ((value['date_of_birth'] as any).toISOString().substring(0,10)),
+        'facebook_url': value['facebook_url'],
+        'first_name': value['first_name'],
         'gender': value['gender'],
-        'github_url': value['githubUrl'],
-        'instagram_url': value['instagramUrl'],
-        'last_name': value['lastName'],
-        'linkedin_url': value['linkedinUrl'],
+        'github_url': value['github_url'],
+        'instagram_url': value['instagram_url'],
+        'last_name': value['last_name'],
+        'linkedin_url': value['linkedin_url'],
         'locale': value['locale'],
-        'marketing_opt_in': value['marketingOptIn'],
+        'marketing_opt_in': value['marketing_opt_in'],
         'phone': value['phone'],
-        'postal_code': value['postalCode'],
-        'secondary_email': value['secondaryEmail'],
+        'postal_code': value['postal_code'],
+        'secondary_email': value['secondary_email'],
         'state': value['state'],
         'timezone': value['timezone'],
-        'twitter_url': value['twitterUrl'],
+        'twitter_url': value['twitter_url'],
         'username': value['username'],
-        'website_url': value['websiteUrl'],
-        'youtube_url': value['youtubeUrl'],
+        'website_url': value['website_url'],
+        'youtube_url': value['youtube_url'],
     };
 }
 

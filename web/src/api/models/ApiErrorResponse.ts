@@ -48,7 +48,7 @@ export interface ApiErrorResponse {
      * @type {string}
      * @memberof ApiErrorResponse
      */
-    traceId?: string | null;
+    trace_id?: string | null;
 }
 
 /**
@@ -75,7 +75,7 @@ export function ApiErrorResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
         'details': json['details'] == null ? undefined : json['details'],
         'message': json['message'],
         'timestamp': (new Date(json['timestamp'])),
-        'traceId': json['trace_id'] == null ? undefined : json['trace_id'],
+        'trace_id': json['trace_id'] == null ? undefined : json['trace_id'],
     };
 }
 
@@ -94,7 +94,7 @@ export function ApiErrorResponseToJSONTyped(value?: ApiErrorResponse | null, ign
         'details': value['details'],
         'message': value['message'],
         'timestamp': ((value['timestamp']).toISOString()),
-        'trace_id': value['traceId'],
+        'trace_id': value['trace_id'],
     };
 }
 

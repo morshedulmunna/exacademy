@@ -79,17 +79,18 @@ export default function RegisterPage() {
             onSubmit={async (values, { setSubmitting }) => {
               try {
                 setSubmitting(true);
-                setError(""); // Clear any previous errors
-                setSuccess(""); // Clear any previous success messages
+                setError("");
 
                 const res = await register(values);
-                console.log(res);
+                console.log("Registration successful:", res);
 
-                // This should be a success response since errors are thrown as ResponseError
-                setSuccess("Registration successful! Please check your email to verify your account.");
-                // You might want to redirect here or clear the form
+                // Add a small delay to show success message before redirect
+                setTimeout(() => {
+                  console.log("Redirecting to:", `/verify?email=${encodeURIComponent(values.email)}`);
+                  router.push(`/verify?email=${encodeURIComponent(values.email)}`);
+                }, 500);
               } catch (error: any) {
-                setError(error.message || "An unexpected error occurred");
+                setError(error.message);
               } finally {
                 setSubmitting(false);
               }
@@ -105,7 +106,7 @@ export default function RegisterPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
                       transition={{ duration: 0.2, ease: EASE }}
-                      className="bg-red-500/20 border  border-red-500/30 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-300 text-xs sm:text-sm"
+                      className=" text-center mb-4 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-300 text-xs sm:text-sm"
                     >
                       {error}
                     </motion.div>

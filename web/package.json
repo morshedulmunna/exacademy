@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 3005",
     "lint": "next lint",
-    "api": "openapi-generator-cli generate -i ./public/openapi.yml -g typescript-fetch -o src/api"
+    "api": "openapi-generator-cli generate -i ./public/openapi.yml -g typescript-fetch -o src/api --additional-properties=supportsES6=true,typescriptThreePlus=true,modelPropertyNaming=original,parameterNaming=original"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",

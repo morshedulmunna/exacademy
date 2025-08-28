@@ -30,7 +30,7 @@ export interface PaginationQuery {
      * @type {number}
      * @memberof PaginationQuery
      */
-    perPage?: number | null;
+    per_page?: number | null;
 }
 
 /**
@@ -51,7 +51,7 @@ export function PaginationQueryFromJSONTyped(json: any, ignoreDiscriminator: boo
     return {
         
         'page': json['page'] == null ? undefined : json['page'],
-        'perPage': json['per_page'] == null ? undefined : json['per_page'],
+        'per_page': json['per_page'] == null ? undefined : json['per_page'],
     };
 }
 
@@ -67,7 +67,7 @@ export function PaginationQueryToJSONTyped(value?: PaginationQuery | null, ignor
     return {
         
         'page': value['page'],
-        'per_page': value['perPage'],
+        'per_page': value['per_page'],
     };
 }
 

@@ -32,7 +32,7 @@ export interface Course {
      * @type {Date}
      * @memberof Course
      */
-    createdAt: Date;
+    created_at: Date;
     /**
      * 
      * @type {string}
@@ -74,7 +74,7 @@ export interface Course {
      * @type {string}
      * @memberof Course
      */
-    instructorId?: string | null;
+    instructor_id?: string | null;
     /**
      * 
      * @type {number}
@@ -86,7 +86,7 @@ export interface Course {
      * @type {number}
      * @memberof Course
      */
-    originalPrice?: number | null;
+    original_price?: number | null;
     /**
      * 
      * @type {number}
@@ -104,7 +104,7 @@ export interface Course {
      * @type {Date}
      * @memberof Course
      */
-    publishedAt?: Date | null;
+    published_at?: Date | null;
     /**
      * 
      * @type {string}
@@ -134,20 +134,20 @@ export interface Course {
      * @type {Date}
      * @memberof Course
      */
-    updatedAt?: Date | null;
+    updated_at?: Date | null;
     /**
      * 
      * @type {number}
      * @memberof Course
      */
-    viewCount: number;
+    view_count: number;
 }
 
 /**
  * Check if a given object implements the Course interface.
  */
 export function instanceOfCourse(value: object): value is Course {
-    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
+    if (!('created_at' in value) || value['created_at'] === undefined) return false;
     if (!('description' in value) || value['description'] === undefined) return false;
     if (!('duration' in value) || value['duration'] === undefined) return false;
     if (!('featured' in value) || value['featured'] === undefined) return false;
@@ -158,7 +158,7 @@ export function instanceOfCourse(value: object): value is Course {
     if (!('slug' in value) || value['slug'] === undefined) return false;
     if (!('students' in value) || value['students'] === undefined) return false;
     if (!('title' in value) || value['title'] === undefined) return false;
-    if (!('viewCount' in value) || value['viewCount'] === undefined) return false;
+    if (!('view_count' in value) || value['view_count'] === undefined) return false;
     return true;
 }
 
@@ -172,25 +172,25 @@ export function CourseFromJSONTyped(json: any, ignoreDiscriminator: boolean): Co
     }
     return {
         
-        'createdAt': (new Date(json['created_at'])),
+        'created_at': (new Date(json['created_at'])),
         'description': json['description'],
         'duration': json['duration'],
         'excerpt': json['excerpt'] == null ? undefined : json['excerpt'],
         'featured': json['featured'],
         'id': json['id'],
         'instructor': json['instructor'] == null ? undefined : InstructorFromJSON(json['instructor']),
-        'instructorId': json['instructor_id'] == null ? undefined : json['instructor_id'],
+        'instructor_id': json['instructor_id'] == null ? undefined : json['instructor_id'],
         'lessons': json['lessons'],
-        'originalPrice': json['original_price'] == null ? undefined : json['original_price'],
+        'original_price': json['original_price'] == null ? undefined : json['original_price'],
         'price': json['price'],
         'published': json['published'],
-        'publishedAt': json['published_at'] == null ? undefined : (new Date(json['published_at'])),
+        'published_at': json['published_at'] == null ? undefined : (new Date(json['published_at'])),
         'slug': json['slug'],
         'students': json['students'],
         'thumbnail': json['thumbnail'] == null ? undefined : json['thumbnail'],
         'title': json['title'],
-        'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
-        'viewCount': json['view_count'],
+        'updated_at': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
+        'view_count': json['view_count'],
     };
 }
 
@@ -205,25 +205,25 @@ export function CourseToJSONTyped(value?: Course | null, ignoreDiscriminator: bo
 
     return {
         
-        'created_at': ((value['createdAt']).toISOString()),
+        'created_at': ((value['created_at']).toISOString()),
         'description': value['description'],
         'duration': value['duration'],
         'excerpt': value['excerpt'],
         'featured': value['featured'],
         'id': value['id'],
         'instructor': InstructorToJSON(value['instructor']),
-        'instructor_id': value['instructorId'],
+        'instructor_id': value['instructor_id'],
         'lessons': value['lessons'],
-        'original_price': value['originalPrice'],
+        'original_price': value['original_price'],
         'price': value['price'],
         'published': value['published'],
-        'published_at': value['publishedAt'] == null ? undefined : ((value['publishedAt'] as any).toISOString()),
+        'published_at': value['published_at'] == null ? undefined : ((value['published_at'] as any).toISOString()),
         'slug': value['slug'],
         'students': value['students'],
         'thumbnail': value['thumbnail'],
         'title': value['title'],
-        'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
-        'view_count': value['viewCount'],
+        'updated_at': value['updated_at'] == null ? undefined : ((value['updated_at'] as any).toISOString()),
+        'view_count': value['view_count'],
     };
 }
 

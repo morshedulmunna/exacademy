@@ -1,7 +1,8 @@
 "use server";
 
 import { VerifyOtpRequest, OkResponse } from "@/api";
-import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
+import { AUTH_API } from "@/configs/API_CLIENT";
+import { ErrorResponse } from "@/configs/error";
 
 /**
  * Server action to verify email with OTP code

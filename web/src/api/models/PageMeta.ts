@@ -30,7 +30,7 @@ export interface PageMeta {
      * @type {number}
      * @memberof PageMeta
      */
-    perPage: number;
+    per_page: number;
     /**
      * 
      * @type {number}
@@ -42,7 +42,7 @@ export interface PageMeta {
      * @type {number}
      * @memberof PageMeta
      */
-    totalPages: number;
+    total_pages: number;
 }
 
 /**
@@ -50,9 +50,9 @@ export interface PageMeta {
  */
 export function instanceOfPageMeta(value: object): value is PageMeta {
     if (!('page' in value) || value['page'] === undefined) return false;
-    if (!('perPage' in value) || value['perPage'] === undefined) return false;
+    if (!('per_page' in value) || value['per_page'] === undefined) return false;
     if (!('total' in value) || value['total'] === undefined) return false;
-    if (!('totalPages' in value) || value['totalPages'] === undefined) return false;
+    if (!('total_pages' in value) || value['total_pages'] === undefined) return false;
     return true;
 }
 
@@ -67,9 +67,9 @@ export function PageMetaFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
     return {
         
         'page': json['page'],
-        'perPage': json['per_page'],
+        'per_page': json['per_page'],
         'total': json['total'],
-        'totalPages': json['total_pages'],
+        'total_pages': json['total_pages'],
     };
 }
 
@@ -85,9 +85,9 @@ export function PageMetaToJSONTyped(value?: PageMeta | null, ignoreDiscriminator
     return {
         
         'page': value['page'],
-        'per_page': value['perPage'],
+        'per_page': value['per_page'],
         'total': value['total'],
-        'total_pages': value['totalPages'],
+        'total_pages': value['total_pages'],
     };
 }
 

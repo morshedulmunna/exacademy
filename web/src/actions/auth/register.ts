@@ -1,7 +1,8 @@
 "use server";
 
 import { RegisterRequest, RegisterResponse } from "@/api";
-import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
+import { AUTH_API } from "@/configs/API_CLIENT";
+import { ErrorResponse } from "@/configs/error";
 
 /**
  * Server action to register a new user account
@@ -10,13 +11,16 @@ import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
  */
 export async function register(data: RegisterRequest): Promise<RegisterResponse> {
   try {
+    console.log("Registering user with data:", data);
+
     // Call the register endpoint
     const response = await AUTH_API.register({
       registerRequest: data,
     });
-
+    console.log(response);
     return response;
   } catch (error) {
+    console.error("Registration error:", error);
     const errorMessage = await ErrorResponse(error);
     throw new Error(errorMessage);
   }

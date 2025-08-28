@@ -42,13 +42,13 @@ export interface CreateLessonRequest {
      * @type {boolean}
      * @memberof CreateLessonRequest
      */
-    isFree: boolean;
+    is_free: boolean;
     /**
      * 
      * @type {string}
      * @memberof CreateLessonRequest
      */
-    moduleId: string;
+    module_id: string;
     /**
      * 
      * @type {number}
@@ -72,7 +72,7 @@ export interface CreateLessonRequest {
      * @type {string}
      * @memberof CreateLessonRequest
      */
-    videoUrl?: string | null;
+    video_url?: string | null;
 }
 
 /**
@@ -80,8 +80,8 @@ export interface CreateLessonRequest {
  */
 export function instanceOfCreateLessonRequest(value: object): value is CreateLessonRequest {
     if (!('duration' in value) || value['duration'] === undefined) return false;
-    if (!('isFree' in value) || value['isFree'] === undefined) return false;
-    if (!('moduleId' in value) || value['moduleId'] === undefined) return false;
+    if (!('is_free' in value) || value['is_free'] === undefined) return false;
+    if (!('module_id' in value) || value['module_id'] === undefined) return false;
     if (!('position' in value) || value['position'] === undefined) return false;
     if (!('published' in value) || value['published'] === undefined) return false;
     if (!('title' in value) || value['title'] === undefined) return false;
@@ -101,12 +101,12 @@ export function CreateLessonRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'content': json['content'] == null ? undefined : json['content'],
         'description': json['description'] == null ? undefined : json['description'],
         'duration': json['duration'],
-        'isFree': json['is_free'],
-        'moduleId': json['module_id'],
+        'is_free': json['is_free'],
+        'module_id': json['module_id'],
         'position': json['position'],
         'published': json['published'],
         'title': json['title'],
-        'videoUrl': json['video_url'] == null ? undefined : json['video_url'],
+        'video_url': json['video_url'] == null ? undefined : json['video_url'],
     };
 }
 
@@ -124,12 +124,12 @@ export function CreateLessonRequestToJSONTyped(value?: CreateLessonRequest | nul
         'content': value['content'],
         'description': value['description'],
         'duration': value['duration'],
-        'is_free': value['isFree'],
-        'module_id': value['moduleId'],
+        'is_free': value['is_free'],
+        'module_id': value['module_id'],
         'position': value['position'],
         'published': value['published'],
         'title': value['title'],
-        'video_url': value['videoUrl'],
+        'video_url': value['video_url'],
     };
 }
 

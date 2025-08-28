@@ -32,25 +32,25 @@ export interface LoginResponse {
      * @type {string}
      * @memberof LoginResponse
      */
-    accessToken: string;
+    access_token: string;
     /**
      * 
      * @type {number}
      * @memberof LoginResponse
      */
-    expiresIn: number;
+    expires_in: number;
     /**
      * 
      * @type {string}
      * @memberof LoginResponse
      */
-    refreshToken: string;
+    refresh_token: string;
     /**
      * 
      * @type {string}
      * @memberof LoginResponse
      */
-    tokenType: string;
+    token_type: string;
     /**
      * 
      * @type {UserResponse}
@@ -63,10 +63,10 @@ export interface LoginResponse {
  * Check if a given object implements the LoginResponse interface.
  */
 export function instanceOfLoginResponse(value: object): value is LoginResponse {
-    if (!('accessToken' in value) || value['accessToken'] === undefined) return false;
-    if (!('expiresIn' in value) || value['expiresIn'] === undefined) return false;
-    if (!('refreshToken' in value) || value['refreshToken'] === undefined) return false;
-    if (!('tokenType' in value) || value['tokenType'] === undefined) return false;
+    if (!('access_token' in value) || value['access_token'] === undefined) return false;
+    if (!('expires_in' in value) || value['expires_in'] === undefined) return false;
+    if (!('refresh_token' in value) || value['refresh_token'] === undefined) return false;
+    if (!('token_type' in value) || value['token_type'] === undefined) return false;
     if (!('user' in value) || value['user'] === undefined) return false;
     return true;
 }
@@ -81,10 +81,10 @@ export function LoginResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
-        'accessToken': json['access_token'],
-        'expiresIn': json['expires_in'],
-        'refreshToken': json['refresh_token'],
-        'tokenType': json['token_type'],
+        'access_token': json['access_token'],
+        'expires_in': json['expires_in'],
+        'refresh_token': json['refresh_token'],
+        'token_type': json['token_type'],
         'user': UserResponseFromJSON(json['user']),
     };
 }
@@ -100,10 +100,10 @@ export function LoginResponseToJSONTyped(value?: LoginResponse | null, ignoreDis
 
     return {
         
-        'access_token': value['accessToken'],
-        'expires_in': value['expiresIn'],
-        'refresh_token': value['refreshToken'],
-        'token_type': value['tokenType'],
+        'access_token': value['access_token'],
+        'expires_in': value['expires_in'],
+        'refresh_token': value['refresh_token'],
+        'token_type': value['token_type'],
         'user': UserResponseToJSON(value['user']),
     };
 }
