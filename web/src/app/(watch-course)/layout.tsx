@@ -1,5 +1,5 @@
 import React from "react";
-import DetailsHeader from "./course/components/DetailsHeader";
+import DetailsHeader from "./learn/components/DetailsHeader";
 
 interface CourseLayoutProps {
   children: React.ReactNode;

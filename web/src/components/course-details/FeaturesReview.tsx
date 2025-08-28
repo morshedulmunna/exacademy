@@ -23,9 +23,9 @@ export default function FeaturesReview({ review }: Props) {
               </div>
               <div className="flex mb-3 items-center gap-2">
                 <RatingView ratingPercentage={(Math.max(1, Math.min(5, review.rating)) / 5) * 100} />
-                <span className="text-sm dark:text-gray-400 text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</span>
+                <span className="text-sm dark:text-gray-400 text-gray-500">{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ""}</span>
               </div>
-              <p className="dark:text-gray-300 text-gray-600 leading-relaxed">{review.content}</p>
+              <p className="dark:text-gray-300 text-gray-600 leading-relaxed">{review.comment}</p>
             </>
           ) : (
             <p className="text-sm dark:text-gray-400 text-gray-500">No featured review yet.</p>

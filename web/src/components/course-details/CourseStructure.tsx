@@ -29,10 +29,10 @@ export default function CourseStructure({ lessons, duration, modules = [] }: Pro
             <div className="mt-4 space-y-3">
               {modules.length > 0 ? (
                 modules
-                  .sort((a, b) => a.order - b.order)
+                  .sort((a, b) => (a.order || 0) - (b.order || 0))
                   .map((module) => {
-                    const totalMinutes = module.lessons.reduce((sum, l) => {
-                      const minutes = parseInt(l.duration);
+                    const totalMinutes = (module.lessons || []).reduce((sum, l) => {
+                      const minutes = parseInt(String(l.duration || 0));
                       return sum + (isNaN(minutes) ? 0 : minutes);
                     }, 0);
                     return (

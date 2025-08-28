@@ -22,7 +22,7 @@ export default function CourseCard({ course }: Props) {
             <p className="underline capitalize hover:text-blue-500 dark:hover:text-blue-400 dark:text-gray-300 text-gray-600 font-medium transition-colors cursor-pointer">{course.instructor?.name}</p>
             <div className="flex items-center gap-2 mt-2">
               <RatingView ratingPercentage={0} />
-              <p className="text-orange-500 dark:text-orange-400 font-medium">{course.viewCount > 0 ? `${course.viewCount.toLocaleString()} views` : ""}</p>
+              <p className="text-orange-500 dark:text-orange-400 font-medium">{course.viewCount && course.viewCount > 0 ? `${course.viewCount.toLocaleString()} views` : ""}</p>
             </div>
           </div>
         </div>

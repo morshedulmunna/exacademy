@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { forgotPasswordAction } from "@/actions/auth/password.action";
 import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
@@ -32,9 +31,6 @@ export default function ForgotPasswordPage() {
               setError("");
               setSuccess("");
               try {
-                await forgotPasswordAction({ email: values.email });
-                setSuccess("We sent a code to your email.");
-                router.push(`/reset-password?email=${encodeURIComponent(values.email)}`);
               } catch (e: any) {
                 setError("Failed to send code.");
               } finally {

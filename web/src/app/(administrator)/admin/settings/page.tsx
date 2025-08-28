@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { PageHeader, GeneralSettings, UserManagementSettings, SecuritySettings, EmailSettings, PaymentSettings, NotificationSettings, SaveButton } from "./components";
 

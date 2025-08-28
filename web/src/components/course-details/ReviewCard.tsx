@@ -16,9 +16,9 @@ export default function ReviewCard({ review }: Props) {
           <h5 className="dark:text-white text-sm md:text-base text-gray-900 font-medium mb-2">{review.user?.name || "Anonymous"}</h5>
           <div className="flex gap-2 items-center my-2 justify-start">
             <RatingView ratingPercentage={(Math.max(1, Math.min(5, review.rating)) / 5) * 100} />
-            <p className="text-sm dark:text-gray-400 text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
+            <p className="text-sm dark:text-gray-400 text-gray-500">{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ""}</p>
           </div>
-          <p className="text-sm dark:text-gray-300 text-gray-600 leading-relaxed">{review.content}</p>
+          <p className="text-sm dark:text-gray-300 text-gray-600 leading-relaxed">{review.comment}</p>
         </div>
       </div>
     </>
