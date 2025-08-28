@@ -26,6 +26,7 @@
     "@types/uuid": "^10.0.0",
     "@vavt/cm-extension": "^1.10.1",
     "@vavt/v3-extension": "^3.0.0",
+    "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.2.6",
