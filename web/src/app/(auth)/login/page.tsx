@@ -8,7 +8,6 @@ import SocialLoginButtons from "@/components/ui/social-login-buttons";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
-import { login } from "@/actions/auth";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -56,12 +55,8 @@ export default function LoginPage() {
               setError("");
               setSubmitting(true);
               try {
-                const res = await login(values);
-                console.log(res);
               } catch (error: any) {
-                setError(error.message);
               } finally {
-                setSubmitting(false);
               }
             }}
           >

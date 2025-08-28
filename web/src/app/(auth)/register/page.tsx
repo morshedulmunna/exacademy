@@ -9,7 +9,6 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { login, register } from "@/actions/auth";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
@@ -78,21 +77,8 @@ export default function RegisterPage() {
             validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
               try {
-                setSubmitting(true);
-                setError("");
-
-                const res = await register(values);
-                console.log("Registration successful:", res);
-
-                // Add a small delay to show success message before redirect
-                setTimeout(() => {
-                  console.log("Redirecting to:", `/verify?email=${encodeURIComponent(values.email)}`);
-                  router.push(`/verify?email=${encodeURIComponent(values.email)}`);
-                }, 500);
               } catch (error: any) {
-                setError(error.message);
               } finally {
-                setSubmitting(false);
               }
             }}
           >
