@@ -1,8 +1,8 @@
 "use server";
 
 import { OkResponse } from "@/api";
-import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
-
+import { AUTH_API } from "@/configs/API_CLIENT";
+import { ErrorResponse } from "@/configs/error";
 /**
  * Server action to log out a user (stateless)
  * @returns Promise<OkResponse> - Response indicating successful logout

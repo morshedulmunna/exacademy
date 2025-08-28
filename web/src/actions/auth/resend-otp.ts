@@ -1,8 +1,8 @@
 "use server";
 
 import { ResendOtpRequest, OkResponse } from "@/api";
-import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
-
+import { AUTH_API } from "@/configs/API_CLIENT";
+import { ErrorResponse } from "@/configs/error";
 /**
  * Server action to resend OTP email to a user
  * @param data - Request containing the user's email address

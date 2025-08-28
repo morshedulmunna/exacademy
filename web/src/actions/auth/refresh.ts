@@ -1,8 +1,8 @@
 "use server";
 
 import { RefreshRequest, TokenResponse } from "@/api";
-import { AUTH_API, ErrorResponse } from "@/configs/API_CLIENT";
-
+import { AUTH_API } from "@/configs/API_CLIENT";
+import { ErrorResponse } from "@/configs/error";
 /**
  * Server action to exchange refresh token for new access token
  * @param data - Refresh token request containing the refresh token
