@@ -1,0 +1,195 @@
+# Default values for execute-academy
+# This is a YAML-formatted file.
+
+# Global configuration
+global:
+  environment: production
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Image configuration
+images:
+  backend:
+    repository: your-dockerhub-username/execute-academy-backend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  frontend:
+    repository: your-dockerhub-username/execute-academy-frontend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+# Backend API configuration
+backend:
+  enabled: true
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 9098
+  env:
+    API_HOST: "0.0.0.0"
+    API_PORT: "9098"
+    DATABASE_URL: "postgres://execute_academy:password@postgres:5432/execute_academy?sslmode=disable"
+    REDIS_URL: "redis://redis:6379/0"
+    VIMEO_TOKEN: "dummy-local-token"
+    KAFKA_BROKERS: "kafka:9092"
+    KAFKA_EMAIL_TOPIC: "emails"
+    KAFKA_CLIENT_ID: "execute_academy_api"
+    ADMIN_USERNAME: "admin"
+    ADMIN_EMAIL: "admin@execute_academy.local"
+    ADMIN_PASSWORD: "admin123"
+  livenessProbe:
+    httpGet:
+      path: /api/health
+      port: 9098
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /api/health
+      port: 9098
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  env:
+    NODE_ENV: production
+    API_BASE_URL: "http://backend:8080"
+    PORT: 3000
+    HOSTNAME: 0.0.0.0
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Database configuration
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+    port: 5432
+  env:
+    POSTGRES_USER: execute_academy
+    POSTGRES_DB: execute_academy
+    POSTGRES_PASSWORD: password
+    POSTGRES_HOST_AUTH_METHOD: trust
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+
+# Redis configuration
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7.2-alpine"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 6379
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  hosts:
+    - host: execute-academy.local
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: frontend
+          servicePort: 3000
+        - path: /api
+          pathType: Prefix
+          serviceName: backend
+          servicePort: 8080
+  tls: []
+
+# Service account configuration
+serviceAccount:
+  create: true
+  name: "execute-academy"
+  annotations: {}
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Container security context
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL

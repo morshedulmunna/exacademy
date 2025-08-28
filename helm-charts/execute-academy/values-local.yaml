@@ -1,0 +1,152 @@
+# Local development values for execute-academy
+# Use this file for local testing with k3d
+
+global:
+  environment: local
+
+# Image configuration for local development
+images:
+  backend:
+    repository: execute-academy-backend
+    tag: "local"
+    pullPolicy: Never
+  frontend:
+    repository: execute-academy-frontend
+    tag: "local"
+    pullPolicy: Never
+
+# Backend configuration for local development
+backend:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 9098
+  env:
+    API_HOST: "0.0.0.0"
+    API_PORT: "9098"
+    DATABASE_URL: "postgres://execute_academy:password@postgres:5432/execute_academy?sslmode=disable"
+    REDIS_URL: "redis://redis:6379/0"
+    VIMEO_TOKEN: "dummy-local-token"
+    KAFKA_BROKERS: "kafka:9092"
+    KAFKA_EMAIL_TOPIC: "emails"
+    KAFKA_CLIENT_ID: "execute_academy_api"
+    ADMIN_USERNAME: "admin"
+    ADMIN_EMAIL: "admin@execute_academy.local"
+    ADMIN_PASSWORD: "admin123"
+
+# Frontend configuration for local development
+frontend:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  env:
+    NODE_ENV: production
+    API_BASE_URL: "http://backend:8080"
+    PORT: 3000
+    HOSTNAME: 0.0.0.0
+
+# Database configuration for local development
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+    port: 5432
+  env:
+    POSTGRES_USER: execute_academy
+    POSTGRES_DB: execute_academy
+    POSTGRES_PASSWORD: password
+    POSTGRES_HOST_AUTH_METHOD: trust
+  persistence:
+    enabled: false  # Use emptyDir for local testing
+
+# Redis configuration for local development
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7.2-alpine"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 6379
+  persistence:
+    enabled: false  # Use emptyDir for local testing
+
+# Ingress configuration for local development
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  hosts:
+    - host: execute-academy.local
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: frontend
+          servicePort: 3000
+        - path: /api
+          pathType: Prefix
+          serviceName: backend
+          servicePort: 8080
+  tls: []
+
+# Service account configuration
+serviceAccount:
+  create: true
+  name: "execute-academy"
+  annotations: {}
+
+# Pod security context (relaxed for local development)
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: false
+  runAsUser: 1000
+
+# Container security context (relaxed for local development)
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsNonRoot: false
+  runAsUser: 1000

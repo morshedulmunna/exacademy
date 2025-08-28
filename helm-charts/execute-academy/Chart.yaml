@@ -1,0 +1,17 @@
+apiVersion: v2
+name: execute-academy
+description: Execute Academy - Backend API and Frontend Web Application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - education
+  - academy
+  - api
+  - web
+home: https://github.com/your-org/execute-academy
+sources:
+  - https://github.com/your-org/execute-academy
+maintainers:
+  - name: Your Name
+    email: your.email@example.com
