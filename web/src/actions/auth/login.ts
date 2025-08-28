@@ -16,9 +16,11 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     const response = await AUTH_API.login({
       loginRequest: data,
     });
-    console.log(response);
 
-    return response;
+    // Extract the actual response data, not the raw response object
+    const responseData = await response.json();
+
+    return responseData;
   } catch (error) {
     const errorMessage = await ErrorResponse(error);
     throw new Error(errorMessage);
