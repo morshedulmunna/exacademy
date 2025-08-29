@@ -152,6 +152,7 @@ export function isNetworkError(error: any): boolean {
  * @returns A user-friendly error message
  */
 export function extractErrorMessage(error: any): string {
+  console.log(error);
   // Handle network errors first
   if (isNetworkError(error)) {
     return "Network error: Please check your internet connection";

@@ -3,10 +3,105 @@
  * These functions only work in client-side code and check for window availability
  */
 
+// Import js-cookie library
+import Cookies from "js-cookie";
+
+export const cookiesStorages = {
+  set: (
+    name: string,
+    value: string,
+    options?: {
+      expires?: Date;
+      maxAge?: number;
+      domain?: string;
+      path?: string;
+      secure?: boolean;
+      sameSite?: "lax" | "strict" | "none";
+    }
+  ): void => {
+    if (typeof window !== "undefined") {
+      try {
+        Cookies.set(name, value, options);
+      } catch (error) {
+        console.error("Error setting cookie:", error);
+      }
+    }
+  },
+  get: (name: string): string | undefined => {
+    try {
+      const result = Cookies.get(name);
+      console.log(result, "result");
+      return result;
+    } catch (error) {
+      console.error("Error getting cookie:", error);
+      return undefined;
+    }
+  },
+
+  getAll: (): Array<{ name: string; value: string }> => {
+    if (typeof window !== "undefined") {
+      try {
+        return Object.entries(Cookies.get()).map(([name, value]) => ({
+          name: name,
+          value: String(value),
+        }));
+      } catch (error) {
+        console.error("Error getting all cookies:", error);
+        return [];
+      }
+    }
+    return [];
+  },
+  has: (name: string): boolean => {
+    if (typeof window !== "undefined") {
+      try {
+        return Cookies.get(name) !== undefined;
+      } catch (error) {
+        console.error("Error checking cookie:", error);
+        return false;
+      }
+    }
+    return false;
+  },
+  delete: (name: string): void => {
+    if (typeof window !== "undefined") {
+      try {
+        Cookies.remove(name);
+      } catch (error) {
+        console.error("Error deleting cookie:", error);
+      }
+    }
+  },
+  clearAll: (): void => {
+    if (typeof window !== "undefined") {
+      try {
+        // Get all cookies and remove them individually
+        const allCookies = Cookies.get();
+        Object.keys(allCookies).forEach((name) => {
+          Cookies.remove(name);
+        });
+      } catch (error) {
+        console.error("Error clearing cookies:", error);
+      }
+    }
+  },
+  toString: (): string => {
+    if (typeof window !== "undefined") {
+      try {
+        return JSON.stringify(Cookies.get());
+      } catch (error) {
+        console.error("Error converting cookies to string:", error);
+        return "";
+      }
+    }
+    return "";
+  },
+};
+
 /**
  * LocalStorage utility functions for client-side storage
  */
-export const localStorage = {
+export const localStorages = {
   /**
    * Set a value in localStorage
    */
@@ -110,178 +205,9 @@ export const localStorage = {
 };
 
 /**
- * Client-side cookie utilities using document.cookie
- * Note: These are client-side only and don't have the same security features as server-side cookies
- */
-export const cookieStorage = {
-  /**
-   * Set a cookie with options
-   */
-  set: (
-    name: string,
-    value: string,
-    options?: {
-      expires?: Date;
-      maxAge?: number;
-      domain?: string;
-      path?: string;
-      secure?: boolean;
-      sameSite?: "lax" | "strict" | "none";
-    }
-  ): void => {
-    if (typeof window !== "undefined") {
-      try {
-        let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
-
-        if (options?.expires) {
-          cookieString += `; expires=${options.expires.toUTCString()}`;
-        }
-
-        if (options?.maxAge) {
-          cookieString += `; max-age=${options.maxAge}`;
-        }
-
-        if (options?.domain) {
-          cookieString += `; domain=${options.domain}`;
-        }
-
-        if (options?.path) {
-          cookieString += `; path=${options.path}`;
-        } else {
-          cookieString += "; path=/";
-        }
-
-        if (options?.secure) {
-          cookieString += "; secure";
-        }
-
-        if (options?.sameSite) {
-          cookieString += `; samesite=${options.sameSite}`;
-        }
-
-        document.cookie = cookieString;
-      } catch (error) {
-        console.error("Error setting cookie:", error);
-      }
-    }
-  },
-
-  /**
-   * Get a cookie value
-   */
-  get: (name: string): string | undefined => {
-    if (typeof window !== "undefined") {
-      try {
-        const nameEQ = `${name}=`;
-        const cookies = document.cookie.split(";");
-
-        for (let cookie of cookies) {
-          cookie = cookie.trim();
-          if (cookie.indexOf(nameEQ) === 0) {
-            return decodeURIComponent(cookie.substring(nameEQ.length));
-          }
-        }
-        return undefined;
-      } catch (error) {
-        console.error("Error getting cookie:", error);
-        return undefined;
-      }
-    }
-    return undefined;
-  },
-
-  /**
-   * Get all cookies
-   */
-  getAll: (): Array<{ name: string; value: string }> => {
-    if (typeof window !== "undefined") {
-      try {
-        const cookies = document.cookie.split(";");
-        return cookies
-          .map((cookie) => cookie.trim().split("="))
-          .filter((parts) => parts.length === 2)
-          .map(([name, value]) => ({
-            name: decodeURIComponent(name),
-            value: decodeURIComponent(value),
-          }));
-      } catch (error) {
-        console.error("Error getting all cookies:", error);
-        return [];
-      }
-    }
-    return [];
-  },
-
-  /**
-   * Check if a cookie exists
-   */
-  has: (name: string): boolean => {
-    if (typeof window !== "undefined") {
-      try {
-        const nameEQ = `${name}=`;
-        const cookies = document.cookie.split(";");
-
-        return cookies.some((cookie) => cookie.trim().indexOf(nameEQ) === 0);
-      } catch (error) {
-        console.error("Error checking cookie:", error);
-        return false;
-      }
-    }
-    return false;
-  },
-
-  /**
-   * Delete a cookie
-   */
-  delete: (name: string): void => {
-    if (typeof window !== "undefined") {
-      try {
-        // Set cookie with past expiration date to delete it
-        document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-      } catch (error) {
-        console.error("Error deleting cookie:", error);
-      }
-    }
-  },
-
-  /**
-   * Clear all cookies by deleting them individually
-   */
-  clearAll: (): void => {
-    if (typeof window !== "undefined") {
-      try {
-        const allCookies = cookieStorage.getAll();
-
-        // Delete each cookie individually
-        for (const cookie of allCookies) {
-          cookieStorage.delete(cookie.name);
-        }
-      } catch (error) {
-        console.error("Error clearing cookies:", error);
-      }
-    }
-  },
-
-  /**
-   * Get cookie as string representation
-   */
-  toString: (): string => {
-    if (typeof window !== "undefined") {
-      try {
-        return document.cookie;
-      } catch (error) {
-        console.error("Error converting cookies to string:", error);
-        return "";
-      }
-    }
-    return "";
-  },
-};
-
-/**
  * SessionStorage utility functions for client-side session storage
  */
-export const sessionStorage = {
+export const sessionStorages = {
   /**
    * Set a value in sessionStorage
    */
@@ -303,6 +229,7 @@ export const sessionStorage = {
     if (typeof window !== "undefined") {
       try {
         const item = window.sessionStorage.getItem(key);
+        console.log(item, "item");
         return item ? JSON.parse(item) : defaultValue || null;
       } catch (error) {
         console.error("Error getting sessionStorage item:", error);
@@ -418,13 +345,13 @@ export const getStorageInfo = () => {
   return {
     localStorage: {
       available: localStorageAvailable,
-      size: localStorageAvailable ? localStorage.size() : 0,
-      used: localStorageAvailable ? localStorage.size() : 0,
+      size: localStorageAvailable ? localStorages.size() : 0,
+      used: localStorageAvailable ? localStorages.size() : 0,
     },
     sessionStorage: {
       available: sessionStorageAvailable,
-      size: sessionStorageAvailable ? sessionStorage.size() : 0,
-      used: sessionStorageAvailable ? sessionStorage.size() : 0,
+      size: sessionStorageAvailable ? sessionStorages.size() : 0,
+      used: sessionStorageAvailable ? sessionStorages.size() : 0,
     },
   };
 };
@@ -433,9 +360,9 @@ export const getStorageInfo = () => {
  * Export default storage utilities
  */
 export default {
-  localStorage,
-  sessionStorage,
-  cookieStorage,
+  localStorages,
+  sessionStorages,
   isStorageAvailable,
   getStorageInfo,
+  cookiesStorages,
 };

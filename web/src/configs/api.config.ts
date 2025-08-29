@@ -1,6 +1,4 @@
-"use server";
-
-import { clearAllServerCookies, getServerCookie } from "@/app/actions";
+import { cookiesStorages, sessionStorages } from "@/lib/storages";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { redirect } from "next/navigation";
 
@@ -35,110 +33,111 @@ export const API: AxiosInstance = axios.create(axiosConfig);
 /**
  * Adds an interceptor to automatically include the token from localStorage
  */
-API.interceptors.request.use(
-  async (config) => {
-    // Only access localStorage in browser environment
-    const token = await getServerCookie("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// API.interceptors.request.use(
+//   async (config) => {
+//     // Only access localStorage in browser environment
+//     const token = cookiesStorages.get("access_token");
+//     console.log(token);
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+//   },
+//   (error) => {
+//     return Promise.reject(error);
+//   }
+// );
 
 /**
  * Response interceptor to handle common responses and errors
  */
-API.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
+// API.interceptors.response.use(
+//   (response: AxiosResponse) => {
+//     return response;
+//   },
 
-  async (error: AxiosError) => {
-    const originalRequest = error.config;
+//   async (error: AxiosError) => {
+//     const originalRequest = error.config;
 
-    if (!originalRequest) {
-      return Promise.reject(error);
-    }
+//     if (!originalRequest) {
+//       return Promise.reject(error);
+//     }
 
-    // Handle 401 Unauthorized errors
-    if (error.response?.status === 401 && originalRequest) {
-      // Don't try to refresh token for login/register endpoints
-      const isAuthEndpoint = originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/register") || originalRequest.url?.includes("/api/auth/login") || originalRequest.url?.includes("/api/auth/register");
+//     // Handle 401 Unauthorized errors
+//     if (error.response?.status === 401 && originalRequest) {
+//       // Don't try to refresh token for login/register endpoints
+//       const isAuthEndpoint = originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/register") || originalRequest.url?.includes("/api/auth/login") || originalRequest.url?.includes("/api/auth/register");
 
-      if (!isAuthEndpoint) {
-        // Try to refresh the token
-        try {
-          const refreshToken = await getServerCookie("refresh_token");
+//       if (!isAuthEndpoint) {
+//         // Try to refresh the token
+//         try {
+//           const refreshToken = sessionStorages.get("refresh_token");
 
-          if (refreshToken) {
-            const refreshResponse = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-              refresh_token: refreshToken,
-            });
+//           if (refreshToken) {
+//             const refreshResponse = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
+//               refresh_token: refreshToken,
+//             });
 
-            const { access_token, refresh_token } = refreshResponse.data;
+//             const { access_token, refresh_token } = refreshResponse.data;
 
-            // Update tokens in localStorage
-            setServerCookie("access_token", access_token);
-            setServerCookie("refresh_token", refresh_token);
+//             // Update tokens in localStorage
+//             sessionStorages.set("access_token", access_token);
+//             sessionStorages.set("refresh_token", refresh_token);
 
-            // Retry the original request with new token
-            originalRequest.headers.Authorization = `Bearer ${access_token}`;
-            return axios(originalRequest);
-          } else {
-            // No refresh token available, redirect to login
-            handleAuthFailure();
-            return Promise.reject(new Error("No refresh token available"));
-          }
-        } catch (refreshError) {
-          // Refresh failed, check if we've exceeded max retries
-          // Max retries exceeded, redirect to login and clear tokens
-          handleAuthFailure();
+//             // Retry the original request with new token
+//             originalRequest.headers.Authorization = `Bearer ${access_token}`;
+//             return axios(originalRequest);
+//           } else {
+//             // No refresh token available, redirect to login
+//             handleAuthFailure();
+//             return Promise.reject(new Error("No refresh token available"));
+//           }
+//         } catch (refreshError) {
+//           // Refresh failed, check if we've exceeded max retries
+//           // Max retries exceeded, redirect to login and clear tokens
+//           handleAuthFailure();
 
-          return Promise.reject(refreshError);
-        }
-      }
-    }
+//           return Promise.reject(refreshError);
+//         }
+//       }
+//     }
 
-    // Ensure error is properly formatted for better debugging
-    if (error.response) {
-      // Server responded with error status
-      console.error(`API Error ${error.response.status}:`, {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response.status,
-        data: error.response.data,
-        headers: error.response.headers,
-      });
-    } else if (error.request) {
-      // Request was made but no response received - avoid logging circular references
-      console.error("API Request Error (No Response):", {
-        url: error.config?.url,
-        method: error.config?.method,
-        statusText: error.request.statusText,
-        readyState: error.request.readyState,
-        responseURL: error.request.responseURL,
-        // Don't log the entire request object to avoid circular references
-      });
-    } else {
-      // Something else happened
-      console.error("API Error:", error.message);
-    }
+//     // Ensure error is properly formatted for better debugging
+//     if (error.response) {
+//       // Server responded with error status
+//       console.error(`API Error ${error.response.status}:`, {
+//         url: error.config?.url,
+//         method: error.config?.method,
+//         status: error.response.status,
+//         data: error.response.data,
+//         headers: error.response.headers,
+//       });
+//     } else if (error.request) {
+//       // Request was made but no response received - avoid logging circular references
+//       console.error("API Request Error (No Response):", {
+//         url: error.config?.url,
+//         method: error.config?.method,
+//         statusText: error.request.statusText,
+//         readyState: error.request.readyState,
+//         responseURL: error.request.responseURL,
+//         // Don't log the entire request object to avoid circular references
+//       });
+//     } else {
+//       // Something else happened
+//       console.error("API Error:", error.message);
+//     }
 
-    return Promise.reject(error);
-  }
-);
+//     return Promise.reject(error);
+//   }
+// );
 
 /**
  * Export the raw axios instance for advanced use cases
  */
 export default API;
 
-const handleAuthFailure = async () => {
-  await clearAllServerCookies();
-  // Redirect to login page
-  redirect("/login");
-};
+// const handleAuthFailure = async () => {
+//   sessionStorages.clearAll();
+//   // Redirect to login page
+//   redirect("/login");
+// };

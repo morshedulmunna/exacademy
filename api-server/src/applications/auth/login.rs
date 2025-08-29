@@ -64,8 +64,6 @@ pub async fn login(
         is_blocked: user.is_blocked,
     };
 
-    dbg!(&user);
-
     Ok(LoginResponse {
         user,
         access_token,

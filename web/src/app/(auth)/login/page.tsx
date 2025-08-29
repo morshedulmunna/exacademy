@@ -9,6 +9,7 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { loginAction } from "@/actions/auth/login";
+import { cookiesStorages, localStorages, sessionStorages } from "@/lib/storages";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -18,8 +19,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     try {
-      localStorage.clear();
-      sessionStorage.clear();
+      localStorages.clearAll();
+      sessionStorages.clearAll();
     } catch {}
   }, []);
 
@@ -65,13 +66,14 @@ export default function LoginPage() {
                   return;
                 }
 
-                // setServerCookie("access_token", response.data.access_token);
-                // setServerCookie("refresh_token", response.data.refresh_token);
+                cookiesStorages.set("access_token", response.data.access_token);
+                cookiesStorages.set("refresh_token", response.data.refresh_token);
 
-                localStorage.setItem("user", JSON.stringify(response.data.user));
+                localStorages.set("user", response.data.user);
 
                 router.push("/");
               } catch (error: any) {
+                console.log(error);
                 setError(error.error?.message || "An unexpected error occurred");
               } finally {
                 setSubmitting(false);

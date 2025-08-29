@@ -26,19 +26,37 @@ where
             .cloned()
             .ok_or_else(|| AppError::Internal("Missing application context".into()))?;
 
-        let auth_header = parts
+        // First try to get token from cookies (access_token)
+        let token = parts
             .headers
-            .get(axum::http::header::AUTHORIZATION)
-            .and_then(|v| v.to_str().ok())
-            .ok_or_else(|| AppError::Unauthorized("Missing Authorization header".into()))?;
-
-        let token = auth_header
-            .strip_prefix("Bearer ")
-            .ok_or_else(|| AppError::Unauthorized("Invalid Authorization scheme".into()))?;
+            .get(axum::http::header::COOKIE)
+            .and_then(|cookie_header| {
+                cookie_header.to_str().ok().and_then(|cookies| {
+                    cookies.split(';').find_map(|cookie| {
+                        let cookie = cookie.trim();
+                        if cookie.starts_with("access_token=") {
+                            Some(cookie[13..].to_string())
+                        } else {
+                            None
+                        }
+                    })
+                })
+            })
+            // If no token in cookies, try Authorization header
+            .or_else(|| {
+                parts
+                    .headers
+                    .get(axum::http::header::AUTHORIZATION)
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|auth_header| {
+                        auth_header.strip_prefix("Bearer ").map(|s| s.to_string())
+                    })
+            })
+            .ok_or_else(|| AppError::Unauthorized("Missing authentication token".into()))?;
 
         let claims: crate::pkg::security::Claims = ctx
             .jwt_service
-            .verify(token)
+            .verify(&token)
             .map_err(|_| AppError::Unauthorized("Invalid token".into()))?;
 
         Ok(AuthUser {
