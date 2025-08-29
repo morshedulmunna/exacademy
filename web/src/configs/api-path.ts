@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
     REFRESH: "/api/auth/refresh",
     LOGOUT: "/api/auth/logout",
     VERIFY: "/api/auth/verify",
+    RESEND_OTP: "/api/auth/resend-otp",
   },
   USERS: {
     PROFILE: "/api/users/profile",

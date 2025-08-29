@@ -5,9 +5,13 @@ import API from "@/configs/api.config";
 import { DataObj, ErrorObj } from "@/lib/utils";
 import { ResponseType } from "@/lib/types";
 
-type LoginRequest = {
+/**
+ * RegistrationRequest defines the payload for user registration.
+ * Fields are aligned with backend API requirements.
+ */
+type VerifyOtpRequest = {
   email: string;
-  password: string;
+  otp: string;
 };
 
 /**
@@ -15,13 +19,13 @@ type LoginRequest = {
  * Calls the login API endpoint with email and password
  * Returns a structured response with success/error information
  */
-export async function loginAction(data: LoginRequest): Promise<ResponseType> {
-  const { email, password } = data;
+export async function VerifyOtpAction(data: VerifyOtpRequest): Promise<ResponseType> {
+  const { email, otp } = data;
 
   try {
-    const response = await API.post(API_ENDPOINTS.AUTH.LOGIN, {
+    const response = await API.post(API_ENDPOINTS.AUTH.VERIFY, {
       email,
-      password,
+      code: otp,
     });
 
     return DataObj(response) as any;

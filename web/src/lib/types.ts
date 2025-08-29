@@ -25,6 +25,15 @@ export interface Post {
   };
 }
 
+export type ResponseType = {
+  success: boolean;
+  message: string;
+  data?: any;
+  status?: number;
+  details?: any;
+  isAxiosError?: boolean;
+};
+
 export interface BlogPagination {
   page: number;
   limit: number;

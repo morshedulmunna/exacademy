@@ -9,7 +9,12 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { RegistrationAction } from "@/actions/auth/registration";
 
+/**
+ * Registration page component that handles user account creation
+ * Provides form validation, error handling, and success feedback
+ */
 export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -55,7 +60,14 @@ export default function RegisterPage() {
     confirmPassword: "",
   };
 
+  /**
+   * Toggles password visibility for the main password field
+   */
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
+
+  /**
+   * Toggles password visibility for the confirm password field
+   */
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
 
   return (
@@ -77,8 +89,26 @@ export default function RegisterPage() {
             validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
               try {
+                setSubmitting(true);
+                setError("");
+                setSuccess("");
+                // Map form values to API payload, omitting confirmPassword
+                const { firstName, lastName, email, username, password } = values;
+                const res = await RegistrationAction({
+                  first_name: firstName,
+                  last_name: lastName,
+                  email,
+                  username,
+                  password,
+                });
+                if (res.success) {
+                  setSuccess(res.message);
+                  router.push(`/verify?email=${email}`);
+                }
               } catch (error: any) {
+                setError(error.message);
               } finally {
+                setSubmitting(false);
               }
             }}
           >
@@ -92,7 +122,7 @@ export default function RegisterPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
                       transition={{ duration: 0.2, ease: EASE }}
-                      className=" text-center mb-4 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-300 text-xs sm:text-sm"
+                      className="bg-red-500/20 border border-red-500/30 text-center mb-4 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-300 text-xs sm:text-sm"
                     >
                       {error}
                     </motion.div>

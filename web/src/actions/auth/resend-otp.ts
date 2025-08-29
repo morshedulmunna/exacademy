@@ -5,23 +5,25 @@ import API from "@/configs/api.config";
 import { DataObj, ErrorObj } from "@/lib/utils";
 import { ResponseType } from "@/lib/types";
 
-type LoginRequest = {
+/**
+ * ResendOtpRequest defines the payload for resending OTP.
+ * Fields are aligned with backend API requirements.
+ */
+type ResendOtpRequest = {
   email: string;
-  password: string;
 };
 
 /**
- * Login server action
- * Calls the login API endpoint with email and password
+ * Resend OTP server action
+ * Calls the resend OTP API endpoint with email
  * Returns a structured response with success/error information
  */
-export async function loginAction(data: LoginRequest): Promise<ResponseType> {
-  const { email, password } = data;
+export async function ResendOtpAction(data: ResendOtpRequest): Promise<ResponseType> {
+  const { email } = data;
 
   try {
-    const response = await API.post(API_ENDPOINTS.AUTH.LOGIN, {
+    const response = await API.post(API_ENDPOINTS.AUTH.RESEND_OTP, {
       email,
-      password,
     });
 
     return DataObj(response) as any;

@@ -5,6 +5,8 @@ import React, { useMemo, useRef, useState, useEffect, useCallback, Suspense } fr
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
+import { VerifyOtpAction } from "@/actions/auth/verify-otp";
+import { ResendOtpAction } from "@/actions/auth/resend-otp";
 
 function VerifyPageInner() {
   const params = useSearchParams();
@@ -35,6 +37,16 @@ function VerifyPageInner() {
     }, 1000);
     return () => clearInterval(id);
   }, [resendDisabledUntil]);
+
+  // Auto-clear success message after 5 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const onChangeDigit = useCallback(
     (index: number, value: string) => {
@@ -72,9 +84,12 @@ function VerifyPageInner() {
     }
     setIsVerifying(true);
     try {
-      // await verifyEmailAction({ email, code: joined });
-      // setSuccess("Email verified successfully.");
-      // router.push("/login");
+      const res = await VerifyOtpAction({ email, otp: joined });
+      if (res.success) {
+        router.push("/login");
+      } else {
+        setError(res.message);
+      }
     } catch (e: any) {
       setError("Invalid or expired code.");
     } finally {
@@ -94,7 +109,13 @@ function VerifyPageInner() {
     if (nowTs < resendDisabledUntil) return;
 
     try {
-      // setIsResending(true);
+      const res = await ResendOtpAction({ email });
+      if (res.success) {
+        setSuccess("Verification code sent successfully!");
+      } else {
+        setError(res.message);
+      }
+      setIsResending(false);
     } catch (e: any) {
       setError("Failed to resend code.");
     } finally {
