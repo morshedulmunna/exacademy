@@ -11,6 +11,8 @@ export default async function DashboardPage() {
   // Fetch current user data from the server
   const userData = await getCurrentLogedInUser();
 
+  console.log(userData);
+
   // Mock data for demonstration (these would typically come from separate API calls)
   const progressData = {
     totalCourses: 5,

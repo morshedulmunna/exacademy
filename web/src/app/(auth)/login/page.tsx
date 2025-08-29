@@ -66,11 +66,6 @@ export default function LoginPage() {
                   return;
                 }
 
-                cookiesStorages.set("access_token", response.data.access_token);
-                cookiesStorages.set("refresh_token", response.data.refresh_token);
-
-                localStorages.set("user", response.data.user);
-
                 router.push("/");
               } catch (error: any) {
                 console.log(error);
