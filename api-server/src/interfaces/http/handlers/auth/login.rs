@@ -42,6 +42,7 @@ pub async fn login(
         if is_prod { "Secure; " } else { "" },
         ctx.auth.refresh_ttl_seconds
     );
+
     headers.append(header::SET_COOKIE, refresh_cookie.parse().unwrap());
 
     let body = Response::with_data("Logged in", output, StatusCode::OK.as_u16());
