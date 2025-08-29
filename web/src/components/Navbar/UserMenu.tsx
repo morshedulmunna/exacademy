@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { User, Settings, ChevronDown, Settings2, Shield, FileText, LogOut } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { getLocalStorageItem, removeLocalStorageItem } from "@/lib/utils";
 
 /**
  * User menu component with dropdown for authenticated users
@@ -30,19 +31,19 @@ export default function UserMenu() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      // Read from localStorage only: structure { user: MinimalUser }
-      const ls = localStorage.getItem("user");
+      // Read from localStorage: structure is directly the user object
+      const ls = getLocalStorageItem("user");
       if (ls) {
         try {
           const parsed = JSON.parse(ls);
-          if (parsed && parsed.user) {
-            setUser(parsed.user as MinimalUser);
+          if (parsed) {
+            setUser(parsed as MinimalUser);
             return;
           }
-        } catch {}
+        } catch (parseError) {}
       }
       setUser(null);
-    } catch {
+    } catch (error) {
       setUser(null);
     }
   }, []);
@@ -53,7 +54,9 @@ export default function UserMenu() {
     if (typeof window !== "undefined") {
       try {
         // Clear any client-side cache/state
-        localStorage.removeItem("user");
+        removeLocalStorageItem("user");
+        removeLocalStorageItem("access_token");
+        removeLocalStorageItem("refresh_token");
         // Clear non-HttpOnly cookies that might exist
         const cookies = document.cookie.split(";");
         for (const cookie of cookies) {

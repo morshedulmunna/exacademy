@@ -9,6 +9,7 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { loginAction } from "@/actions/auth/login";
+import { setLocalStorageItem } from "@/lib/utils";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -64,6 +65,13 @@ export default function LoginPage() {
                 if (!response.success) {
                   setError(response.message || "An error occurred");
                 }
+
+                setLocalStorageItem("access_token", response.data.access_token);
+                setLocalStorageItem("refresh_token", response.data.refresh_token);
+
+                setLocalStorageItem("user", JSON.stringify(response.data.user));
+
+                router.push("/");
               } catch (error: any) {
                 setError(error.error.message);
               } finally {

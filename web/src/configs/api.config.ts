@@ -48,9 +48,9 @@ export const setAuthToken = (token: string | null): void => {
 
   // Also store in localStorage if in browser environment
   if (token) {
-    setLocalStorageItem("token", token);
+    setLocalStorageItem("access_token", token);
   } else {
-    removeLocalStorageItem("token");
+    removeLocalStorageItem("access_token");
   }
 };
 
@@ -61,7 +61,7 @@ const handleAuthFailure = (): void => {
   // Clear all authentication tokens
   removeLocalStorageItem("access_token");
   removeLocalStorageItem("refresh_token");
-  removeLocalStorageItem("token");
+  removeLocalStorageItem("user");
 
   // Clear retry counts
   retryCounts.clear();
@@ -78,7 +78,7 @@ const handleAuthFailure = (): void => {
 API.interceptors.request.use(
   (config) => {
     // Only access localStorage in browser environment
-    const token = getLocalStorageItem("token");
+    const token = getLocalStorageItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -131,7 +131,6 @@ API.interceptors.response.use(
             // Update tokens in localStorage
             setLocalStorageItem("access_token", access_token);
             setLocalStorageItem("refresh_token", refresh_token);
-            setLocalStorageItem("token", access_token);
 
             // Retry the original request with new token
             originalRequest.headers.Authorization = `Bearer ${access_token}`;
