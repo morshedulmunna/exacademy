@@ -202,18 +202,19 @@ export function isAxiosError(error: any): boolean {
 export function ErrorObj(error: any) {
   return {
     success: false,
-    error: {
-      message: extractErrorMessage(error),
-      status: extractErrorStatus(error),
-      details: error?.response?.data || error,
-      isAxiosError: isAxiosError(error),
-    },
+    message: extractErrorMessage(error),
+    status: extractErrorStatus(error),
+    details: error?.response?.data || error,
+    isAxiosError: isAxiosError(error),
   };
 }
 
 export function DataObj(data: any) {
+  console.log(data);
   return {
     success: true,
-    data: data.data,
+    message: data.data.message,
+    status: data.data.status_code,
+    data: data.data.data,
   };
 }

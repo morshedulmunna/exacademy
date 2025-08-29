@@ -62,7 +62,7 @@ export default function LoginPage() {
                 console.log(response);
 
                 if (!response.success) {
-                  setError(response.error?.message || "An error occurred");
+                  setError(response.message || "An error occurred");
                 }
               } catch (error: any) {
                 setError(error.error.message);

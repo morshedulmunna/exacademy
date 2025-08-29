@@ -11,13 +11,11 @@ type LoginRequest = {
 
 type ResponseType = {
   success: boolean;
+  message: string;
   data?: any;
-  error?: {
-    message: string;
-    status?: number;
-    details?: any;
-    isAxiosError?: boolean;
-  };
+  status?: number;
+  details?: any;
+  isAxiosError?: boolean;
 };
 
 /**
