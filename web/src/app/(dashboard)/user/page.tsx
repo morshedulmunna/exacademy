@@ -16,7 +16,17 @@ export default async function DashboardPage() {
   // Extract user data from response
   const userData: User =
     userResponse.success && userResponse.data
-      ? userResponse.data
+      ? {
+          id: userResponse.data.id,
+          name: userResponse.data.full_name || userResponse.data.username,
+          email: userResponse.data.email,
+          username: userResponse.data.username,
+          avatar: userResponse?.data?.avatar_url || undefined,
+          bio: undefined,
+          role: userResponse.data.role,
+          createdAt: userResponse.data.createdAt,
+          updatedAt: userResponse.data.updatedAt,
+        }
       : {
           id: "",
           name: "Guest User",
