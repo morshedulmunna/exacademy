@@ -1,4 +1,5 @@
 "use server";
+
 import { cookies } from "next/headers";
 
 /**
@@ -14,28 +15,28 @@ import { cookies } from "next/headers";
 /**
  * Set a cookie with options
  */
-export async function setServerCookie(
-  name: string,
-  value: string,
-  options?: {
-    expires?: Date;
-    maxAge?: number;
-    domain?: string;
-    path?: string;
-    secure?: boolean;
-    httpOnly?: boolean;
-    sameSite?: boolean | "lax" | "strict" | "none";
-    priority?: "low" | "medium" | "high";
-    partitioned?: boolean;
-  }
-): Promise<void> {
-  try {
-    const cookieStore = await cookies();
-    cookieStore.set(name, value, options);
-  } catch (error) {
-    console.error("Error setting server cookie:", error);
-  }
-}
+// export async function setServerCookie(
+//   name: string,
+//   value: string,
+//   options?: {
+//     expires?: Date;
+//     maxAge?: number;
+//     domain?: string;
+//     path?: string;
+//     secure?: boolean;
+//     httpOnly?: boolean;
+//     sameSite?: boolean | "lax" | "strict" | "none";
+//     priority?: "low" | "medium" | "high";
+//     partitioned?: boolean;
+//   }
+// ): Promise<void> {
+//   try {
+//     const cookieStore = await cookies();
+//     cookieStore.set(name, value, options);
+//   } catch (error) {
+//     console.error("Error setting server cookie:", error);
+//   }
+// }
 
 /**
  * Get a cookie value

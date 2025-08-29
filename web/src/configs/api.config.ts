@@ -1,6 +1,6 @@
 "use server";
 
-import { clearAllServerCookies, getServerCookie, setServerCookie } from "@/lib/server-storages";
+import { clearAllServerCookies, getServerCookie } from "@/app/actions";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { redirect } from "next/navigation";
 
