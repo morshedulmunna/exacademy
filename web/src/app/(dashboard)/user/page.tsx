@@ -9,35 +9,7 @@ import { User } from "@/lib/types";
  */
 export default async function DashboardPage() {
   // Fetch current user data from the server
-  const userResponse = await getCurrentLogedInUser();
-
-  console.log(userResponse);
-
-  // Extract user data from response
-  const userData: User =
-    userResponse.success && userResponse.data
-      ? {
-          id: userResponse.data.id,
-          name: userResponse.data.full_name || userResponse.data.username,
-          email: userResponse.data.email,
-          username: userResponse.data.username,
-          avatar: userResponse?.data?.avatar_url || undefined,
-          bio: undefined,
-          role: userResponse.data.role,
-          createdAt: userResponse.data.createdAt,
-          updatedAt: userResponse.data.updatedAt,
-        }
-      : {
-          id: "",
-          name: "Guest User",
-          email: "guest@example.com",
-          username: "guest",
-          avatar: undefined,
-          bio: undefined,
-          role: "guest",
-          createdAt: undefined,
-          updatedAt: undefined,
-        };
+  const userData = await getCurrentLogedInUser();
 
   // Mock data for demonstration (these would typically come from separate API calls)
   const progressData = {
@@ -153,7 +125,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader userName={userData.name} userEmail={userData.email} avatar={userData.avatar} />
+      <DashboardHeader userData={userData} />
       <ProgressOverview {...progressData} />
       <CurrentCourses courses={currentCourses} />
       <RecommendedCourses courses={recommendedCourses} />
