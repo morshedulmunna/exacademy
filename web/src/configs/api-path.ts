@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
     RESEND_OTP: "/api/auth/resend-otp",
   },
   USERS: {
-    PROFILE: "/api/users/profile",
+    INFO: "/api/users",
     UPDATE: "/api/users/update",
     LIST: "/api/users",
   },

@@ -66,12 +66,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
         {/* Mobile Category Dropdown */}
         <div className="mb-4">
-          <button
-            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-            className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 ${
-              theme === "dark" ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-700"
-            }`}
-          >
+          <button onClick={() => setIsCategoryOpen(!isCategoryOpen)} className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 ${theme === "dark" ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-700"}`}>
             <span className="font-medium">Categories</span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? "rotate-180" : ""}`} />
           </button>
@@ -88,9 +83,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                       setIsCategoryOpen(false);
                       onClose();
                     }}
-                    className={`flex items-center space-x-3 p-3 border-b last:border-b-0 transition-all duration-200 ${
-                      theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-700 border-gray-700" : "text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-200"
-                    }`}
+                    className={`flex items-center space-x-3 p-3 border-b last:border-b-0 transition-all duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-700 border-gray-700" : "text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-200"}`}
                   >
                     <IconComponent className="w-5 h-5 text-purple-500" />
                     <div className="flex-1">
@@ -111,9 +104,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               key={href}
               href={href}
               target={target}
-              className={`block transition-colors duration-300 text-base font-medium py-2 border-b last:border-b-0 ${
-                theme === "dark" ? "text-gray-300 hover:text-white border-white/5" : "text-gray-600 hover:text-gray-900 border-gray-200/50"
-              }`}
+              className={`block transition-colors duration-300 text-base font-medium py-2 border-b last:border-b-0 ${theme === "dark" ? "text-gray-300 hover:text-white border-white/5" : "text-gray-600 hover:text-gray-900 border-gray-200/50"}`}
               onClick={onClose}
             >
               {label}
@@ -146,32 +137,19 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Link
-                  href="/profile"
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${
-                    theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
-                  onClick={onClose}
-                >
+                <Link href="/profile" className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`} onClick={onClose}>
                   <User className="w-4 h-4" />
                   <span>Profile</span>
                 </Link>
                 <Link
                   href="/dashboard"
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${
-                    theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}
                   onClick={onClose}
                 >
                   <Settings className="w-4 h-4" />
                   <span>Dashboard</span>
                 </Link>
-                <button
-                  onClick={handleSignOut}
-                  className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg transition-colors duration-200 ${
-                    theme === "dark" ? "text-red-400 hover:text-red-300 hover:bg-red-500/10" : "text-red-600 hover:text-red-700 hover:bg-red-50"
-                  }`}
-                >
+                <button onClick={handleSignOut} className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-red-400 hover:text-red-300 hover:bg-red-500/10" : "text-red-600 hover:text-red-700 hover:bg-red-50"}`}>
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>
                 </button>

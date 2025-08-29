@@ -1,18 +1,35 @@
 import React from "react";
 import { DashboardHeader, ProgressOverview, CurrentCourses, RecommendedCourses, RecentActivity } from "./components";
+import { getCurrentLogedInUser } from "@/actions/users/get-current-user";
+import { User } from "@/lib/types";
 
 /**
  * Learner Dashboard Page
  * Comprehensive dashboard for learners to track progress and access courses
  */
-export default function DashboardPage() {
-  // Mock data for demonstration
-  const userData = {
-    userName: "John Doe",
-    userEmail: "john@example.com",
-    avatar: undefined,
-  };
+export default async function DashboardPage() {
+  // Fetch current user data from the server
+  const userResponse = await getCurrentLogedInUser();
 
+  console.log(userResponse);
+
+  // Extract user data from response
+  const userData: User =
+    userResponse.success && userResponse.data
+      ? userResponse.data
+      : {
+          id: "",
+          name: "Guest User",
+          email: "guest@example.com",
+          username: "guest",
+          avatar: undefined,
+          bio: undefined,
+          role: "guest",
+          createdAt: undefined,
+          updatedAt: undefined,
+        };
+
+  // Mock data for demonstration (these would typically come from separate API calls)
   const progressData = {
     totalCourses: 5,
     completedCourses: 2,
@@ -126,7 +143,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader {...userData} />
+      <DashboardHeader userName={userData.name} userEmail={userData.email} avatar={userData.avatar} />
       <ProgressOverview {...progressData} />
       <CurrentCourses courses={currentCourses} />
       <RecommendedCourses courses={recommendedCourses} />
