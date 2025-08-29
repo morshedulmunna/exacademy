@@ -1,10 +1,15 @@
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
+"use server";
+import { removeLocalStorageItem } from "@/lib/utils";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
+import { cookies } from "next/headers";
 
 /**
  * API Configuration and Axios Instance
  * Provides a configured axios instance with interceptors for authentication,
  * error handling, and request/response processing.
+ *
+ * Development mode: Uses cookies for token storage
+ * Production mode: Uses Authorization headers with localStorage fallback
  */
 
 // Environment-based API base URL
@@ -19,48 +24,37 @@ const MAX_RETRY_ATTEMPTS = 5;
 // Track retry attempts for each request
 const retryCounts = new Map<string, number>();
 
-// Axios instance configuration
-const axiosConfig: AxiosRequestConfig = {
-  baseURL: API_BASE_URL,
-  timeout: REQUEST_TIMEOUT,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-  withCredentials: true,
-};
+// Check if we're in development mode
+const isDevelopment = process.env.NODE_ENV === "development";
 
-/**
- * Creates and configures the main axios instance
- */
-export const API: AxiosInstance = axios.create(axiosConfig);
+// Cookie names for development mode
+const ACCESS_TOKEN_COOKIE = "access_token";
+const REFRESH_TOKEN_COOKIE = "refresh_token";
 
-/**
- * Sets the authorization token for API requests
- * @param token - The JWT or bearer token
- */
-export const setAuthToken = (token: string | null): void => {
-  if (token) {
-    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  } else {
-    delete API.defaults.headers.common["Authorization"];
-  }
+async function getCookie(cookieName: string) {
+  const cookieStore = await cookies();
+  const info = cookieStore.get(cookieName);
+  return info;
+}
 
-  // Also store in localStorage if in browser environment
-  if (token) {
-    setLocalStorageItem("access_token", token);
-  } else {
-    removeLocalStorageItem("access_token");
-  }
-};
+async function setCookie(cookieName: string, cookieValue: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(cookieName, cookieValue);
+}
+
+async function deleteCookie(cookieName: string) {
+  (await cookies()).delete(cookieName);
+}
 
 /**
  * Handles authentication failure by clearing tokens and redirecting to login
  */
 const handleAuthFailure = (): void => {
-  // Clear all authentication tokens
-  removeLocalStorageItem("access_token");
-  removeLocalStorageItem("refresh_token");
+  // Development mode: Clear cookies
+  deleteCookie(ACCESS_TOKEN_COOKIE);
+  deleteCookie(REFRESH_TOKEN_COOKIE);
+
+  // Clear user data from localStorage (common for both modes)
   removeLocalStorageItem("user");
 
   // Clear retry counts
@@ -72,13 +66,30 @@ const handleAuthFailure = (): void => {
   }
 };
 
+// Axios instance configuration
+const axiosConfig: AxiosRequestConfig = {
+  baseURL: API_BASE_URL,
+  timeout: REQUEST_TIMEOUT,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+  withCredentials: isDevelopment, // Enable cookies in development mode
+};
+
 /**
- * Adds an interceptor to automatically include the token from localStorage
+ * Creates and configures the main axios instance
+ */
+export const API: AxiosInstance = axios.create(axiosConfig);
+
+/**
+ * Adds an interceptor to automatically include the token from cookies or headers
  */
 API.interceptors.request.use(
-  (config) => {
-    // Only access localStorage in browser environment
-    const token = getLocalStorageItem("access_token");
+  async (config) => {
+    const token = (await getCookie(ACCESS_TOKEN_COOKIE))?.value;
+    console.log(token, "TOken______");
+    // Production mode: Get token from localStorage and set in headers
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -119,21 +130,24 @@ API.interceptors.response.use(
 
         // Try to refresh the token
         try {
-          const refreshToken = getLocalStorageItem("refresh_token");
+          const refreshToken = (await getCookie(REFRESH_TOKEN_COOKIE))?.value;
 
           if (refreshToken) {
-            const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+            const refreshResponse = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
               refresh_token: refreshToken,
             });
 
             const { access_token, refresh_token } = refreshResponse.data;
 
-            // Update tokens in localStorage
-            setLocalStorageItem("access_token", access_token);
-            setLocalStorageItem("refresh_token", refresh_token);
+            // Update tokens based on mode
+            setCookie(ACCESS_TOKEN_COOKIE, access_token);
+            setCookie(REFRESH_TOKEN_COOKIE, refresh_token);
 
-            // Retry the original request with new token
-            originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            // In production mode, retry with new token in headers
+            if (!isDevelopment) {
+              originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            }
+
             return axios(originalRequest);
           } else {
             // No refresh token available, redirect to login

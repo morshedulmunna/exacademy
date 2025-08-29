@@ -9,7 +9,7 @@ import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
 import { loginAction } from "@/actions/auth/login";
-import { setLocalStorageItem } from "@/lib/utils";
+import { setAuthToken, setRefreshToken } from "@/configs/api.config";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -63,16 +63,19 @@ export default function LoginPage() {
 
                 if (!response.success) {
                   setError(response.message || "An error occurred");
+                  return;
                 }
 
-                setLocalStorageItem("access_token", response.data.access_token);
-                setLocalStorageItem("refresh_token", response.data.refresh_token);
+                // Use the new token management functions that handle both modes
+                setAuthToken(response.data.access_token);
+                setRefreshToken(response.data.refresh_token);
 
-                setLocalStorageItem("user", JSON.stringify(response.data.user));
+                // Store user data in localStorage (common for both modes)
+                localStorage.setItem("user", JSON.stringify(response.data.user));
 
                 router.push("/");
               } catch (error: any) {
-                setError(error.error.message);
+                setError(error.error?.message || "An unexpected error occurred");
               } finally {
                 setSubmitting(false);
                 setIsLoading(false);
