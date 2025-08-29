@@ -24,7 +24,7 @@ fn build_app(ctx: Arc<AppContext>) -> Router {
     let compression = CompressionLayer::new();
 
     let api = routes::router();
-    let rate_limit_state = RateLimitState::new(100, 60);
+    let rate_limit_state = RateLimitState::new(25, 60);
 
     let app = Router::new()
         .merge(api)

@@ -212,5 +212,8 @@ export function ErrorObj(error: any) {
 }
 
 export function DataObj(data: any) {
-  console.log(data, "Data _____ from DataObj");
+  return {
+    success: true,
+    data: data.data,
+  };
 }
