@@ -60,7 +60,6 @@ export default function LoginPage() {
               setIsLoading(true);
               try {
                 const response = await loginAction(values);
-                console.log(response);
 
                 if (!response.success) {
                   setError(response.message || "An error occurred");

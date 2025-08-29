@@ -161,7 +161,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
   const handleLessonClick = (lessonId: string) => {
     setCurrentLesson(lessonId);
-    console.log(`Navigating to lesson: ${lessonId}`);
     // Navigate to lesson page or open lesson content
   };
 

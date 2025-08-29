@@ -70,7 +70,6 @@ export default function RichTextEditor({ content, onChange, placeholder = "Write
       },
     },
     onUpdate: ({ editor }) => {
-      // console.log(editor.getHTML());
       onChange(editor.getHTML());
     },
   });

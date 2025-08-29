@@ -2,51 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { User, Settings, ChevronDown, Settings2, Shield, FileText, LogOut } from "lucide-react";
 import { useTheme } from "@/themes/ThemeProvider";
-import { useOutsideClick } from "@/hooks/useOutsideClick";
-import { getLocalStorageItem, removeLocalStorageItem } from "@/lib/utils";
+import { useOutsideClick, useGetUserInfo } from "@/hooks";
+import { removeLocalStorageItem } from "@/lib/utils";
 
 /**
  * User menu component with dropdown for authenticated users
  */
-type MinimalUser = {
-  id: string;
-  email: string;
-  username?: string | null;
-  name?: string | null;
-  role?: string | null;
-  avatar?: string | null;
-};
 
 export default function UserMenu() {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [user, setUser] = useState<MinimalUser | null>(null);
+  const { user, isLoading, error, clearUser } = useGetUserInfo();
   const { theme } = useTheme();
 
   // Ref for user dropdown menu
   const userMenuRef = useOutsideClick(() => setShowUserMenu(false));
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      // Read from localStorage: structure is directly the user object
-      const ls = getLocalStorageItem("user");
-      if (ls) {
-        try {
-          const parsed = JSON.parse(ls);
-          if (parsed) {
-            setUser(parsed as MinimalUser);
-            return;
-          }
-        } catch (parseError) {}
-      }
-      setUser(null);
-    } catch (error) {
-      setUser(null);
-    }
-  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -66,10 +38,24 @@ export default function UserMenu() {
           document.cookie = `${name}=; Max-Age=0; path=/`;
         }
       } catch {}
+      clearUser();
       setShowUserMenu(false);
       window.location.href = "/";
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-3">
+        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+        <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error("User data error:", error);
+  }
 
   if (!user) {
     return (
@@ -133,7 +119,7 @@ export default function UserMenu() {
 
               {user.role === "user" && (
                 <Link
-                  href={`/${user?.username}/courses`}
+                  href={`/user/?name=${user?.username}/courses`}
                   className={`flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}
                   onClick={() => setShowUserMenu(false)}
                 >

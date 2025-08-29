@@ -10,9 +10,6 @@ export async function deleteCourse(courseId: string): Promise<{ success: boolean
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Simulate successful deletion
-    console.log(`Course ${courseId} deleted successfully`);
-
     return {
       success: true,
       message: "Course deleted successfully",

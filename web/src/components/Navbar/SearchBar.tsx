@@ -15,7 +15,6 @@ export default function SearchBar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       // TODO: Implement search functionality
-      console.log("Searching for:", searchQuery);
     }
   };
 

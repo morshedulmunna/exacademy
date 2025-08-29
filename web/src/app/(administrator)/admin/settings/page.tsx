@@ -8,10 +8,7 @@ import { PageHeader, GeneralSettings, UserManagementSettings, SecuritySettings, 
  * Clean, component-based admin interface for managing system settings
  */
 export default function SettingsPage() {
-  const handleSave = () => {
-    // Handle save functionality
-    console.log("Saving settings...");
-  };
+  const handleSave = () => {};
 
   return (
     <div className="space-y-6">

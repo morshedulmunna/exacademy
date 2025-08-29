@@ -210,7 +210,6 @@ export function ErrorObj(error: any) {
 }
 
 export function DataObj(data: any) {
-  console.log(data);
   return {
     success: true,
     message: data.data.message,

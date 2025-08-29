@@ -81,12 +81,10 @@ export default function CourseCard({
 }: CourseCardProps) {
   const handleAddToCart = () => {
     // Add to cart functionality here
-    console.log("Adding to cart:", title);
   };
 
   const handleViewCourse = () => {
     // View course functionality here
-    console.log("Viewing course:", title);
   };
 
   return (

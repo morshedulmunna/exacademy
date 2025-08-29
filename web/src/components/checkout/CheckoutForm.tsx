@@ -26,14 +26,11 @@ export default function CheckoutForm({ courseData, onPaymentSuccess, onPaymentEr
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // In real app, integrate with payment gateway here
-      console.log("Payment processed:", { paymentForm, selectedPaymentMethod });
 
       if (selectedPaymentMethod === "stripe") {
         // Handle Stripe payment
-        console.log("Processing Stripe payment...");
       } else {
         // Handle SSL Commerz payment
-        console.log("Processing SSL Commerz payment...");
       }
 
       onPaymentSuccess();
