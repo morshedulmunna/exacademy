@@ -8,10 +8,12 @@ import SocialLoginButtons from "@/components/ui/social-login-buttons";
 import LightBackgroundEffect from "@/common/Effect/light-backgound-effect";
 import { Formik, Form, Field, ErrorMessage, FieldInputProps } from "formik";
 import * as Yup from "yup";
+import { loginAction } from "@/actions/auth/login";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -54,15 +56,29 @@ export default function LoginPage() {
             onSubmit={async (values, { setSubmitting }) => {
               setError("");
               setSubmitting(true);
+              setIsLoading(true);
               try {
+                const response = await loginAction(values);
+                console.log(response);
+
+                if (!response.success) {
+                  setError(response.error?.message || "An error occurred");
+                }
               } catch (error: any) {
+                setError(error.error.message);
               } finally {
+                setSubmitting(false);
+                setIsLoading(false);
               }
             }}
           >
             {({ isSubmitting }) => (
               <>
-                {error && <div className=" text-center rounded-lg p-3 sm:p-4 text-red-600 dark:text-red-300 text-sm">{error}</div>}
+                {error && (
+                  <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm text-center">
+                    <span>{error}</span>
+                  </div>
+                )}
 
                 <Form className="space-y-4 sm:space-y-6">
                   <div>
@@ -123,15 +139,15 @@ export default function LoginPage() {
 
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isLoading}
                     className="w-full gradient-bg text-white py-2.5 sm:py-3 px-4 rounded-lg font-semibold  transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
                   >
-                    {isSubmitting ? "Signing in..." : "Sign In"}
+                    {isSubmitting || isLoading ? "Signing in..." : "Sign In"}
                   </button>
                 </Form>
 
                 {/* Social Login Buttons */}
-                <SocialLoginButtons isLoading={isSubmitting} />
+                <SocialLoginButtons isLoading={isSubmitting || isLoading} />
               </>
             )}
           </Formik>

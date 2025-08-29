@@ -1,30 +1,30 @@
 // Base API endpoints
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
-    REFRESH: "/auth/refresh",
-    LOGOUT: "/auth/logout",
-    VERIFY: "/auth/verify",
+    LOGIN: "/api/auth/login",
+    REGISTER: "/api/auth/register",
+    REFRESH: "/api/auth/refresh",
+    LOGOUT: "/api/auth/logout",
+    VERIFY: "/api/auth/verify",
   },
   USERS: {
-    PROFILE: "/users/profile",
-    UPDATE: "/users/update",
-    LIST: "/users",
+    PROFILE: "/api/users/profile",
+    UPDATE: "/api/users/update",
+    LIST: "/api/users",
   },
   COURSES: {
-    LIST: "/courses",
-    DETAIL: "/courses",
-    CREATE: "/courses",
-    UPDATE: "/courses",
-    DELETE: "/courses",
+    LIST: "/api/courses",
+    DETAIL: "/api/courses",
+    CREATE: "/api/courses",
+    UPDATE: "/api/courses",
+    DELETE: "/api/courses",
   },
   MODULES: {
-    LIST: "/modules",
-    DETAIL: "/modules",
+    LIST: "/api/modules",
+    DETAIL: "/api/modules",
   },
   LESSONS: {
-    LIST: "/lessons",
-    DETAIL: "/lessons",
+    LIST: "/api/lessons",
+    DETAIL: "/api/lessons",
   },
 } as const;

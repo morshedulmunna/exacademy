@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from "axios";
+import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 
 /**
  * API Configuration and Axios Instance
@@ -7,10 +8,16 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, In
  */
 
 // Environment-based API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:9098";
 
 // Request timeout in milliseconds
 const REQUEST_TIMEOUT = 30000;
+
+// Maximum retry attempts for failed requests
+const MAX_RETRY_ATTEMPTS = 5;
+
+// Track retry attempts for each request
+const retryCounts = new Map<string, number>();
 
 // Axios instance configuration
 const axiosConfig: AxiosRequestConfig = {
@@ -20,7 +27,7 @@ const axiosConfig: AxiosRequestConfig = {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  withCredentials: true, // Include cookies in requests
+  withCredentials: true,
 };
 
 /**
@@ -29,24 +36,55 @@ const axiosConfig: AxiosRequestConfig = {
 export const API: AxiosInstance = axios.create(axiosConfig);
 
 /**
- * Request interceptor to add authentication token and common headers
+ * Sets the authorization token for API requests
+ * @param token - The JWT or bearer token
+ */
+export const setAuthToken = (token: string | null): void => {
+  if (token) {
+    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete API.defaults.headers.common["Authorization"];
+  }
+
+  // Also store in localStorage if in browser environment
+  if (token) {
+    setLocalStorageItem("token", token);
+  } else {
+    removeLocalStorageItem("token");
+  }
+};
+
+/**
+ * Handles authentication failure by clearing tokens and redirecting to login
+ */
+const handleAuthFailure = (): void => {
+  // Clear all authentication tokens
+  removeLocalStorageItem("access_token");
+  removeLocalStorageItem("refresh_token");
+  removeLocalStorageItem("token");
+
+  // Clear retry counts
+  retryCounts.clear();
+
+  // Redirect to login page if in browser environment
+  if (typeof window !== "undefined") {
+    window.location.href = "/login";
+  }
+};
+
+/**
+ * Adds an interceptor to automatically include the token from localStorage
  */
 API.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Add authentication token if available
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-
+  (config) => {
+    // Only access localStorage in browser environment
+    const token = getLocalStorageItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
-    // Add request timestamp for debugging
-    (config as any).metadata = { startTime: new Date() };
-
     return config;
   },
-  (error: AxiosError) => {
-    console.error("Request interceptor error:", error);
+  (error) => {
     return Promise.reject(error);
   }
 );
@@ -56,110 +94,100 @@ API.interceptors.request.use(
  */
 API.interceptors.response.use(
   (response: AxiosResponse) => {
-    // Log response time for debugging
-    const endTime = new Date();
-    const startTime = (response.config as any).metadata?.startTime;
-
-    if (startTime) {
-      const duration = endTime.getTime() - startTime.getTime();
-      console.debug(`API Request completed in ${duration}ms:`, response.config.url);
-    }
-
     return response;
   },
+
   async (error: AxiosError) => {
     const originalRequest = error.config;
 
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    // Create a unique key for this request to track retry attempts
+    const requestKey = `${originalRequest.method}-${originalRequest.url}`;
+    const currentRetryCount = retryCounts.get(requestKey) || 0;
+
     // Handle 401 Unauthorized errors
-    if (error.response?.status === 401 && originalRequest) {
-      // Try to refresh the token
-      try {
-        const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null;
+    if (error.response?.status === 401 && currentRetryCount < MAX_RETRY_ATTEMPTS) {
+      // Don't try to refresh token for login/register endpoints
+      const isAuthEndpoint = originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/register") || originalRequest.url?.includes("/api/auth/login") || originalRequest.url?.includes("/api/auth/register");
 
-        if (refreshToken) {
-          const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
+      if (!isAuthEndpoint) {
+        // Increment retry count
+        retryCounts.set(requestKey, currentRetryCount + 1);
 
-          const { access_token, refresh_token } = refreshResponse.data;
+        // Try to refresh the token
+        try {
+          const refreshToken = getLocalStorageItem("refresh_token");
 
-          // Update tokens in localStorage
-          if (typeof window !== "undefined") {
-            localStorage.setItem("access_token", access_token);
-            localStorage.setItem("refresh_token", refresh_token);
+          if (refreshToken) {
+            const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+              refresh_token: refreshToken,
+            });
+
+            const { access_token, refresh_token } = refreshResponse.data;
+
+            // Update tokens in localStorage
+            setLocalStorageItem("access_token", access_token);
+            setLocalStorageItem("refresh_token", refresh_token);
+            setLocalStorageItem("token", access_token);
+
+            // Retry the original request with new token
+            originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            return axios(originalRequest);
+          } else {
+            // No refresh token available, redirect to login
+            handleAuthFailure();
+            return Promise.reject(new Error("No refresh token available"));
+          }
+        } catch (refreshError) {
+          // Refresh failed, check if we've exceeded max retries
+          if (currentRetryCount >= MAX_RETRY_ATTEMPTS - 1) {
+            // Max retries exceeded, redirect to login and clear tokens
+            handleAuthFailure();
+            return Promise.reject(new Error("Maximum retry attempts exceeded. Please login again."));
           }
 
-          // Retry the original request with new token
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
-          return API(originalRequest);
-        }
-      } catch (refreshError) {
-        // Refresh failed, redirect to login
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          window.location.href = "/login";
+          // Still have retries left, continue with current retry count
+          return Promise.reject(refreshError);
         }
       }
     }
 
-    // Handle other common errors
-    if (error.response?.status === 403) {
-      console.error("Access forbidden:", error.response.data);
-    } else if (error.response?.status === 404) {
-      console.error("Resource not found:", error.response.data);
-    } else if (error.response?.status && error.response.status >= 500) {
-      console.error("Server error:", error.response.data);
+    // Clear retry count for successful requests or non-401 errors
+    if (error.response?.status !== 401) {
+      retryCounts.delete(requestKey);
+    }
+
+    // Ensure error is properly formatted for better debugging
+    if (error.response) {
+      // Server responded with error status
+      console.error(`API Error ${error.response.status}:`, {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response.status,
+        data: error.response.data,
+        headers: error.response.headers,
+      });
+    } else if (error.request) {
+      // Request was made but no response received - avoid logging circular references
+      console.error("API Request Error (No Response):", {
+        url: error.config?.url,
+        method: error.config?.method,
+        statusText: error.request.statusText,
+        readyState: error.request.readyState,
+        responseURL: error.request.responseURL,
+        // Don't log the entire request object to avoid circular references
+      });
+    } else {
+      // Something else happened
+      console.error("API Error:", error.message);
     }
 
     return Promise.reject(error);
   }
 );
-
-/**
- * API response wrapper for consistent error handling
- */
-export interface ApiResponse<T = any> {
-  data: T;
-  message?: string;
-  success: boolean;
-}
-
-/**
- * Generic API request function with proper typing
- */
-export const apiRequest = async <T = any>(config: AxiosRequestConfig): Promise<ApiResponse<T>> => {
-  try {
-    const response = await API(config);
-    return {
-      data: response.data,
-      message: response.data.message,
-      success: true,
-    };
-  } catch (error) {
-    const axiosError = error as AxiosError;
-    return {
-      data: null as T,
-      message: (axiosError.response?.data as any)?.message || axiosError.message,
-      success: false,
-    };
-  }
-};
-
-/**
- * HTTP method helpers for common operations
- */
-export const api = {
-  get: <T = any>(url: string, config?: AxiosRequestConfig) => apiRequest<T>({ ...config, method: "GET", url }),
-
-  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => apiRequest<T>({ ...config, method: "POST", url, data }),
-
-  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => apiRequest<T>({ ...config, method: "PUT", url, data }),
-
-  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => apiRequest<T>({ ...config, method: "PATCH", url, data }),
-
-  delete: <T = any>(url: string, config?: AxiosRequestConfig) => apiRequest<T>({ ...config, method: "DELETE", url }),
-};
 
 /**
  * Export the raw axios instance for advanced use cases
