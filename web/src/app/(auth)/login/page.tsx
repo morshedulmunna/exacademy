@@ -17,12 +17,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    try {
-      localStorages.clearAll();
-      sessionStorages.clearAll();
-    } catch {}
-  }, []);
+  // Note: Do not clear storage automatically on login page load to avoid wiping tokens
 
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email address").required("Email is required"),

@@ -80,7 +80,9 @@ API.interceptors.response.use(
     const originalRequest = error.config as any;
     const status = (error.response?.status as number) || 0;
 
-    if (status === 401 && !originalRequest?._retry) {
+    const url = String(originalRequest?.url || "");
+    const isAuthEndpoint = url.includes("/api/auth/");
+    if (status === 401 && !originalRequest?._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
       try {
         // Get refresh token from cookie or localStorage
