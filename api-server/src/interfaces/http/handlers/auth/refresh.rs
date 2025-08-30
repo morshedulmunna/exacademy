@@ -28,7 +28,7 @@ pub async fn refresh(
 
     // Update access_token and refresh_token cookies
     let access_cookie = format!(
-        "access_token={}; Path=/; HttpOnly; SameSite=Lax; {}Max-Age={}",
+        "access_token={}; Path=/; HttpOnly; SameSite=Lax; {}Domain=localhost; Max-Age={}",
         output.access_token,
         if is_prod { "Secure; " } else { "" },
         ctx.auth.access_ttl_seconds
@@ -36,7 +36,7 @@ pub async fn refresh(
     headers.append(header::SET_COOKIE, access_cookie.parse().unwrap());
 
     let refresh_cookie = format!(
-        "refresh_token={}; Path=/; HttpOnly; SameSite=Lax; {}Max-Age={}",
+        "refresh_token={}; Path=/; HttpOnly; SameSite=Lax; {}Domain=localhost; Max-Age={}",
         output.refresh_token,
         if is_prod { "Secure; " } else { "" },
         ctx.auth.refresh_ttl_seconds

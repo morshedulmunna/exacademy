@@ -66,6 +66,8 @@ export default function LoginPage() {
                   return;
                 }
 
+                localStorages.set("user", response.data.user);
+
                 router.push("/");
               } catch (error: any) {
                 console.log(error);
