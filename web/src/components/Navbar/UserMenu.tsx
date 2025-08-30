@@ -121,7 +121,7 @@ export default function UserMenu() {
 
               {user.role === "user" && (
                 <Link
-                  href={`/user/?name=${user?.username}/courses`}
+                  href={`/learner?username=${encodeURIComponent(user?.username ?? "")}`}
                   className={`flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-colors duration-200 ${theme === "dark" ? "text-gray-300 hover:text-white hover:bg-white/10" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"}`}
                   onClick={() => setShowUserMenu(false)}
                 >

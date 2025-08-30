@@ -1,15 +1,20 @@
 import React from "react";
 import { DashboardHeader, ProgressOverview, CurrentCourses, RecommendedCourses, RecentActivity } from "./components";
 import { getCurrentLogedInUser } from "@/actions/users/get-current-user";
-import { User } from "@/lib/types";
+import { notFound } from "next/navigation";
 
 /**
  * Learner Dashboard Page
  * Comprehensive dashboard for learners to track progress and access courses
  */
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: { username: string } }) {
+  const { username } = await searchParams;
   // Fetch current user data from the server
   const userData = await getCurrentLogedInUser();
+
+  if (userData?.data.username !== username) {
+    return notFound();
+  }
 
   // Mock data for demonstration (these would typically come from separate API calls)
   const progressData = {
