@@ -1,0 +1,437 @@
+"use client";
+
+import React from "react";
+import RichTextEditor from "@/components/rich-text-editor";
+import { generateSlug } from "@/lib/utils";
+import API from "@/configs/api.config";
+import { API_ENDPOINTS } from "@/configs/api-path";
+import ImageUpload from "@/components/ui/ImageUpload";
+import { DollarSign, Clock, Hash, Tag as TagIcon, X } from "lucide-react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+
+/**
+ * NewCourseForm
+ * Client-side form with live preview and rich text description
+ */
+export default function NewCourseForm() {
+  const [slugManual, setSlugManual] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [tags, setTags] = React.useState<string[]>([]);
+  const [tagInput, setTagInput] = React.useState("");
+  const [outcomes, setOutcomes] = React.useState<string[]>([]);
+  const [outcomeInput, setOutcomeInput] = React.useState("");
+
+  const formik = useFormik({
+    initialValues: {
+      title: "",
+      slug: "",
+      price: "",
+      originalPrice: "",
+      duration: "",
+      excerpt: "",
+      description: "<p></p>",
+      featured: false,
+      published: false,
+      thumbnail: "",
+      category: "",
+    },
+    validationSchema: Yup.object({
+      title: Yup.string().trim().min(3, "Too short").required("Title is required"),
+      slug: Yup.string().trim(),
+      price: Yup.number().typeError("Must be a number").min(0, "Must be >= 0").required("Price is required"),
+      originalPrice: Yup.number()
+        .typeError("Must be a number")
+        .min(0, "Must be >= 0")
+        .nullable()
+        .transform((v, o) => (o === "" ? null : v)),
+      duration: Yup.string().trim().required("Duration is required"),
+      excerpt: Yup.string().trim().max(300, "Max 300 characters"),
+      description: Yup.string().required("Description is required"),
+      category: Yup.string().trim(),
+      thumbnail: Yup.string().trim(),
+      featured: Yup.boolean(),
+      published: Yup.boolean(),
+    }),
+    onSubmit: async (values) => {
+      await createCourseWithPublished(values.published);
+    },
+  });
+
+  const computedSlug = formik.values.slug || generateSlug(formik.values.title);
+
+  React.useEffect(() => {
+    if (!slugManual) {
+      formik.setFieldValue("slug", generateSlug(formik.values.title));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.title, slugManual]);
+  const parsedPrice = Number(formik.values.price || 0);
+  const parsedOriginalPrice = formik.values.originalPrice ? Number(formik.values.originalPrice) : undefined;
+
+  async function createCourseWithPublished(publishFlag: boolean) {
+    setError(null);
+    try {
+      setLoading(true);
+      const payload: any = {
+        title: formik.values.title.trim(),
+        slug: computedSlug,
+        price: parsedPrice,
+        original_price: parsedOriginalPrice,
+        duration: formik.values.duration.trim(),
+        description: formik.values.description,
+        featured: formik.values.featured,
+        published: publishFlag,
+        excerpt: formik.values.excerpt.trim() || undefined,
+        thumbnail: formik.values.thumbnail.trim() || undefined,
+      };
+      const res = await API.post(API_ENDPOINTS.COURSES.CREATE, payload, { responseType: "text" });
+      const courseId = String(res.data);
+      window.location.href = `/admin/courses/${courseId}/builder`;
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || "Failed to create course");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Submit is managed by formik.handleSubmit via form tag
+
+  function markAllTouchedAndSubmit() {
+    const fields = ["title", "slug", "price", "originalPrice", "duration", "excerpt", "description", "category", "thumbnail"] as const;
+    const touched: Record<string, boolean> = {};
+    for (const key of fields) touched[key] = true;
+    formik.setTouched(touched as any, true);
+    formik.submitForm();
+  }
+
+  function handleSaveDraft() {
+    formik.setFieldValue("published", false, false);
+    markAllTouchedAndSubmit();
+  }
+
+  function handleCreate() {
+    formik.setFieldValue("published", !!formik.values.published, false);
+    markAllTouchedAndSubmit();
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 pb-24">
+      <form onSubmit={formik.handleSubmit} className="md:col-span-8 space-y-6">
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-base font-semibold">Basic information</h2>
+            <p className="text-sm text-gray-500 mt-1">Title, slug and a short summary.</p>
+          </div>
+          <div className="p-6 space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
+              <input
+                name="title"
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                required
+                placeholder="Course title"
+                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {(formik.touched.title || formik.submitCount > 0) && formik.errors.title && <p className="mt-1 text-xs text-red-600">{formik.errors.title}</p>}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Slug</label>
+                <input
+                  name="slug"
+                  value={formik.values.slug}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    formik.setFieldValue("slug", v);
+                    setSlugManual(v.length > 0);
+                  }}
+                  onBlur={(e) => {
+                    formik.handleBlur(e);
+                    if (!formik.values.slug) setSlugManual(false);
+                  }}
+                  placeholder="auto-from-title if empty"
+                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="mt-1 text-[11px] text-gray-500">Preview: {computedSlug || "(empty)"}</p>
+                {(formik.touched.slug || formik.submitCount > 0) && formik.errors.slug && <p className="mt-1 text-xs text-red-600">{String(formik.errors.slug)}</p>}
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Excerpt</label>
+                <input
+                  name="excerpt"
+                  value={formik.values.excerpt}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  placeholder="Short summary (optional)"
+                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {(formik.touched.excerpt || formik.submitCount > 0) && formik.errors.excerpt && <p className="mt-1 text-xs text-red-600">{formik.errors.excerpt}</p>}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Tags</label>
+              <div className="mt-1 flex items-center gap-2">
+                <div className="relative flex-1">
+                  <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && tagInput.trim()) {
+                        e.preventDefault();
+                        if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
+                        setTagInput("");
+                      }
+                    }}
+                    placeholder="Add a tag and press Enter"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              {tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {tags.map((t, i) => (
+                    <span key={`${t}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 text-xs">
+                      #{t}
+                      <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Remove ${t}`} className="ml-1 text-blue-500 hover:text-blue-700">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-base font-semibold">Pricing & meta</h2>
+            <p className="text-sm text-gray-500 mt-1">Set price, duration and category.</p>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Price (USD)</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    name="price"
+                    value={formik.values.price}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    required
+                    placeholder="99.00"
+                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {(formik.touched.price || formik.submitCount > 0) && formik.errors.price && <p className="mt-1 text-xs text-red-600">{String(formik.errors.price)}</p>}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Original price (optional)</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    name="originalPrice"
+                    value={formik.values.originalPrice}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="129.00"
+                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {(formik.touched.originalPrice || formik.submitCount > 0) && formik.errors.originalPrice && <p className="mt-1 text-xs text-red-600">{String(formik.errors.originalPrice)}</p>}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Duration</label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    name="duration"
+                    value={formik.values.duration}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    required
+                    placeholder="e.g. 12h"
+                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {(formik.touched.duration || formik.submitCount > 0) && formik.errors.duration && <p className="mt-1 text-xs text-red-600">{formik.errors.duration}</p>}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Category</label>
+                <input
+                  name="category"
+                  value={formik.values.category}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  placeholder="e.g. Web Development"
+                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm"
+                />
+                {(formik.touched.category || formik.submitCount > 0) && formik.errors.category && <p className="mt-1 text-xs text-red-600">{String(formik.errors.category)}</p>}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Learning outcomes</label>
+              <div className="mt-1 flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    value={outcomeInput}
+                    onChange={(e) => setOutcomeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && outcomeInput.trim()) {
+                        e.preventDefault();
+                        setOutcomes([...outcomes, outcomeInput.trim()]);
+                        setOutcomeInput("");
+                      }
+                    }}
+                    placeholder="Add an outcome and press Enter"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              {outcomes.length > 0 && (
+                <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {outcomes.map((o, i) => (
+                    <li key={`${o}-${i}`} className="text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-md px-3 py-2 flex items-start justify-between gap-2">
+                      <span className="truncate">{o}</span>
+                      <button type="button" onClick={() => setOutcomes(outcomes.filter((_, idx) => idx !== i))} aria-label={`Remove ${o}`} className="text-gray-500 hover:text-gray-700">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {/* Featured toggle moved to the right-side panel */}
+          </div>
+        </section>
+
+        {/* Thumbnail moved to right-side preview card */}
+
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-base font-semibold">Description</h2>
+            <p className="text-sm text-gray-500 mt-1">Use the editor to write a compelling description.</p>
+          </div>
+          <div className="p-6">
+            <RichTextEditor content={formik.values.description} onChange={(val) => formik.setFieldValue("description", val)} placeholder="Detailed course description" />
+            {(formik.touched.description || formik.submitCount > 0) && formik.errors.description && <p className="mt-1 text-xs text-red-600">{String(formik.errors.description)}</p>}
+          </div>
+        </section>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <div className="flex justify-end md:hidden">
+          <button disabled={loading} type="submit" className="inline-flex items-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+            {loading ? "Creating..." : "Create Course"}
+          </button>
+        </div>
+      </form>
+
+      <aside className="md:col-span-4">
+        <div className="sticky top-24 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-5 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Thumbnail</h3>
+            <ImageUpload
+              category="thumbnails"
+              aspectRatio="video"
+              placeholder="Drag & drop image here or click to upload"
+              onImageUploaded={(file) => formik.setFieldValue("thumbnail", file.original)}
+              onImageRemoved={() => formik.setFieldValue("thumbnail", "")}
+              showPreview={false}
+            />
+            {(formik.touched.thumbnail || formik.submitCount > 0) && formik.errors.thumbnail && <p className="mt-2 text-xs text-red-600">{String(formik.errors.thumbnail)}</p>}
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Featured</span>
+                <input id="featured" checked={formik.values.featured} onChange={(e) => formik.setFieldValue("featured", e.target.checked)} name="featured" type="checkbox" className="h-4 w-4" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Published</span>
+                <input id="published" checked={formik.values.published} onChange={(e) => formik.setFieldValue("published", e.target.checked)} name="published" type="checkbox" className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
+              <div>
+                <div className="text-xs text-gray-500">Price</div>
+                <div className="text-sm font-medium">${isNaN(parsedPrice) ? "0.00" : parsedPrice.toFixed(2)}</div>
+              </div>
+              {formik.values.category && (
+                <div>
+                  <div className="text-xs text-gray-500">Category</div>
+                  <div className="text-sm font-medium">{formik.values.category}</div>
+                </div>
+              )}
+              {formik.values.duration && (
+                <div>
+                  <div className="text-xs text-gray-500">Duration</div>
+                  <div className="text-sm font-medium">{formik.values.duration}</div>
+                </div>
+              )}
+              {computedSlug && (
+                <div>
+                  <div className="text-xs text-gray-500">Slug</div>
+                  <div className="text-sm font-medium">/{computedSlug}</div>
+                </div>
+              )}
+            </div>
+            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-sm font-medium mb-2">Short preview</div>
+              <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                <div className="flex items-center gap-3">
+                  {formik.values.thumbnail ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={formik.values.thumbnail} alt={formik.values.title || "thumbnail"} className="h-12 w-12 rounded object-cover" />
+                  ) : (
+                    <div className="h-12 w-12 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] text-gray-500">IMG</div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold truncate">{formik.values.title || "Untitled course"}</div>
+                    <div className="text-xs text-gray-500 truncate">/{computedSlug || "slug"}</div>
+                  </div>
+                  <span className="ml-auto inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs">${isNaN(parsedPrice) ? "0.00" : parsedPrice.toFixed(2)}</span>
+                </div>
+                {formik.values.excerpt && <div className="mt-2 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{formik.values.excerpt}</div>}
+                <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-gray-600 dark:text-gray-400">
+                  {formik.values.duration && <span className="inline-flex items-center rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5">{formik.values.duration}</span>}
+                  {formik.values.category && <span className="inline-flex items-center rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5">{formik.values.category}</span>}
+                  {formik.values.featured && <span className="inline-flex items-center rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-0.5">Featured</span>}
+                  {formik.values.published && <span className="inline-flex items-center rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5">Published</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleSaveDraft}
+            className="inline-flex items-center rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+          >
+            {loading ? "Saving..." : "Save draft"}
+          </button>
+          <button type="button" disabled={loading} onClick={handleCreate} className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+            {loading ? "Creating..." : "Create & open builder"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
