@@ -24,6 +24,8 @@ export async function loginAction(data: LoginRequest): Promise<ResponseType> {
       password,
     });
 
+    // Note: Cookies are set on the client after login to be available to SSR
+
     return DataObj(response) as any;
   } catch (error) {
     return ErrorObj(error) as ResponseType;
