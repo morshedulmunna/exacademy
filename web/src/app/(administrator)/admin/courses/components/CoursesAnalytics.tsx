@@ -2,6 +2,7 @@
 import React from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend, Filler } from "chart.js";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
+import { ArrowUpRight, ArrowDownRight, Trophy } from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend, Filler);
 
@@ -56,27 +57,47 @@ export const CoursesAnalytics: React.FC<CoursesAnalyticsProps> = ({ totalRevenue
     scales: { x: { grid: { display: false } }, y: { grid: { color: "rgba(0,0,0,0.05)" } } },
   };
 
-  const doughnutData = {
-    labels: ["Web", "Frontend", "Backend", "Design", "JavaScript"],
-    datasets: [
-      {
-        data: [32, 24, 18, 16, 10],
-        backgroundColor: ["#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ef4444"],
-        borderWidth: 0,
-      },
-    ],
-  };
-
   const cardClass = "bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4";
 
+  // Derived metrics for compact footers
+  const enrollmentSeries = lineData.datasets[0].data as number[];
+  const enrollmentTotal = enrollmentSeries.reduce((a, b) => a + b, 0);
+  const enrollmentMoM = enrollmentSeries[enrollmentSeries.length - 1] - enrollmentSeries[enrollmentSeries.length - 2];
+  const bestMonthIndex = enrollmentSeries.indexOf(Math.max(...enrollmentSeries));
+
+  const revenueSeries = barData.datasets[0].data as number[];
+  const revenueYtd = revenueSeries.reduce((a, b) => a + b, 0);
+  const revenueMoM = revenueSeries[revenueSeries.length - 1] - revenueSeries[revenueSeries.length - 2];
+  const avgRevenuePerMonth = Math.round(revenueYtd / revenueSeries.length);
+
+  const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className={cardClass}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Enrollments Trend</h3>
           <span className="text-xs text-gray-400">Last 12 months</span>
         </div>
         <Line data={lineData} options={lineOptions} height={80} />
+        <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white">{enrollmentTotal}</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${enrollmentMoM >= 0 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"}`}>
+              {enrollmentMoM >= 0 ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
+              {Math.abs(enrollmentMoM)} MoM
+            </div>
+          </div>
+          <div className="flex items-center justify-end space-x-2">
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Best: <span className="font-medium text-gray-800 dark:text-gray-200">{months[bestMonthIndex]}</span>
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className={cardClass}>
@@ -85,15 +106,21 @@ export const CoursesAnalytics: React.FC<CoursesAnalyticsProps> = ({ totalRevenue
           <span className="text-xs text-gray-400">This year</span>
         </div>
         <Bar data={barData} options={barOptions} height={80} />
-      </div>
-
-      <div className={cardClass}>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Categories</h3>
-          <span className="text-xs text-gray-400">Distribution</span>
-        </div>
-        <div className="max-w-[220px] mx-auto">
-          <Doughnut data={doughnutData} />
+        <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">YTD</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white">{formatCurrency(revenueYtd)}</p>
+          </div>
+          <div className="flex items-center">
+            <div className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${revenueMoM >= 0 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"}`}>
+              {revenueMoM >= 0 ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
+              {formatCurrency(Math.abs(revenueMoM))} MoM
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Avg / month</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white">{formatCurrency(avgRevenuePerMonth)}</p>
+          </div>
         </div>
       </div>
     </div>
