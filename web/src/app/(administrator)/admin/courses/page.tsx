@@ -1,5 +1,5 @@
 import React from "react";
-import { PageHeader, StatsGrid, SearchFilters, CoursesGrid } from "./components";
+import { PageHeader, CoursesAnalytics, CoursesKpis, PaginatedCoursesTable } from "./components";
 
 /**
  * Course Management Page
@@ -96,16 +96,15 @@ export default function CourseManagementPage() {
     draftCourses: courses.filter((c) => !c.published).length,
     totalStudents: courses.reduce((sum, c) => sum + c.students, 0),
     totalRevenue: courses.reduce((sum, c) => sum + c.price * c.students, 0),
-    averageRating: courses.filter((c) => c.rating > 0).reduce((sum, c) => sum + c.rating, 0) / courses.filter((c) => c.rating > 0).length || 0,
+    averageRating: courses.filter((c) => c.rating > 0).reduce((sum, c) => sum + c.rating, 0) / (courses.filter((c) => c.rating > 0).length || 1),
   };
 
   return (
     <div className="space-y-6">
       <PageHeader title="Course Management" subtitle="Manage your courses, track enrollments, and monitor performance" newCourseUrl="/admin/courses/new" />
-
-      <StatsGrid stats={stats} />
-      <SearchFilters />
-      <CoursesGrid courses={courses} />
+      <CoursesKpis totalCourses={stats.totalCourses} publishedCourses={stats.publishedCourses} draftCourses={stats.draftCourses} totalStudents={stats.totalStudents} totalRevenue={stats.totalRevenue} averageRating={stats.averageRating} />
+      <CoursesAnalytics totalRevenue={stats.totalRevenue} />
+      <PaginatedCoursesTable courses={courses} pageSize={10} />
     </div>
   );
 }

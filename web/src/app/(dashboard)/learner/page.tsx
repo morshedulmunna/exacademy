@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
  * Learner Dashboard Page
  * Comprehensive dashboard for learners to track progress and access courses
  */
-export default async function DashboardPage({ searchParams }: { searchParams: { username: string } }) {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ username: string }> }) {
   const { username } = await searchParams;
   // Fetch current user data from the server
   const userData = await getCurrentLogedInUser();
