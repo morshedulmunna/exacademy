@@ -22,8 +22,12 @@ export const PaginatedCoursesTable: React.FC<PaginatedCoursesTableProps> = ({ co
 
   return (
     <div className="space-y-4">
-      <CoursesTable courses={currentPageData} />
-      <Pagination numberOfData={courses.length} limits={pageSize} activePage={currentPage} getCurrentPage={(p) => setCurrentPage(p)} />
+      <div className="overflow-hidden rounded-lg">
+        <CoursesTable courses={currentPageData} />
+      </div>
+      <div className="flex justify-end">
+        <Pagination className="w-auto" numberOfData={courses.length} limits={pageSize} activePage={currentPage} getCurrentPage={(p) => setCurrentPage(p)} />
+      </div>
     </div>
   );
 };

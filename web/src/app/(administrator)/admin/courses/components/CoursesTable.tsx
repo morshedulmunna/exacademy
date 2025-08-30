@@ -34,21 +34,16 @@ interface CoursesTableProps {
  */
 export const CoursesTable: React.FC<CoursesTableProps> = ({ courses }) => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="overflow-x-hidden">
+      <table className="w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Instructor</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Students</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rating</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Lessons</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Duration</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+            <th className="w-1/2 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>
+            <th className="w-40 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Instructor</th>
+            <th className="w-28 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+            <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Students</th>
+            <th className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created</th>
+            <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -66,8 +61,8 @@ export const CoursesTable: React.FC<CoursesTableProps> = ({ courses }) => (
  */
 const CourseRow: React.FC<{ course: AdminCourseItem }> = ({ course }) => (
   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="flex items-center">
+    <td className="px-6 py-4 align-top">
+      <div className="flex items-start">
         <div className="flex-shrink-0 h-10 w-10">
           <div className="h-10 w-10 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
             {course.image ? (
@@ -78,54 +73,42 @@ const CourseRow: React.FC<{ course: AdminCourseItem }> = ({ course }) => (
             )}
           </div>
         </div>
-        <div className="ml-4">
-          <div className="text-sm font-medium text-gray-900 dark:text-white">{course.title}</div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 max-w-xs truncate">{course.excerpt}</div>
+        <div className="ml-4 min-w-0">
+          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{course.title}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 break-words">{course.excerpt}</div>
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 flex flex-wrap gap-x-3 gap-y-1">
+            <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">${course.price.toFixed(2)}</span>
+            <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">★ {course.rating > 0 ? course.rating.toFixed(1) : "-"}</span>
+            <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">{course.totalLessons} lessons</span>
+            {course.category && <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">{course.category}</span>}
+          </div>
         </div>
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="flex items-center">
-        <User className="w-4 h-4 text-gray-400 mr-2" />
-        <div>
-          <div className="text-sm text-gray-900 dark:text-white">{course.instructor?.name || "Unknown"}</div>
-          {course.instructor?.email && <div className="text-xs text-gray-500 dark:text-gray-400">{course.instructor.email}</div>}
+    <td className="px-6 py-4 align-top">
+      <div className="flex items-start">
+        <User className="w-4 h-4 text-gray-400 mr-2 mt-0.5" />
+        <div className="min-w-0">
+          <div className="text-sm text-gray-900 dark:text-white truncate">{course.instructor?.name || "Unknown"}</div>
+          {course.instructor?.email && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{course.instructor.email}</div>}
         </div>
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className="px-6 py-4 align-top">
       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${course.published ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}>
         {course.published ? "Published" : "Draft"}
       </span>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className="px-6 py-4 align-top">
       <div className="text-sm text-gray-900 dark:text-white">{course.students.toLocaleString()}</div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="text-sm text-gray-900 dark:text-white">
-        ${""}
-        {course.price.toFixed(2)}
-      </div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="text-sm text-gray-900 dark:text-white">{course.rating > 0 ? course.rating.toFixed(1) : "-"}</div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="text-sm text-gray-900 dark:text-white">{course.totalLessons}</div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="text-sm text-gray-900 dark:text-white">{course.totalDuration}h</div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="text-sm text-gray-900 dark:text-white">{course.category}</div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className="px-6 py-4 align-top">
       <div className="flex items-center">
         <Calendar className="w-4 h-4 text-gray-400 mr-2" />
         <div className="text-sm text-gray-900 dark:text-white">{new Date(course.createdAt).toLocaleDateString()}</div>
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+    <td className="px-6 py-4 align-top text-sm font-medium">
       <div className="flex items-center space-x-2">
         <Link href={`/courses/${course.slug}`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="View">
           <Eye className="w-4 h-4" />
@@ -135,9 +118,6 @@ const CourseRow: React.FC<{ course: AdminCourseItem }> = ({ course }) => (
         </Link>
         <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete">
           <Trash2 className="w-4 h-4" />
-        </button>
-        <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300" title="More">
-          <MoreHorizontal className="w-4 h-4" />
         </button>
       </div>
     </td>
