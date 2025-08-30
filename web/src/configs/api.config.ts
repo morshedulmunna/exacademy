@@ -42,24 +42,10 @@ API.interceptors.request.use(async (config) => {
       } catch {}
     }
 
-    // Client-side: try cookie, then localStorage
+    // Client-side: read from cookie only
     if (!token && typeof document !== "undefined") {
       const match = document.cookie.split("; ").find((row) => row.startsWith("access_token="));
       if (match) token = decodeURIComponent(match.split("=")[1]);
-
-      if (!token) {
-        try {
-          const raw = window.localStorage.getItem("access_token");
-          if (raw) {
-            try {
-              // Handle values saved via JSON.stringify
-              token = JSON.parse(raw);
-            } catch {
-              token = raw;
-            }
-          }
-        } catch {}
-      }
     }
 
     if (token && !config.headers?.Authorization) {
@@ -85,7 +71,7 @@ API.interceptors.response.use(
     if (status === 401 && !originalRequest?._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
       try {
-        // Get refresh token from cookie or localStorage
+        // Get refresh token from cookie only
         let refreshToken: string | undefined;
 
         if (typeof window === "undefined") {
@@ -97,18 +83,6 @@ API.interceptors.response.use(
         } else {
           const match = document.cookie.split("; ").find((row) => row.startsWith("refresh_token="));
           if (match) refreshToken = decodeURIComponent(match.split("=")[1]);
-          if (!refreshToken) {
-            try {
-              const raw = window.localStorage.getItem("refresh_token");
-              if (raw) {
-                try {
-                  refreshToken = JSON.parse(raw);
-                } catch {
-                  refreshToken = raw;
-                }
-              }
-            } catch {}
-          }
         }
 
         if (!refreshToken) throw new Error("Missing refresh token");
@@ -120,14 +94,12 @@ API.interceptors.response.use(
 
         if (!newAccessToken) throw new Error("Failed to refresh token");
 
-        // Persist new tokens both as cookies and localStorage (client only for cookies)
+        // Persist new tokens as cookies only (client-side)
         if (typeof document !== "undefined") {
           if (newAccessToken) {
-            window.localStorage.setItem("access_token", JSON.stringify(newAccessToken));
             document.cookie = `access_token=${encodeURIComponent(newAccessToken)}; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
           }
           if (newRefreshToken) {
-            window.localStorage.setItem("refresh_token", JSON.stringify(newRefreshToken));
             document.cookie = `refresh_token=${encodeURIComponent(newRefreshToken)}; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
           }
         }
@@ -139,11 +111,9 @@ API.interceptors.response.use(
         };
         return API(originalRequest);
       } catch (refreshError) {
-        // On refresh failure, clear tokens (client) and reject
+        // On refresh failure, clear cookies (client) and reject
         if (typeof document !== "undefined") {
           try {
-            window.localStorage.removeItem("access_token");
-            window.localStorage.removeItem("refresh_token");
             const cookies = document.cookie.split(";");
             for (const cookie of cookies) {
               const eqPos = cookie.indexOf("=");

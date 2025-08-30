@@ -65,12 +65,9 @@ export default function LoginPage() {
                 const accessToken = response.data?.access_token;
                 const refreshToken = response.data?.refresh_token;
                 if (accessToken) {
-                  localStorages.set("access_token", accessToken);
-                  // Also set a non-HttpOnly cookie for SSR reads (sameSite=lax)
                   document.cookie = `access_token=${encodeURIComponent(accessToken)}; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
                 }
                 if (refreshToken) {
-                  localStorages.set("refresh_token", refreshToken);
                   document.cookie = `refresh_token=${encodeURIComponent(refreshToken)}; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
                 }
                 if (response.data?.user) {
