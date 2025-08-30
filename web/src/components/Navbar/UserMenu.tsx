@@ -7,6 +7,7 @@ import { User, Settings, ChevronDown, Settings2, Shield, FileText, LogOut } from
 import { useTheme } from "@/themes/ThemeProvider";
 import { useOutsideClick, useGetUserInfo } from "@/hooks";
 import { removeLocalStorageItem } from "@/lib/utils";
+import { logoutAction } from "@/actions/auth/logout";
 
 /**
  * User menu component with dropdown for authenticated users
@@ -22,6 +23,7 @@ export default function UserMenu() {
 
   const handleSignOut = async () => {
     try {
+      await logoutAction();
     } catch {}
     if (typeof window !== "undefined") {
       try {
