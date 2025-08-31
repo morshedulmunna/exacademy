@@ -25,6 +25,9 @@ pub struct SystemConfig {
     pub grpc_port: u16,
     /// Graceful shutdown timeout in seconds.
     pub shutdown_grace_seconds: u64,
+    /// Maximum allowed size in bytes for uploaded files (streamed or in-memory).
+    /// Defaults to 10 MiB.
+    pub max_upload_bytes: usize,
 }
 
 impl SystemConfig {
@@ -46,6 +49,7 @@ impl SystemConfig {
         let grpc_host = env::var("GRPC_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
         let grpc_port = parse_port_with_default("GRPC_PORT", 50051)?;
         let shutdown_grace_seconds = parse_u64_with_default("SHUTDOWN_GRACE_SECONDS", 10)?;
+        let max_upload_bytes = parse_usize_with_default("MAX_UPLOAD_BYTES", 10 * 1024 * 1024)?;
 
         Ok(Self {
             app_env,
@@ -55,6 +59,7 @@ impl SystemConfig {
             grpc_host,
             grpc_port,
             shutdown_grace_seconds,
+            max_upload_bytes,
         })
     }
 }
@@ -91,6 +96,22 @@ fn parse_u64_with_default(
     }
 }
 
+/// Parse a `usize` from an environment variable, applying a default when missing.
+fn parse_usize_with_default(
+    var: &str,
+    default_value: usize,
+) -> Result<usize, Box<dyn std::error::Error>> {
+    match env::var(var) {
+        Ok(val) => {
+            let parsed: usize = val
+                .parse()
+                .map_err(|_| format!("{} must be a valid usize", var))?;
+            Ok(parsed)
+        }
+        Err(_) => Ok(default_value),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -116,6 +137,7 @@ mod tests {
             "GRPC_HOST",
             "GRPC_PORT",
             "SHUTDOWN_GRACE_SECONDS",
+            "MAX_UPLOAD_BYTES",
         ]);
 
         let cfg = SystemConfig::load_from_env().expect("should load defaults");
@@ -126,6 +148,7 @@ mod tests {
         assert_eq!(cfg.grpc_host, "127.0.0.1");
         assert_eq!(cfg.grpc_port, 50051);
         assert_eq!(cfg.shutdown_grace_seconds, 10);
+        assert_eq!(cfg.max_upload_bytes, 10 * 1024 * 1024);
     }
 
     #[test]
@@ -139,6 +162,7 @@ mod tests {
             "GRPC_HOST",
             "GRPC_PORT",
             "SHUTDOWN_GRACE_SECONDS",
+            "MAX_UPLOAD_BYTES",
         ]);
 
         unsafe {
@@ -149,6 +173,7 @@ mod tests {
             env::set_var("GRPC_HOST", "0.0.0.0");
             env::set_var("GRPC_PORT", "6000");
             env::set_var("SHUTDOWN_GRACE_SECONDS", "30");
+            env::set_var("MAX_UPLOAD_BYTES", "2097152");
         }
 
         let cfg = SystemConfig::load_from_env().expect("should load custom values");
@@ -159,6 +184,7 @@ mod tests {
         assert_eq!(cfg.grpc_host, "0.0.0.0");
         assert_eq!(cfg.grpc_port, 6000);
         assert_eq!(cfg.shutdown_grace_seconds, 30);
+        assert_eq!(cfg.max_upload_bytes, 2 * 1024 * 1024);
     }
 
     #[test]

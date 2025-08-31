@@ -66,7 +66,6 @@ bytes = "1"
 tokio-util = { version = "0.7", features = ["io"] }
 futures = "0.3"
 
-# Kafka removed; no messaging dependency
 
 # Validation (derive-based, similar to Zod schemas)
 validator = { version = "0.18", features = ["derive"] }

@@ -7,6 +7,7 @@ pub mod redis;
 pub mod response;
 pub mod security;
 pub mod upload;
+pub mod utils;
 pub mod validators;
 pub mod vimeo;
 
