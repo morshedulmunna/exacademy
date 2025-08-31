@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { deleteCourse } from "@/actions/courses/delete.action";
+import LoaderOverlay from "@/common/LoaderOverlay";
 
 interface DeleteCourseButtonProps {
   courseId: string;
@@ -99,14 +100,7 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
       )}
 
       {/* Global Loader Overlay */}
-      {isDeleting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="flex flex-col items-center space-y-3">
-            <div className="h-10 w-10 rounded-full border-4 border-white/30 border-t-white animate-spin" aria-hidden="true" />
-            <p className="text-white text-sm">Deleting "{courseTitle}"...</p>
-          </div>
-        </div>
-      )}
+      <LoaderOverlay open={isDeleting} text={`Deleting "${courseTitle}"...`} />
     </>
   );
 }
