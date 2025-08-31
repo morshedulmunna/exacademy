@@ -30,6 +30,7 @@ type CourseInitial = {
   thumbnail?: string | File | null;
   category?: string;
   outcomes: string[];
+  tags?: string[];
 };
 
 export default function NewCourseForm({ mode = "create", course }: { mode?: "create" | "edit"; course?: CourseInitial }) {
@@ -37,7 +38,7 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
   const [slugManual, setSlugManual] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [tags, setTags] = React.useState<string[]>([]);
+  const [tags, setTags] = React.useState<string[]>(course?.tags || []);
   const [tagInput, setTagInput] = React.useState("");
   const [outcomeInput, setOutcomeInput] = React.useState("");
   const [thumbnailFile, setThumbnailFile] = React.useState<File | null>(null);
@@ -158,7 +159,10 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
         status: formik.values.status,
         excerpt: formik.values.excerpt.trim() || undefined,
         thumbnail: formik.values.thumbnail || undefined,
-        outcomes: formik.values.outcomes,
+        // Backend expects JSON or comma-separated strings for arrays in multipart
+        outcomes: JSON.stringify(formik.values.outcomes || []),
+        category: formik.values.category || undefined,
+        tags: JSON.stringify(tags || []),
       };
       const generateFormData = generateFormDataFromObject(payload);
       if (mode === "edit" && course?.id) {

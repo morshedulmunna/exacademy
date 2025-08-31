@@ -23,6 +23,8 @@ pub async fn create_course(
             instructor_id,
             // Ensure NOT NULL constraint: default to empty array when missing
             outcomes: Some(input.outcomes.unwrap_or_default()),
+            category: input.category,
+            tags: input.tags,
         })
         .await?;
     Ok(slug)

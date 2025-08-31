@@ -35,6 +35,9 @@ impl From<CourseRecord> for Course {
             featured: record.featured,
             view_count: record.view_count,
             status: record.status,
+            outcomes: record.outcomes,
+            category: record.category,
+            tags: record.tags,
             instructor_id: record.instructor_id,
             instructor: record.instructor.map(|i| Instructor {
                 id: i.id,

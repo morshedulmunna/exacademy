@@ -22,6 +22,8 @@ pub async fn update_course_by_id(
                 lessons: input.lessons,
                 status: input.status,
                 outcomes: input.outcomes,
+                category: input.category,
+                tags: input.tags,
                 featured: input.featured,
             },
         )

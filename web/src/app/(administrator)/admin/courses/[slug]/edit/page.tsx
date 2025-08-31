@@ -3,11 +3,12 @@ import NewCourseForm from "../../new/NewCourseForm";
 import { getCourseBySlugAction } from "@/actions/courses/get-course.action";
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function EditCoursePage({ params }: Props) {
-  const { success, data } = await getCourseBySlugAction(params.slug);
+  const { slug } = await params;
+  const { success, data } = await getCourseBySlugAction(slug);
   const c = success ? data : null;
   const initial = c
     ? {
@@ -22,7 +23,8 @@ export default async function EditCoursePage({ params }: Props) {
         featured: Boolean(c.featured),
         status: (c.status as any) || "draft",
         thumbnail: c.thumbnail || undefined,
-        category: "",
+        category: c.category || "",
+        tags: c.tags || [],
         outcomes: c.outcomes || [],
       }
     : undefined;

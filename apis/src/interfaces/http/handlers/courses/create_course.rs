@@ -24,6 +24,8 @@ struct ParsedCreateCourseFields {
     featured: bool,
     status: Option<String>,
     outcomes: Option<Vec<String>>,
+    category: Option<String>,
+    tags: Option<Vec<String>>,
 }
 
 impl ParsedCreateCourseFields {
@@ -41,6 +43,8 @@ impl ParsedCreateCourseFields {
             featured: form.bool("featured").unwrap_or(false),
             status: form.text("status").map(|s| s.to_string()),
             outcomes: form.json_vec_string("outcomes"),
+            category: form.text("category").map(|s| s.to_string()),
+            tags: form.json_vec_string("tags"),
         })
     }
 }
@@ -91,6 +95,8 @@ pub async fn create_course(
         featured: parsed.featured,
         status: parsed.status,
         outcomes: parsed.outcomes,
+        category: parsed.category,
+        tags: parsed.tags,
     };
 
     // Validate according to struct annotations; cleanup uploaded file on failure

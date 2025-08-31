@@ -35,6 +35,8 @@ pub async fn update_course(
     let featured = form.bool("featured");
     let status = form.text("status").map(|s| s.to_string());
     let outcomes = form.json_vec_string("outcomes");
+    let category = form.text("category").map(|s| s.to_string());
+    let tags = form.json_vec_string("tags");
 
     // Thumbnail can be provided as a file or as a direct URL via "thumbnail_url"
     let mut thumbnail: Option<String> = form.text("thumbnail_url").map(|s| s.to_string());
@@ -69,6 +71,8 @@ pub async fn update_course(
         featured,
         outcomes,
         status,
+        category,
+        tags,
     };
 
     // Validate; delete uploaded file if validation fails
