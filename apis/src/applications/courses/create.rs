@@ -19,7 +19,9 @@ pub async fn create_course(
             original_price: input.original_price,
             duration: input.duration,
             featured: input.featured,
-            instructor_id: Some(instructor_id),
+            published: input.published,
+            status: Some(input.status.unwrap_or("draft".to_string())),
+            instructor_id,
         })
         .await?;
     Ok(id)

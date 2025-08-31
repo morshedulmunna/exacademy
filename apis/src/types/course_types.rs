@@ -3,6 +3,32 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
 
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct CreateCourseRequest {
+    #[validate(length(min = 1))]
+    pub slug: String,
+    #[validate(length(min = 1))]
+    pub title: String,
+    #[validate(length(min = 1))]
+    pub description: String,
+    pub excerpt: Option<String>,
+    #[validate(url)]
+    pub thumbnail: Option<String>,
+    /// Price must be non-negative.
+    #[validate(range(min = 0.0))]
+    pub price: f64,
+    /// Original price must be non-negative.
+    #[validate(range(min = 0.0))]
+    pub original_price: Option<f64>,
+
+    #[validate(length(min = 1))]
+    pub duration: String,
+    pub featured: bool,
+    pub published: bool,
+    pub status: Option<String>,
+}
+
+// Checking -----
 /// API-facing Course types. Mirrors DB but keeps HTTP contract tidy.
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct Course {
@@ -92,24 +118,6 @@ pub struct Lesson {
     pub published: bool,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
-}
-
-#[derive(Debug, Deserialize, ToSchema, Validate)]
-pub struct CreateCourseRequest {
-    #[validate(length(min = 1))]
-    pub slug: String,
-    #[validate(length(min = 1))]
-    pub title: String,
-    #[validate(length(min = 1))]
-    pub description: String,
-    pub excerpt: Option<String>,
-    #[validate(url)]
-    pub thumbnail: Option<String>,
-    pub price: f64,
-    pub original_price: Option<f64>,
-    #[validate(length(min = 1))]
-    pub duration: String,
-    pub featured: bool,
 }
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]

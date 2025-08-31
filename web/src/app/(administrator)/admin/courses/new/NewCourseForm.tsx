@@ -86,9 +86,8 @@ export default function NewCourseForm() {
         excerpt: formik.values.excerpt.trim() || undefined,
         thumbnail: formik.values.thumbnail.trim() || undefined,
       };
-      const res = await API.post(API_ENDPOINTS.COURSES.CREATE, payload, { responseType: "text" });
-      const courseId = String(res.data);
-      window.location.href = `/admin/courses/${courseId}/builder`;
+      console.log(payload, "New Course Payload _________ ");
+      // window.location.href = `/admin/courses/${courseId}/builder`;
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.message || "Failed to create course");
     } finally {
@@ -138,7 +137,7 @@ export default function NewCourseForm() {
               />
               {(formik.touched.title || formik.submitCount > 0) && formik.errors.title && <p className="mt-1 text-xs text-red-600">{formik.errors.title}</p>}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Slug</label>
                 <input
@@ -159,51 +158,52 @@ export default function NewCourseForm() {
                 <p className="mt-1 text-[11px] text-gray-500">Preview: {computedSlug || "(empty)"}</p>
                 {(formik.touched.slug || formik.submitCount > 0) && formik.errors.slug && <p className="mt-1 text-xs text-red-600">{String(formik.errors.slug)}</p>}
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Excerpt</label>
-                <input
-                  name="excerpt"
-                  value={formik.values.excerpt}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  placeholder="Short summary (optional)"
-                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {(formik.touched.excerpt || formik.submitCount > 0) && formik.errors.excerpt && <p className="mt-1 text-xs text-red-600">{formik.errors.excerpt}</p>}
+
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Tags</label>
+                <div className="mt-1 flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && tagInput.trim()) {
+                          e.preventDefault();
+                          if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
+                          setTagInput("");
+                        }
+                      }}
+                      placeholder="Add a tag and press Enter"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                {tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {tags.map((t, i) => (
+                      <span key={`${t}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 text-xs">
+                        #{t}
+                        <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Remove ${t}`} className="ml-1 text-blue-500 hover:text-blue-700">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Tags</label>
-              <div className="mt-1 flex items-center gap-2">
-                <div className="relative flex-1">
-                  <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && tagInput.trim()) {
-                        e.preventDefault();
-                        if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
-                        setTagInput("");
-                      }
-                    }}
-                    placeholder="Add a tag and press Enter"
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              {tags.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {tags.map((t, i) => (
-                    <span key={`${t}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 text-xs">
-                      #{t}
-                      <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Remove ${t}`} className="ml-1 text-blue-500 hover:text-blue-700">
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Excerpt</label>
+              <textarea
+                name="excerpt"
+                value={formik.values.excerpt}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="Short summary (optional)"
+                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {(formik.touched.excerpt || formik.submitCount > 0) && formik.errors.excerpt && <p className="mt-1 text-xs text-red-600">{formik.errors.excerpt}</p>}
             </div>
           </div>
         </section>

@@ -22,12 +22,12 @@ pub struct CourseRecord {
     pub original_price: Option<f64>,
     pub duration: String,
     pub lessons: i32,
-    pub students: i32,
     pub published: bool,
     pub featured: bool,
     pub view_count: i32,
+    pub status: String,
+    /// Instructor foreign key; may be NULL for legacy rows
     pub instructor_id: Option<uuid::Uuid>,
-    /// Joined instructor summary when available
     pub instructor: Option<InstructorSummary>,
     pub published_at: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,
@@ -45,7 +45,9 @@ pub struct CreateCourseRecord {
     pub original_price: Option<f64>,
     pub duration: String,
     pub featured: bool,
-    pub instructor_id: Option<uuid::Uuid>,
+    pub published: bool,
+    pub status: Option<String>,
+    pub instructor_id: uuid::Uuid,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -58,9 +60,9 @@ pub struct UpdateCourseRecord {
     pub original_price: Option<f64>,
     pub duration: Option<String>,
     pub lessons: Option<i32>,
-    pub students: Option<i32>,
-    pub published: Option<bool>,
+    pub status: Option<String>,
     pub featured: Option<bool>,
+    pub published: Option<bool>,
 }
 
 #[async_trait::async_trait]

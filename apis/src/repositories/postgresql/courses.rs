@@ -2,7 +2,7 @@ use sqlx::Row;
 
 use crate::pkg::error::{AppError, AppResult};
 use crate::repositories::courses::{
-    CourseRecord, CoursesRepository, CreateCourseRecord, InstructorSummary, UpdateCourseRecord,
+    CourseRecord, CoursesRepository, CreateCourseRecord, UpdateCourseRecord,
 };
 
 pub struct PostgresCoursesRepository {
@@ -15,9 +15,9 @@ impl CoursesRepository for PostgresCoursesRepository {
         let rec = sqlx::query(
             r#"INSERT INTO courses (
                     slug, title, description, excerpt, thumbnail,
-                    price, original_price, duration, featured, instructor_id
+                    price, original_price, duration, featured, published, status, instructor_id
                 ) VALUES (
-                    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10
+                    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12
                 ) RETURNING id"#,
         )
         .bind(&input.slug)
@@ -29,7 +29,9 @@ impl CoursesRepository for PostgresCoursesRepository {
         .bind(&input.original_price)
         .bind(&input.duration)
         .bind(input.featured)
-        .bind(&input.instructor_id)
+        .bind(input.published)
+        .bind(&input.status)
+        .bind(input.instructor_id)
         .fetch_one(&self.pool)
         .await
         .map_err(AppError::from)?;
@@ -43,10 +45,18 @@ impl CoursesRepository for PostgresCoursesRepository {
         limit: i64,
     ) -> AppResult<(Vec<CourseRecord>, i64)> {
         // fetch items
+        // Use a read-only transaction for a consistent snapshot across list and count
+        let mut tx = self.pool.begin().await.map_err(AppError::from)?;
+        sqlx::query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+            .execute(&mut *tx)
+            .await
+            .map_err(AppError::from)?;
+
         let rows = sqlx::query(
             r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
-                       c.price, c.original_price, c.duration, c.lessons, c.students,
-                       c.published, c.featured, c.view_count, c.instructor_id,
+                       c.price, c.original_price, c.duration, c.lessons,
+                       c.published, c.status, c.featured, c.view_count,
+                       c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
                        u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
@@ -59,17 +69,19 @@ impl CoursesRepository for PostgresCoursesRepository {
         .bind(instructor_id)
         .bind(offset)
         .bind(limit)
-        .fetch_all(&self.pool)
+        .fetch_all(&mut *tx)
         .await
         .map_err(AppError::from)?;
 
-        // fetch total count for this instructor
+        // fetch total count for this instructor within the same snapshot
         let count_row: (i64,) =
             sqlx::query_as(r#"SELECT COUNT(*) as count FROM courses WHERE instructor_id = $1"#)
                 .bind(instructor_id)
-                .fetch_one(&self.pool)
+                .fetch_one(&mut *tx)
                 .await
                 .map_err(AppError::from)?;
+
+        tx.commit().await.map_err(AppError::from)?;
 
         let items: Vec<CourseRecord> = rows
             .into_iter()
@@ -81,8 +93,9 @@ impl CoursesRepository for PostgresCoursesRepository {
     async fn find_by_id(&self, id: uuid::Uuid) -> AppResult<Option<CourseRecord>> {
         let row = sqlx::query(
             r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
-                       c.price, c.original_price, c.duration, c.lessons, c.students,
-                       c.published, c.featured, c.view_count, c.instructor_id,
+                       c.price, c.original_price, c.duration, c.lessons,
+                       c.published, c.status, c.featured, c.view_count,
+                       c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
                        u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
@@ -100,8 +113,9 @@ impl CoursesRepository for PostgresCoursesRepository {
     async fn find_by_slug(&self, slug: &str) -> AppResult<Option<CourseRecord>> {
         let row = sqlx::query(
             r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
-                       c.price, c.original_price, c.duration, c.lessons, c.students,
-                       c.published, c.featured, c.view_count, c.instructor_id,
+                       c.price, c.original_price, c.duration, c.lessons,
+                       c.published, c.status, c.featured, c.view_count,
+                       c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
                        u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
@@ -131,14 +145,14 @@ impl CoursesRepository for PostgresCoursesRepository {
                     original_price = COALESCE($6, original_price),
                     duration = COALESCE($7, duration),
                     lessons = COALESCE($8, lessons),
-                    students = COALESCE($9, students),
-                    published = COALESCE($10, published),
-                    featured = COALESCE($11, featured)
+                    status = COALESCE($9, status),
+                    featured = COALESCE($10, featured),
+                    published = COALESCE($11, published)
                 WHERE id = $12
                 RETURNING id, slug, title, description, excerpt, thumbnail,
-                          price, original_price, duration, lessons, students,
-                          published, featured, view_count, instructor_id,
-                          published_at, created_at, updated_at"#,
+                          price, original_price, duration, lessons,
+                          published, status, featured, view_count,
+                          instructor_id, published_at, created_at, updated_at"#,
         )
         .bind(input.title)
         .bind(input.description)
@@ -148,9 +162,9 @@ impl CoursesRepository for PostgresCoursesRepository {
         .bind(input.original_price)
         .bind(input.duration)
         .bind(input.lessons)
-        .bind(input.students)
-        .bind(input.published)
+        .bind(input.status)
         .bind(input.featured)
+        .bind(input.published)
         .bind(id)
         .fetch_optional(&self.pool)
         .await
@@ -167,10 +181,10 @@ impl CoursesRepository for PostgresCoursesRepository {
             original_price: row.try_get("original_price").ok(),
             duration: row.get("duration"),
             lessons: row.get("lessons"),
-            students: row.get("students"),
             published: row.get("published"),
             featured: row.get("featured"),
             view_count: row.get("view_count"),
+            status: row.get("status"),
             instructor_id: row.try_get("instructor_id").ok(),
             instructor: None,
             published_at: row.try_get("published_at").ok(),
@@ -190,15 +204,28 @@ impl CoursesRepository for PostgresCoursesRepository {
 }
 
 fn map_course_row_with_instructor(row: sqlx::postgres::PgRow) -> CourseRecord {
-    let instructor: Option<InstructorSummary> = row
-        .try_get::<uuid::Uuid, _>("instructor_id_join")
-        .ok()
-        .map(|id| InstructorSummary {
-            id,
-            username: row.try_get("instructor_username").ok().unwrap_or_default(),
-            full_name: row.try_get("instructor_full_name").ok(),
-            avatar_url: row.try_get("instructor_avatar_url").ok(),
-        });
+    let instructor_id_opt: Option<uuid::Uuid> = row.try_get("instructor_id").ok();
+
+    let instructor = match (
+        row.try_get::<uuid::Uuid, _>("instructor_id_join").ok(),
+        row.try_get::<String, _>("instructor_username").ok(),
+        row.try_get::<Option<String>, _>("instructor_full_name")
+            .ok()
+            .flatten(),
+        row.try_get::<Option<String>, _>("instructor_avatar_url")
+            .ok()
+            .flatten(),
+    ) {
+        (Some(id), Some(username), full_name, avatar_url) => {
+            Some(crate::repositories::courses::InstructorSummary {
+                id,
+                username,
+                full_name,
+                avatar_url,
+            })
+        }
+        _ => None,
+    };
 
     CourseRecord {
         id: row.get("id"),
@@ -211,11 +238,11 @@ fn map_course_row_with_instructor(row: sqlx::postgres::PgRow) -> CourseRecord {
         original_price: row.try_get("original_price").ok(),
         duration: row.get("duration"),
         lessons: row.get("lessons"),
-        students: row.get("students"),
         published: row.get("published"),
         featured: row.get("featured"),
         view_count: row.get("view_count"),
-        instructor_id: row.try_get("instructor_id").ok(),
+        status: row.get("status"),
+        instructor_id: instructor_id_opt,
         instructor,
         published_at: row.try_get("published_at").ok(),
         created_at: row.get("created_at"),
