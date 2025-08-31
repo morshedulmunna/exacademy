@@ -1,24 +1,18 @@
 "use server";
 
+import API from "@/configs/api.config";
+
 /**
- * Server action to delete a course
+ * Delete a course by id via backend API
  * @param courseId - The ID of the course to delete
- * @returns Promise<{ success: boolean; message: string }>
  */
 export async function deleteCourse(courseId: string): Promise<{ success: boolean; message: string }> {
   try {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    return {
-      success: true,
-      message: "Course deleted successfully",
-    };
-  } catch (error) {
-    console.error("Failed to delete course:", error);
-    return {
-      success: false,
-      message: "Failed to delete course",
-    };
+    const res = await API.delete(`/api/courses/${courseId}`);
+    const message: string = res?.data?.message || "Course deleted successfully";
+    return { success: true, message };
+  } catch (error: any) {
+    const message: string = error?.response?.data?.message || error?.message || "Failed to delete course";
+    return { success: false, message };
   }
 }

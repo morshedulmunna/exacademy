@@ -40,10 +40,10 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
         onDelete();
       }
 
-      // Redirect to the same page to trigger a refresh after a short delay
+      // Refresh current page to update the list
       setTimeout(() => {
-        router.push("/admin-handler/courses");
-      }, 1500);
+        router.refresh();
+      }, 500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred while deleting the course");
     } finally {
@@ -75,7 +75,7 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
             </div>
 
             <div className="flex justify-end">
-              <button onClick={() => router.push("/admin-handler/courses")} className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+              <button onClick={() => router.refresh()} className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                 Continue
               </button>
             </div>

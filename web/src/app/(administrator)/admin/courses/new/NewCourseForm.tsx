@@ -63,7 +63,14 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
     },
     validationSchema: Yup.object({
       title: Yup.string().trim().min(3, "Too short").required("Title is required"),
-      slug: Yup.string().trim(),
+      slug: Yup.string()
+        .trim()
+        .test("slug-format", "Invalid slug. Use letters only, or lowercase with hyphens.", (value) => {
+          if (!value) return true; // empty -> auto-generated from title
+          const lettersOnly = /^[A-Za-z]+$/;
+          const kebabLower = /^[a-z]+(?:-[a-z]+)*$/;
+          return lettersOnly.test(value) || kebabLower.test(value);
+        }),
       price: Yup.number().typeError("Must be a number").min(0, "Must be >= 0").required("Price is required"),
       originalPrice: Yup.number()
         .typeError("Must be a number")
@@ -86,6 +93,19 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
   });
 
   const computedSlug = formik.values.slug || generateSlug(formik.values.title);
+
+  /**
+   * Normalizes manual slug input: blocks spaces, strips invalid chars.
+   * Allows letters-only (any case) or lowercase kebab-case with hyphens.
+   */
+  function sanitizeSlugInput(value: string): string {
+    const lettersAndHyphensOnly = value.replace(/[^A-Za-z-]/g, "");
+    const compactHyphens = lettersAndHyphensOnly.replace(/-{2,}/g, "-").replace(/^-+|-+$/g, "");
+    if (compactHyphens.includes("-")) {
+      return compactHyphens.toLowerCase();
+    }
+    return compactHyphens;
+  }
 
   React.useEffect(() => {
     if (!slugManual && mode === "create") {
@@ -243,12 +263,21 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
                   name="slug"
                   value={formik.values.slug}
                   onChange={(e) => {
-                    const v = e.target.value;
+                    const v = sanitizeSlugInput(e.target.value);
                     formik.setFieldValue("slug", v);
                     setSlugManual(v.length > 0);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === " " || e.key === "Spacebar") {
+                      e.preventDefault();
+                    }
+                  }}
                   onBlur={(e) => {
                     formik.handleBlur(e);
+                    if (formik.values.slug) {
+                      const fixed = sanitizeSlugInput(formik.values.slug);
+                      if (fixed !== formik.values.slug) formik.setFieldValue("slug", fixed);
+                    }
                     if (!formik.values.slug) setSlugManual(false);
                   }}
                   placeholder="auto-from-title if empty"

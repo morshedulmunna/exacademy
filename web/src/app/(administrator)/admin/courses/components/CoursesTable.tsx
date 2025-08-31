@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Calendar, User, Eye, Edit, Trash2, Wrench } from "lucide-react";
+import DeleteCourseButton from "@/components/course/DeleteCourseButton";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 interface Instructor {
@@ -160,9 +161,7 @@ const CourseRow: React.FC<{ course: AdminCourseItem; onEdit: (course: AdminCours
         <button onClick={() => onEdit(course)} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" title="Edit">
           <Edit className="w-4 h-4" />
         </button>
-        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete">
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <DeleteCourseButton courseId={course.id} courseTitle={course.title} onDelete={() => {}} />
       </div>
     </td>
   </tr>
