@@ -1,6 +1,10 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Calendar, User, Eye, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Calendar, User, Eye, Edit, Trash2, Wrench } from "lucide-react";
+import CourseEditModal from "./CourseEditModal";
 
 interface Instructor {
   name: string;
@@ -32,34 +36,72 @@ interface CoursesTableProps {
  * Admin Courses table component
  * Presents a compact, scannable list alternative to card grid
  */
-export const CoursesTable: React.FC<CoursesTableProps> = ({ courses }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div className="overflow-x-hidden">
-      <table className="w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th className="w-1/2 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>
-            <th className="w-40 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Instructor</th>
-            <th className="w-28 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-            <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Students</th>
-            <th className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created</th>
-            <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          {courses.map((course) => (
-            <CourseRow key={course.id} course={course} />
-          ))}
-        </tbody>
-      </table>
+export const CoursesTable: React.FC<CoursesTableProps> = ({ courses }) => {
+  const router = useRouter();
+  const [isEditOpen, setIsEditOpen] = React.useState(false);
+  const [selectedCourse, setSelectedCourse] = React.useState<AdminCourseItem | null>(null);
+
+  const openEdit = React.useCallback((course: AdminCourseItem) => {
+    setSelectedCourse(course);
+    setIsEditOpen(true);
+  }, []);
+
+  const closeEdit = React.useCallback(() => {
+    setIsEditOpen(false);
+    setSelectedCourse(null);
+  }, []);
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="overflow-x-hidden">
+        <table className="w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th className="w-1/2 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>
+              <th className="w-40 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Instructor</th>
+              <th className="w-28 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Students</th>
+              <th className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created</th>
+              <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            {courses.map((course) => (
+              <CourseRow key={course.id} course={course} onEdit={openEdit} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedCourse && (
+        <CourseEditModal
+          isOpen={isEditOpen}
+          onClose={closeEdit}
+          courseId={selectedCourse.id}
+          defaultValues={{
+            title: selectedCourse.title,
+            description: "",
+            excerpt: selectedCourse.excerpt,
+            thumbnail: selectedCourse.image,
+            price: selectedCourse.price,
+            original_price: undefined,
+            duration: String(selectedCourse.totalDuration ?? ""),
+            lessons: selectedCourse.totalLessons,
+            students: selectedCourse.students,
+            published: selectedCourse.published,
+            featured: false,
+          }}
+          onUpdated={() => router.refresh()}
+        />
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 /**
  * Individual course row component
  */
-const CourseRow: React.FC<{ course: AdminCourseItem }> = ({ course }) => (
+const CourseRow: React.FC<{ course: AdminCourseItem; onEdit: (course: AdminCourseItem) => void }> = ({ course, onEdit }) => (
   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
     <td className="px-6 py-4 align-top">
       <div className="flex items-start">
@@ -110,12 +152,15 @@ const CourseRow: React.FC<{ course: AdminCourseItem }> = ({ course }) => (
     </td>
     <td className="px-6 py-4 align-top text-sm font-medium">
       <div className="flex items-center space-x-2">
+        <Link href={`/admin/courses/${course.slug}/builder`} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" title="Builder">
+          <Wrench className="w-4 h-4" />
+        </Link>
         <Link href={`/courses/${course.slug}`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="View">
           <Eye className="w-4 h-4" />
         </Link>
-        <Link href={`/admin/courses/${course.slug}/edit`} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" title="Edit">
+        <button onClick={() => onEdit(course)} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" title="Edit">
           <Edit className="w-4 h-4" />
-        </Link>
+        </button>
         <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete">
           <Trash2 className="w-4 h-4" />
         </button>

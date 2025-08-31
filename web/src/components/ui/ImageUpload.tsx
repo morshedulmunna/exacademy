@@ -10,14 +10,15 @@ interface ImageUploadProps {
   showPreview?: boolean;
   aspectRatio?: "square" | "video" | "auto";
   placeholder?: string;
+  initialUrl?: string;
 }
 
 /**
  * Fast image upload component with drag-and-drop and progress tracking
  */
-export default function ImageUpload({ category = "blog", onImageUploaded, onImageRemoved, className = "", maxFileSize = 10 * 1024 * 1024, showPreview = true, aspectRatio = "auto", placeholder = "Drop an image here or click to browse" }: ImageUploadProps) {
+export default function ImageUpload({ category = "blog", onImageUploaded, onImageRemoved, className = "", maxFileSize = 10 * 1024 * 1024, showPreview = true, aspectRatio = "auto", placeholder = "Drop an image here or click to browse", initialUrl }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl || null);
   const [fileMeta, setFileMeta] = useState<{ filename: string; size: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,12 +28,20 @@ export default function ImageUpload({ category = "blog", onImageUploaded, onImag
   // Revoke object URL on unmount or when replaced
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
 
+  // Keep preview in sync if an initial URL is provided and no local selection exists
+  useEffect(() => {
+    if (initialUrl && !previewUrl) {
+      setPreviewUrl(initialUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialUrl]);
+
   const handleRemoveImage = async () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     setFileMeta(null);
     setError(null);

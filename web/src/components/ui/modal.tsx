@@ -17,7 +17,7 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal Content */}
-      <div className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden">
         {/* Header */}
         {title && (
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -36,7 +36,7 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
         )}
 
         {/* Content */}
-        <div className="p-0">{children}</div>
+        <div className="p-0 max-h-[75vh] overflow-y-auto">{children}</div>
       </div>
     </div>
   );
