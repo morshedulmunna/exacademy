@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Calendar, User, Eye, Edit, Trash2, Wrench } from "lucide-react";
-import CourseEditModal from "./CourseEditModal";
 
 interface Instructor {
   name: string;
@@ -17,7 +16,7 @@ export interface AdminCourseItem {
   slug: string;
   excerpt: string;
   instructor: Instructor;
-  published: boolean;
+  status: "draft" | "published" | "archived";
   price: number;
   students: number;
   rating: number;
@@ -38,18 +37,13 @@ interface CoursesTableProps {
  */
 export const CoursesTable: React.FC<CoursesTableProps> = ({ courses }) => {
   const router = useRouter();
-  const [isEditOpen, setIsEditOpen] = React.useState(false);
-  const [selectedCourse, setSelectedCourse] = React.useState<AdminCourseItem | null>(null);
 
-  const openEdit = React.useCallback((course: AdminCourseItem) => {
-    setSelectedCourse(course);
-    setIsEditOpen(true);
-  }, []);
-
-  const closeEdit = React.useCallback(() => {
-    setIsEditOpen(false);
-    setSelectedCourse(null);
-  }, []);
+  const openEdit = React.useCallback(
+    (course: AdminCourseItem) => {
+      router.push(`/admin/courses/${course.slug}/edit`);
+    },
+    [router]
+  );
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -73,27 +67,7 @@ export const CoursesTable: React.FC<CoursesTableProps> = ({ courses }) => {
         </table>
       </div>
 
-      {selectedCourse && (
-        <CourseEditModal
-          isOpen={isEditOpen}
-          onClose={closeEdit}
-          courseId={selectedCourse.id}
-          defaultValues={{
-            title: selectedCourse.title,
-            description: "",
-            excerpt: selectedCourse.excerpt,
-            thumbnail: selectedCourse.image,
-            price: selectedCourse.price,
-            original_price: undefined,
-            duration: String(selectedCourse.totalDuration ?? ""),
-            lessons: selectedCourse.totalLessons,
-            students: selectedCourse.students,
-            published: selectedCourse.published,
-            featured: false,
-          }}
-          onUpdated={() => router.refresh()}
-        />
-      )}
+      {/* Edit modal removed; navigates to dedicated edit page */}
     </div>
   );
 };
@@ -137,9 +111,9 @@ const CourseRow: React.FC<{ course: AdminCourseItem; onEdit: (course: AdminCours
       </div>
     </td>
     <td className="px-6 py-4 align-top">
-      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${course.published ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}>
-        {course.published ? "Published" : "Draft"}
-      </span>
+      {course.status === "published" && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Published</span>}
+      {course.status === "draft" && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Draft</span>}
+      {course.status === "archived" && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">Archived</span>}
     </td>
     <td className="px-6 py-4 align-top">
       <div className="text-sm text-gray-900 dark:text-white">{course.students.toLocaleString()}</div>

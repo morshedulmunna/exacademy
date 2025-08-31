@@ -8,13 +8,32 @@ import { DollarSign, Clock, Hash, Tag as TagIcon, X } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createCourseAction } from "@/actions/courses/create.action";
+import { updateCourseAction } from "@/actions/courses/update.action";
 import API from "@/configs/api.config";
+import { useRouter } from "next/navigation";
 
 /**
  * NewCourseForm
  * Client-side form with live preview and rich text description
  */
-export default function NewCourseForm() {
+type CourseInitial = {
+  id?: string;
+  title: string;
+  slug: string;
+  price: string;
+  originalPrice?: string | null;
+  duration: string;
+  excerpt?: string;
+  description: string;
+  featured: boolean;
+  status: "draft" | "published" | "archived";
+  thumbnail?: string | File | null;
+  category?: string;
+  outcomes: string[];
+};
+
+export default function NewCourseForm({ mode = "create", course }: { mode?: "create" | "edit"; course?: CourseInitial }) {
+  const router = useRouter();
   const [slugManual, setSlugManual] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -24,20 +43,22 @@ export default function NewCourseForm() {
   const [thumbnailFile, setThumbnailFile] = React.useState<File | null>(null);
   const [slugStatus, setSlugStatus] = React.useState<"idle" | "checking" | "available" | "taken">("idle");
 
+  const originalSlugRef = React.useRef<string | undefined>(course?.slug);
+
   const formik = useFormik({
     initialValues: {
-      title: "",
-      slug: "",
-      price: "",
-      originalPrice: "",
-      duration: "",
-      excerpt: "",
-      description: "<p></p>",
-      featured: false,
-      published: false,
-      thumbnail: "",
-      category: "",
-      outcomes: [],
+      title: course?.title || "",
+      slug: course?.slug || "",
+      price: course?.price || "",
+      originalPrice: course?.originalPrice ?? "",
+      duration: course?.duration || "",
+      excerpt: course?.excerpt || "",
+      description: course?.description || "<p></p>",
+      featured: course?.featured ?? false,
+      status: course?.status || ("draft" as const),
+      thumbnail: (course?.thumbnail as any) || "",
+      category: course?.category || "",
+      outcomes: course?.outcomes || [],
     },
     validationSchema: Yup.object({
       title: Yup.string().trim().min(3, "Too short").required("Title is required"),
@@ -54,22 +75,23 @@ export default function NewCourseForm() {
       category: Yup.string().trim(),
       thumbnail: Yup.string().trim(),
       featured: Yup.boolean(),
-      published: Yup.boolean(),
+      status: Yup.string().oneOf(["draft", "published", "archived"]).required(),
       outcomes: Yup.array().of(Yup.string().trim()),
     }),
     onSubmit: async (values) => {
-      await createCourseWithPublished(values.published);
+      await submitCourse();
     },
+    enableReinitialize: true,
   });
 
   const computedSlug = formik.values.slug || generateSlug(formik.values.title);
 
   React.useEffect(() => {
-    if (!slugManual) {
+    if (!slugManual && mode === "create") {
       formik.setFieldValue("slug", generateSlug(formik.values.title));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.title, slugManual]);
+  }, [formik.values.title, slugManual, mode]);
 
   // Debounced slug availability check against public course-by-slug endpoint
   React.useEffect(() => {
@@ -84,8 +106,13 @@ export default function NewCourseForm() {
         // 200 means slug exists -> taken
         await API.get(`/api/course/${computedSlug}`);
         if (canceled) return;
-        setSlugStatus("taken");
-        formik.setFieldError("slug", "Slug already in use");
+        // If editing and slug unchanged, consider available
+        if (mode === "edit" && originalSlugRef.current === computedSlug) {
+          setSlugStatus("available");
+        } else {
+          setSlugStatus("taken");
+          formik.setFieldError("slug", "Slug already in use");
+        }
       } catch (e: any) {
         const status = e?.response?.status as number | undefined;
         // 404 means not found -> available; network errors also treated as available to avoid blocking
@@ -107,11 +134,11 @@ export default function NewCourseForm() {
       clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [computedSlug]);
+  }, [computedSlug, mode]);
   const parsedPrice = Number(formik.values.price || 0);
   const parsedOriginalPrice = formik.values.originalPrice ? Number(formik.values.originalPrice) : undefined;
 
-  async function createCourseWithPublished(publishFlag: boolean) {
+  async function submitCourse() {
     setError(null);
     try {
       setLoading(true);
@@ -128,26 +155,35 @@ export default function NewCourseForm() {
         duration: formik.values.duration.trim(),
         description: formik.values.description,
         featured: formik.values.featured,
-        published: publishFlag,
+        status: formik.values.status,
         excerpt: formik.values.excerpt.trim() || undefined,
         thumbnail: formik.values.thumbnail || undefined,
         outcomes: formik.values.outcomes,
       };
       const generateFormData = generateFormDataFromObject(payload);
-
-      const res = await createCourseAction(generateFormData);
-      if (!res?.success) {
-        if (
-          res?.status === 409 &&
-          String(res?.message || "")
-            .toLowerCase()
-            .includes("slug")
-        ) {
-          formik.setFieldError("slug", "Slug already in use");
+      if (mode === "edit" && course?.id) {
+        const res = await updateCourseAction(course.id, generateFormData);
+        if (!res?.success) {
+          throw new Error(res?.message || "Failed to update course");
         }
-        throw new Error(res?.message || "Failed to create course");
+        router.push(`/admin/courses`);
+        router.refresh();
+      } else {
+        const res = await createCourseAction(generateFormData);
+        if (!res?.success) {
+          if (
+            res?.status === 409 &&
+            String(res?.message || "")
+              .toLowerCase()
+              .includes("slug")
+          ) {
+            formik.setFieldError("slug", "Slug already in use");
+          }
+          throw new Error(res?.message || "Failed to create course");
+        }
+        router.push(`/admin/courses/${res.data}/builder`);
+        router.refresh();
       }
-      window.location.href = `/admin/courses/${res.data}/builder`;
     } catch (err: any) {
       setError(err?.message || "Failed to create course");
     } finally {
@@ -158,7 +194,7 @@ export default function NewCourseForm() {
   // Submit is managed by formik.handleSubmit via form tag
 
   function markAllTouchedAndSubmit() {
-    const fields = ["title", "slug", "price", "originalPrice", "duration", "excerpt", "description", "category", "thumbnail", "outcomes"] as const;
+    const fields = ["title", "slug", "price", "originalPrice", "duration", "excerpt", "description", "category", "thumbnail", "outcomes", "status"] as const;
     const touched: Record<string, boolean> = {};
     for (const key of fields) touched[key] = true;
     formik.setTouched(touched as any, true);
@@ -166,12 +202,11 @@ export default function NewCourseForm() {
   }
 
   function handleSaveDraft() {
-    formik.setFieldValue("published", false, false);
+    formik.setFieldValue("status", "draft", false);
     markAllTouchedAndSubmit();
   }
 
   function handleCreate() {
-    formik.setFieldValue("published", !!formik.values.published, false);
     markAllTouchedAndSubmit();
   }
 
@@ -405,7 +440,7 @@ export default function NewCourseForm() {
         {error && <p className="text-sm text-red-600">{error}</p>}
         <div className="flex justify-end md:hidden">
           <button disabled={loading} type="submit" className="inline-flex items-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-            {loading ? "Creating..." : "Create Course"}
+            {loading ? (mode === "edit" ? "Updating..." : "Creating...") : mode === "edit" ? "Update Course" : "Create Course"}
           </button>
         </div>
       </form>
@@ -419,6 +454,7 @@ export default function NewCourseForm() {
               aspectRatio="video"
               showPreview={true}
               placeholder="Drag & drop image here or click to upload"
+              initialUrl={typeof formik.values.thumbnail === "string" ? (formik.values.thumbnail as string) : undefined}
               onImageUploaded={(file) => {
                 console.log(file);
                 formik.setFieldValue("thumbnail", file.file as File);
@@ -437,9 +473,13 @@ export default function NewCourseForm() {
                 <span className="text-sm text-gray-700 dark:text-gray-300">Featured</span>
                 <input id="featured" checked={formik.values.featured} onChange={(e) => formik.setFieldValue("featured", e.target.checked)} name="featured" type="checkbox" className="h-4 w-4" />
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">Published</span>
-                <input id="published" checked={formik.values.published} onChange={(e) => formik.setFieldValue("published", e.target.checked)} name="published" type="checkbox" className="h-4 w-4" />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <select name="status" value={formik.values.status} onChange={(e) => formik.setFieldValue("status", e.target.value)} className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
               </div>
             </div>
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
@@ -470,9 +510,9 @@ export default function NewCourseForm() {
               <div className="text-sm font-medium mb-2">Short preview</div>
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
                 <div className="flex items-center gap-3">
-                  {formik.values.thumbnail ? (
+                  {typeof formik.values.thumbnail === "string" && formik.values.thumbnail ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={formik.values.thumbnail} alt={formik.values.title || "thumbnail"} className="h-12 w-12 rounded object-cover" />
+                    <img src={formik.values.thumbnail as string} alt={formik.values.title || "thumbnail"} className="h-12 w-12 rounded object-cover" />
                   ) : (
                     <div className="h-12 w-12 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] text-gray-500">IMG</div>
                   )}
@@ -487,7 +527,9 @@ export default function NewCourseForm() {
                   {formik.values.duration && <span className="inline-flex items-center rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5">{formik.values.duration}</span>}
                   {formik.values.category && <span className="inline-flex items-center rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5">{formik.values.category}</span>}
                   {formik.values.featured && <span className="inline-flex items-center rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-0.5">Featured</span>}
-                  {formik.values.published && <span className="inline-flex items-center rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5">Published</span>}
+                  {formik.values.status === "draft" && <span className="inline-flex items-center rounded bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 px-2 py-0.5">Draft</span>}
+                  {formik.values.status === "published" && <span className="inline-flex items-center rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5">Published</span>}
+                  {formik.values.status === "archived" && <span className="inline-flex items-center rounded bg-zinc-100 text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-200 px-2 py-0.5">Archived</span>}
                 </div>
               </div>
             </div>
@@ -505,7 +547,7 @@ export default function NewCourseForm() {
             {loading ? "Saving..." : "Save draft"}
           </button>
           <button type="button" disabled={loading} onClick={handleCreate} className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-            {loading ? "Creating..." : "Create & open builder"}
+            {loading ? (mode === "edit" ? "Updating..." : "Creating...") : mode === "edit" ? "Update & open builder" : "Create & open builder"}
           </button>
         </div>
       </div>

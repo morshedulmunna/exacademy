@@ -15,9 +15,9 @@ impl CoursesRepository for PostgresCoursesRepository {
         let rec = sqlx::query(
             r#"INSERT INTO courses (
                     slug, title, description, excerpt, thumbnail,
-                    price, original_price, duration, featured, published, status, instructor_id, outcomes
+                    price, original_price, duration, featured, status, instructor_id, outcomes
                 ) VALUES (
-                    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+                    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12
                 ) RETURNING slug"#,
         )
         .bind(&input.slug)
@@ -29,7 +29,6 @@ impl CoursesRepository for PostgresCoursesRepository {
         .bind(&input.original_price)
         .bind(&input.duration)
         .bind(input.featured)
-        .bind(input.published)
         .bind(&input.status)
         .bind(input.instructor_id)
         .bind(input.outcomes)
@@ -56,7 +55,7 @@ impl CoursesRepository for PostgresCoursesRepository {
         let rows = sqlx::query(
             r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
                        c.price, c.original_price, c.duration, c.lessons,
-                       c.published, c.status, c.featured, c.view_count,
+                       c.status, c.featured, c.view_count,
                        c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
@@ -95,7 +94,7 @@ impl CoursesRepository for PostgresCoursesRepository {
         let row = sqlx::query(
             r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
                        c.price, c.original_price, c.duration, c.lessons,
-                       c.published, c.status, c.featured, c.view_count,
+                       c.status, c.featured, c.view_count,
                        c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
@@ -115,7 +114,7 @@ impl CoursesRepository for PostgresCoursesRepository {
         let row = sqlx::query(
             r#"SELECT c.id, c.slug, c.title, c.description, c.excerpt, c.thumbnail,
                        c.price, c.original_price, c.duration, c.lessons,
-                       c.published, c.status, c.featured, c.view_count,
+                       c.status, c.featured, c.view_count,
                        c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
@@ -148,12 +147,11 @@ impl CoursesRepository for PostgresCoursesRepository {
                     lessons = COALESCE($8, lessons),
                     status = COALESCE($9, status),
                     featured = COALESCE($10, featured),
-                    published = COALESCE($11, published),
-                    outcomes = COALESCE($12, outcomes)
-                WHERE id = $13
+                    outcomes = COALESCE($11, outcomes)
+                WHERE id = $12
                 RETURNING id, slug, title, description, excerpt, thumbnail,
                           price, original_price, duration, lessons,
-                          published, status, featured, view_count, outcomes,
+                          status, featured, view_count, outcomes,
                           instructor_id, published_at, created_at, updated_at"#,
         )
         .bind(input.title)
@@ -166,7 +164,6 @@ impl CoursesRepository for PostgresCoursesRepository {
         .bind(input.lessons)
         .bind(input.status)
         .bind(input.featured)
-        .bind(input.published)
         .bind(input.outcomes)
         .bind(id)
         .fetch_optional(&self.pool)
@@ -184,7 +181,6 @@ impl CoursesRepository for PostgresCoursesRepository {
             original_price: row.try_get("original_price").ok(),
             duration: row.get("duration"),
             lessons: row.get("lessons"),
-            published: row.get("published"),
             featured: row.get("featured"),
             view_count: row.get("view_count"),
             status: row.get("status"),
@@ -240,7 +236,6 @@ fn map_course_row_with_instructor(row: sqlx::postgres::PgRow) -> CourseRecord {
         original_price: row.try_get("original_price").ok(),
         duration: row.get("duration"),
         lessons: row.get("lessons"),
-        published: row.get("published"),
         featured: row.get("featured"),
         view_count: row.get("view_count"),
         status: row.get("status"),

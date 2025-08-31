@@ -24,7 +24,6 @@ pub struct CreateCourseRequest {
     #[validate(length(min = 1))]
     pub duration: String,
     pub featured: bool,
-    pub published: bool,
     pub status: Option<String>,
     pub outcomes: Option<Vec<String>>,
 }
@@ -44,9 +43,9 @@ pub struct Course {
     pub duration: String,
     pub lessons: i32,
     pub students: i32,
-    pub published: bool,
     pub featured: bool,
     pub view_count: i32,
+    pub status: String,
     pub instructor_id: Uuid,
     pub instructor: Option<Instructor>,
     pub published_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -133,9 +132,9 @@ pub struct UpdateCourseRequest {
     pub duration: Option<String>,
     pub lessons: Option<i32>,
     pub students: Option<i32>,
-    pub published: Option<bool>,
     pub featured: Option<bool>,
     pub outcomes: Option<Vec<String>>,
+    pub status: Option<String>,
 }
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]

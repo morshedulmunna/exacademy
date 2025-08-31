@@ -32,8 +32,8 @@ pub async fn update_course(
     let original_price = form.f64("original_price");
     let duration = form.text("duration").map(|s| s.to_string());
     let lessons = form.text("lessons").and_then(|v| v.parse::<i32>().ok());
-    let published = form.bool("published");
     let featured = form.bool("featured");
+    let status = form.text("status").map(|s| s.to_string());
     let outcomes = form.json_vec_string("outcomes");
 
     // Thumbnail can be provided as a file or as a direct URL via "thumbnail_url"
@@ -66,9 +66,9 @@ pub async fn update_course(
         duration,
         lessons,
         students: None,
-        published,
         featured,
         outcomes,
+        status,
     };
 
     // Validate; delete uploaded file if validation fails

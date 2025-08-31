@@ -13,7 +13,7 @@ pub fn router() -> Router {
         .route("/api/courses/:id", delete(h::delete_course))
         // Instructor specific
         .route(
-            "/api/v1/instructors/courses/list",
+            "/api/instructors/courses/list",
             get(h::list_courses_by_instructor_paginated),
         )
         // Public fetch by slug

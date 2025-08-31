@@ -22,7 +22,6 @@ struct ParsedCreateCourseFields {
     original_price: Option<f64>,
     duration: String,
     featured: bool,
-    published: bool,
     status: Option<String>,
     outcomes: Option<Vec<String>>,
 }
@@ -40,7 +39,6 @@ impl ParsedCreateCourseFields {
             original_price: form.f64("original_price"),
             duration: form.required_text("duration")?.to_string(),
             featured: form.bool("featured").unwrap_or(false),
-            published: form.bool("published").unwrap_or(false),
             status: form.text("status").map(|s| s.to_string()),
             outcomes: form.json_vec_string("outcomes"),
         })
@@ -91,7 +89,6 @@ pub async fn create_course(
         original_price: parsed.original_price,
         duration: parsed.duration,
         featured: parsed.featured,
-        published: parsed.published,
         status: parsed.status,
         outcomes: parsed.outcomes,
     };

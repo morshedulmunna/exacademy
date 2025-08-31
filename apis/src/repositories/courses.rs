@@ -22,7 +22,6 @@ pub struct CourseRecord {
     pub original_price: Option<f64>,
     pub duration: String,
     pub lessons: i32,
-    pub published: bool,
     pub featured: bool,
     pub view_count: i32,
     pub status: String,
@@ -46,7 +45,6 @@ pub struct CreateCourseRecord {
     pub original_price: Option<f64>,
     pub duration: String,
     pub featured: bool,
-    pub published: bool,
     pub status: Option<String>,
     pub instructor_id: uuid::Uuid,
     pub outcomes: Option<Vec<String>>,
@@ -64,7 +62,6 @@ pub struct UpdateCourseRecord {
     pub lessons: Option<i32>,
     pub status: Option<String>,
     pub featured: Option<bool>,
-    pub published: Option<bool>,
     pub outcomes: Option<Vec<String>>,
 }
 

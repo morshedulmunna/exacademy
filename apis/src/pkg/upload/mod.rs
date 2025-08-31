@@ -42,6 +42,38 @@ impl LocalFsStorage {
         Ok(())
     }
 
+    /// Compute a web-visible prefix under "/uploads" that mirrors the
+    /// on-disk `root` path. For example, if `root` is `./uploads/courses`,
+    /// this returns `uploads/courses`. If no `uploads` segment is present,
+    /// fall back to just `uploads`.
+    fn web_prefix_under_uploads(&self) -> String {
+        use std::path::Component;
+
+        let mut started = false;
+        let mut parts: Vec<String> = Vec::new();
+        for comp in self.root.components() {
+            let s = match comp {
+                Component::Prefix(p) => p.as_os_str().to_string_lossy().into_owned(),
+                Component::RootDir => continue,
+                Component::CurDir => continue,
+                Component::ParentDir => continue,
+                Component::Normal(os) => os.to_string_lossy().into_owned(),
+            };
+            if s == "uploads" {
+                started = true;
+            }
+            if started {
+                parts.push(s);
+            }
+        }
+
+        if parts.is_empty() {
+            "uploads".to_string()
+        } else {
+            parts.join("/")
+        }
+    }
+
     fn next_filename(&self, original_name: Option<&str>) -> String {
         // Preserve extension if present; otherwise use UUID only
         if let Some(name) = original_name {
@@ -66,7 +98,8 @@ impl Storage for LocalFsStorage {
         fs::write(&path, bytes)
             .await
             .map_err(|e| AppError::Internal(e.to_string()))?;
-        Ok(format!("/uploads/{}", filename))
+        let web_prefix = self.web_prefix_under_uploads();
+        Ok(format!("/{}/{}", web_prefix, filename))
     }
 
     async fn save_multipart_field(
@@ -98,7 +131,8 @@ impl Storage for LocalFsStorage {
                 .map_err(|e| AppError::Internal(e.to_string()))?;
         }
 
-        Ok(format!("/uploads/{}", filename))
+        let web_prefix = self.web_prefix_under_uploads();
+        Ok(format!("/{}/{}", web_prefix, filename))
     }
 }
 

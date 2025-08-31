@@ -19,7 +19,6 @@ pub async fn create_course(
             original_price: input.original_price,
             duration: input.duration,
             featured: input.featured,
-            published: input.published,
             status: Some(input.status.unwrap_or("draft".to_string())),
             instructor_id,
             // Ensure NOT NULL constraint: default to empty array when missing

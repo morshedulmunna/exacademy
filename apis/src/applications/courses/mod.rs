@@ -32,9 +32,9 @@ impl From<CourseRecord> for Course {
             lessons: record.lessons,
             // students column was removed from DB in migration 0006; expose 0 for now
             students: 0,
-            published: record.published,
             featured: record.featured,
             view_count: record.view_count,
+            status: record.status,
             instructor_id: record.instructor_id,
             instructor: record.instructor.map(|i| Instructor {
                 id: i.id,
