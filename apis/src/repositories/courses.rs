@@ -26,6 +26,7 @@ pub struct CourseRecord {
     pub featured: bool,
     pub view_count: i32,
     pub status: String,
+    pub outcomes: Option<Vec<String>>,
     /// Instructor foreign key (required)
     pub instructor_id: uuid::Uuid,
     pub instructor: Option<InstructorSummary>,
@@ -48,6 +49,7 @@ pub struct CreateCourseRecord {
     pub published: bool,
     pub status: Option<String>,
     pub instructor_id: uuid::Uuid,
+    pub outcomes: Option<Vec<String>>,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -63,6 +65,7 @@ pub struct UpdateCourseRecord {
     pub status: Option<String>,
     pub featured: Option<bool>,
     pub published: Option<bool>,
+    pub outcomes: Option<Vec<String>>,
 }
 
 #[async_trait::async_trait]

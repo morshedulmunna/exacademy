@@ -21,6 +21,7 @@ pub async fn update_course_by_id(
                 duration: input.duration,
                 lessons: input.lessons,
                 status: None, // status is not exposed in update request currently
+                outcomes: input.outcomes,
                 featured: input.featured,
                 published: input.published,
             },

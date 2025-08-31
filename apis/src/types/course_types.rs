@@ -26,6 +26,7 @@ pub struct CreateCourseRequest {
     pub featured: bool,
     pub published: bool,
     pub status: Option<String>,
+    pub outcomes: Option<Vec<String>>,
 }
 
 // Checking -----
@@ -134,6 +135,7 @@ pub struct UpdateCourseRequest {
     pub students: Option<i32>,
     pub published: Option<bool>,
     pub featured: Option<bool>,
+    pub outcomes: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]

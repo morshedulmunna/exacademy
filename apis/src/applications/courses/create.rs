@@ -22,6 +22,7 @@ pub async fn create_course(
             published: input.published,
             status: Some(input.status.unwrap_or("draft".to_string())),
             instructor_id,
+            outcomes: input.outcomes,
         })
         .await?;
     Ok(id)
