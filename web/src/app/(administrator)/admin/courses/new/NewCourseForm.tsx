@@ -65,11 +65,11 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
       title: Yup.string().trim().min(3, "Too short").required("Title is required"),
       slug: Yup.string()
         .trim()
-        .test("slug-format", "Invalid slug. Use letters only, or lowercase with hyphens.", (value) => {
+        .test("slug-format", "Invalid slug. Use letters/numbers, or lowercase with hyphens.", (value) => {
           if (!value) return true; // empty -> auto-generated from title
-          const lettersOnly = /^[A-Za-z]+$/;
-          const kebabLower = /^[a-z]+(?:-[a-z]+)*$/;
-          return lettersOnly.test(value) || kebabLower.test(value);
+          const lettersNumbersOnly = /^[A-Za-z0-9]+$/;
+          const kebabLower = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+          return lettersNumbersOnly.test(value) || kebabLower.test(value);
         }),
       price: Yup.number().typeError("Must be a number").min(0, "Must be >= 0").required("Price is required"),
       originalPrice: Yup.number()
@@ -95,16 +95,26 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
   const computedSlug = formik.values.slug || generateSlug(formik.values.title);
 
   /**
-   * Normalizes manual slug input: blocks spaces, strips invalid chars.
-   * Allows letters-only (any case) or lowercase kebab-case with hyphens.
+   * Normalizes manual slug input for live typing:
+   * - allows letters, numbers, spaces, hyphens
+   * - converts spaces/underscores to hyphens
+   * - collapses repeated hyphens
+   * Note: does NOT trim leading/trailing hyphens so typing '-' is possible; trimming happens on blur.
    */
   function sanitizeSlugInput(value: string): string {
-    const lettersAndHyphensOnly = value.replace(/[^A-Za-z-]/g, "");
-    const compactHyphens = lettersAndHyphensOnly.replace(/-{2,}/g, "-").replace(/^-+|-+$/g, "");
-    if (compactHyphens.includes("-")) {
-      return compactHyphens.toLowerCase();
-    }
-    return compactHyphens;
+    const allowed = value.replace(/[^A-Za-z0-9\s-]/g, "");
+    const withHyphens = allowed.replace(/[\s_]+/g, "-");
+    const compact = withHyphens.replace(/-{2,}/g, "-");
+    return compact;
+  }
+
+  /**
+   * Finalizes slug on blur: trims leading/trailing hyphens and lowercases if hyphenated.
+   */
+  function finalizeSlug(value: string): string {
+    const sanitized = sanitizeSlugInput(value);
+    const trimmed = sanitized.replace(/^-+|-+$/g, "");
+    return trimmed.includes("-") ? trimmed.toLowerCase() : trimmed;
   }
 
   React.useEffect(() => {
@@ -267,15 +277,10 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
                     formik.setFieldValue("slug", v);
                     setSlugManual(v.length > 0);
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === " " || e.key === "Spacebar") {
-                      e.preventDefault();
-                    }
-                  }}
                   onBlur={(e) => {
                     formik.handleBlur(e);
                     if (formik.values.slug) {
-                      const fixed = sanitizeSlugInput(formik.values.slug);
+                      const fixed = finalizeSlug(formik.values.slug);
                       if (fixed !== formik.values.slug) formik.setFieldValue("slug", fixed);
                     }
                     if (!formik.values.slug) setSlugManual(false);
