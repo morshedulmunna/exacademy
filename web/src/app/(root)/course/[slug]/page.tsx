@@ -11,28 +11,37 @@ import MoreCoursesByInstructor from "@/components/course-details/MoreCoursesByIn
 import StudentReviews from "@/components/course-details/StudentReviews";
 import React from "react";
 import { notFound } from "next/navigation";
-// Backend removed; course details disabled
+import { getSingleCourseDetailsBySlug } from "@/actions/courses/get-single-course-details-by-slug";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type Props = { params: Promise<{ slug: string }> };
 
-async function getCourse(_slug: string): Promise<any | null> {
-  // No backend; treat as not found
-  return null;
+async function fetchCourse(slug: string): Promise<any | null> {
+  const res = await getSingleCourseDetailsBySlug(slug);
+  if (!res?.success || !res?.data) return null;
+  const c = res.data;
+  // Map backend fields to UI expectations where needed
+  return {
+    ...c,
+    originalPrice: c.original_price ?? undefined,
+    instructor: c.instructor ? { id: c.instructor.id, name: c.instructor.full_name || c.instructor.username, avatar: c.instructor.avatar_url } : undefined,
+    modules: c.modules || [],
+    reviews: c.reviews || [],
+  };
 }
 
 export default async function CourseDetailsPage({ params }: Props) {
   const { slug } = await params;
-  const course = await getCourse(slug);
+  const course = await fetchCourse(slug);
   if (!course) return notFound();
 
-  const firstLessonWithVideo = course.modules?.flatMap((m: any) => m.lessons || []).find((l: any) => !!l.videoUrl);
-  const videoUrl: string | undefined = firstLessonWithVideo?.videoUrl;
+  const firstLessonWithVideo = course.modules?.flatMap((m: any) => m.lessons || []).find((l: any) => !!l.videoUrl || !!l.video_url);
+  const videoUrl: string | undefined = firstLessonWithVideo?.videoUrl || firstLessonWithVideo?.video_url;
 
   // derive rating stats from reviews
-  const ratings = (course.reviews || []).map((r: any) => r.rating);
+  const ratings = (course.reviews || []).map((r: any) => r.rating).filter((r: any) => typeof r === "number");
   const ratingCount = ratings.length;
   const averageRating = ratingCount > 0 ? ratings.reduce((a: number, b: number) => a + b, 0) / ratingCount : undefined;
 
