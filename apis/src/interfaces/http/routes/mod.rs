@@ -16,7 +16,7 @@ pub fn router() -> Router {
         .route("/api/health", get(health::handler))
         .merge(auth::router())
         .merge(users::router())
-        // .merge(courses::router())
+        .merge(courses::router())
         // .merge(modules::router())
         // .merge(lessons::router())
         .merge(media::router())

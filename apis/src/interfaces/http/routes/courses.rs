@@ -1,23 +1,21 @@
 use axum::{
     Router,
-    // routing::{delete, get, patch, post},
+    routing::{delete, get, patch, post},
 };
 
-// use crate::interfaces::http::handlers::courses as h;
+use crate::interfaces::http::handlers::courses as h;
 
 pub fn router() -> Router {
-    todo!()
+    Router::new()
+        .route("/api/courses", post(h::create_course))
+        .route("/api/courses/:id", get(h::get_course_by_id))
+        .route("/api/courses/:id", patch(h::update_course))
+        .route("/api/courses/:id", delete(h::delete_course))
+        // Instructor specific
+        .route(
+            "/api/v1/instructors/courses/list",
+            get(h::list_courses_by_instructor_paginated),
+        )
+        // Public fetch by slug
+        .route("/api/course/:slug", get(h::get_course_by_slug))
 }
-
-// Router::new()
-//         .route("/api/courses", post(h::create_course))
-//         .route("/api/courses/:id", get(h::get_course_by_id))
-//         .route("/api/courses/:id", patch(h::update_course))
-//         .route("/api/courses/:id", delete(h::delete_course))
-//         // Instructor specific
-//         .route(
-//             "/api/v1/instructors/courses/list",
-//             get(h::list_courses_by_instructor_paginated),
-//         )
-//         // Public fetch by slug
-//         .route("/api/course/:slug", get(h::get_course_by_slug))
