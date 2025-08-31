@@ -46,7 +46,7 @@ pub struct Course {
     pub published: bool,
     pub featured: bool,
     pub view_count: i32,
-    pub instructor_id: Option<Uuid>,
+    pub instructor_id: Uuid,
     pub instructor: Option<Instructor>,
     pub published_at: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,

@@ -185,7 +185,7 @@ impl CoursesRepository for PostgresCoursesRepository {
             featured: row.get("featured"),
             view_count: row.get("view_count"),
             status: row.get("status"),
-            instructor_id: row.try_get("instructor_id").ok(),
+            instructor_id: row.get("instructor_id"),
             instructor: None,
             published_at: row.try_get("published_at").ok(),
             created_at: row.get("created_at"),
@@ -204,8 +204,6 @@ impl CoursesRepository for PostgresCoursesRepository {
 }
 
 fn map_course_row_with_instructor(row: sqlx::postgres::PgRow) -> CourseRecord {
-    let instructor_id_opt: Option<uuid::Uuid> = row.try_get("instructor_id").ok();
-
     let instructor = match (
         row.try_get::<uuid::Uuid, _>("instructor_id_join").ok(),
         row.try_get::<String, _>("instructor_username").ok(),
@@ -242,7 +240,7 @@ fn map_course_row_with_instructor(row: sqlx::postgres::PgRow) -> CourseRecord {
         featured: row.get("featured"),
         view_count: row.get("view_count"),
         status: row.get("status"),
-        instructor_id: instructor_id_opt,
+        instructor_id: row.get("instructor_id"),
         instructor,
         published_at: row.try_get("published_at").ok(),
         created_at: row.get("created_at"),

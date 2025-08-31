@@ -9,6 +9,7 @@ import ImageUpload from "@/components/ui/ImageUpload";
 import { DollarSign, Clock, Hash, Tag as TagIcon, X } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { createCourseAction } from "@/actions/courses/create.action";
 
 /**
  * NewCourseForm
@@ -20,7 +21,6 @@ export default function NewCourseForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagInput, setTagInput] = React.useState("");
-  const [outcomes, setOutcomes] = React.useState<string[]>([]);
   const [outcomeInput, setOutcomeInput] = React.useState("");
 
   const formik = useFormik({
@@ -36,6 +36,7 @@ export default function NewCourseForm() {
       published: false,
       thumbnail: "",
       category: "",
+      outcomes: [],
     },
     validationSchema: Yup.object({
       title: Yup.string().trim().min(3, "Too short").required("Title is required"),
@@ -53,6 +54,7 @@ export default function NewCourseForm() {
       thumbnail: Yup.string().trim(),
       featured: Yup.boolean(),
       published: Yup.boolean(),
+      outcomes: Yup.array().of(Yup.string().trim()),
     }),
     onSubmit: async (values) => {
       await createCourseWithPublished(values.published);
@@ -85,11 +87,14 @@ export default function NewCourseForm() {
         published: publishFlag,
         excerpt: formik.values.excerpt.trim() || undefined,
         thumbnail: formik.values.thumbnail.trim() || undefined,
+        outcomes: formik.values.outcomes,
       };
       console.log(payload, "New Course Payload _________ ");
-      // window.location.href = `/admin/courses/${courseId}/builder`;
+      const res = await createCourseAction(payload);
+      console.log(res, "res_ create course");
+      // window.location.href = `/admin/courses/${res.data.id}/builder`;
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Failed to create course");
+      setError(err?.message || "Failed to create course");
     } finally {
       setLoading(false);
     }
@@ -98,7 +103,7 @@ export default function NewCourseForm() {
   // Submit is managed by formik.handleSubmit via form tag
 
   function markAllTouchedAndSubmit() {
-    const fields = ["title", "slug", "price", "originalPrice", "duration", "excerpt", "description", "category", "thumbnail"] as const;
+    const fields = ["title", "slug", "price", "originalPrice", "duration", "excerpt", "description", "category", "thumbnail", "outcomes"] as const;
     const touched: Record<string, boolean> = {};
     for (const key of fields) touched[key] = true;
     formik.setTouched(touched as any, true);
@@ -293,7 +298,7 @@ export default function NewCourseForm() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && outcomeInput.trim()) {
                         e.preventDefault();
-                        setOutcomes([...outcomes, outcomeInput.trim()]);
+                        formik.setFieldValue("outcomes", [...(formik.values.outcomes || []), outcomeInput.trim()]);
                         setOutcomeInput("");
                       }
                     }}
@@ -302,12 +307,22 @@ export default function NewCourseForm() {
                   />
                 </div>
               </div>
-              {outcomes.length > 0 && (
+              {formik.values.outcomes.length > 0 && (
                 <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {outcomes.map((o, i) => (
+                  {formik.values.outcomes.map((o, i) => (
                     <li key={`${o}-${i}`} className="text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-md px-3 py-2 flex items-start justify-between gap-2">
                       <span className="truncate">{o}</span>
-                      <button type="button" onClick={() => setOutcomes(outcomes.filter((_, idx) => idx !== i))} aria-label={`Remove ${o}`} className="text-gray-500 hover:text-gray-700">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          formik.setFieldValue(
+                            "outcomes",
+                            formik.values.outcomes.filter((_, idx) => idx !== i)
+                          )
+                        }
+                        aria-label={`Remove ${o}`}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </li>
@@ -347,10 +362,10 @@ export default function NewCourseForm() {
             <ImageUpload
               category="thumbnails"
               aspectRatio="video"
+              showPreview={true}
               placeholder="Drag & drop image here or click to upload"
               onImageUploaded={(file) => formik.setFieldValue("thumbnail", file.original)}
               onImageRemoved={() => formik.setFieldValue("thumbnail", "")}
-              showPreview={false}
             />
             {(formik.touched.thumbnail || formik.submitCount > 0) && formik.errors.thumbnail && <p className="mt-2 text-xs text-red-600">{String(formik.errors.thumbnail)}</p>}
           </div>

@@ -26,8 +26,8 @@ pub struct CourseRecord {
     pub featured: bool,
     pub view_count: i32,
     pub status: String,
-    /// Instructor foreign key; may be NULL for legacy rows
-    pub instructor_id: Option<uuid::Uuid>,
+    /// Instructor foreign key (required)
+    pub instructor_id: uuid::Uuid,
     pub instructor: Option<InstructorSummary>,
     pub published_at: Option<chrono::DateTime<chrono::Utc>>,
     pub created_at: chrono::DateTime<chrono::Utc>,

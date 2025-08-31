@@ -10,10 +10,10 @@ import { DataObj, ErrorObj } from "@/lib/utils";
  */
 export async function createCourseAction(payload: any) {
   try {
-    const res = await API.post(API_ENDPOINTS.COURSES.CREATE, payload, { responseType: "text" });
-    return { success: true, id: String(res.data) } as const;
+    const res = await API.post(API_ENDPOINTS.COURSES.CREATE, payload);
+    return DataObj(res) as any;
   } catch (error) {
-    return { success: false, ...(ErrorObj(error) as any) } as const;
+    return ErrorObj(error) as any;
   }
 }
 
@@ -23,10 +23,10 @@ export async function createCourseAction(payload: any) {
  */
 export async function createModuleAction(courseId: string, payload: { title: string; description?: string; position: number }) {
   try {
-    const res = await API.post(`/api/courses/${courseId}/modules`, payload, { responseType: "text" });
-    return { success: true, id: String(res.data) } as const;
+    const res = await API.post(`/api/courses/${courseId}/modules`, payload);
+    return DataObj(res) as any;
   } catch (error) {
-    return { success: false, ...(ErrorObj(error) as any) } as const;
+    return ErrorObj(error) as any;
   }
 }
 
@@ -36,9 +36,9 @@ export async function createModuleAction(courseId: string, payload: { title: str
  */
 export async function createLessonAction(moduleId: string, payload: { title: string; duration: string; position: number; is_free: boolean; published: boolean; description?: string; content?: string; video_url?: string }) {
   try {
-    const res = await API.post(`/api/modules/${moduleId}/lessons`, { module_id: moduleId, ...payload }, { responseType: "text" });
-    return { success: true, id: String(res.data) } as const;
+    const res = await API.post(`/api/modules/${moduleId}/lessons`, { module_id: moduleId, ...payload });
+    return DataObj(res) as any;
   } catch (error) {
-    return { success: false, ...(ErrorObj(error) as any) } as const;
+    return ErrorObj(error) as any;
   }
 }
