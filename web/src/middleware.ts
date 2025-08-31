@@ -1,24 +1,57 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getCurrentLogedInUser } from "./actions/users/get-current-user";
 
 /**
- * Protect admin routes: requires authenticated user with admin role
- * - Reads `access_token` from cookies
- * - Validates token expiry (exp) if present
- * - Decodes JWT payload to verify `role` is admin
- * - Redirects to /login if unauthenticated/expired
- * - Redirects to / if authenticated but not admin
+ * Middleware: Protect only `/admin/:path*` routes for ADMIN users
+ * - Requires `access_token` cookie (JWT)
+ * - Validates token expiry (exp)
+ * - Checks `role` claim equals `ADMIN`
+ * - Redirects unauthenticated/expired to `/login`
+ * - Redirects authenticated non-admin to `/`
  */
 export default async function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("access_token")?.value;
 
-  if (accessToken) {
-    return NextResponse.next();
-  } else {
+  // No token: force login
+  if (!accessToken) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
+
+  // Decode JWT payload (base64url) without external deps
+  const decodeJwtPayload = (token: string): any | null => {
+    try {
+      const parts = token.split(".");
+      if (parts.length < 2) return null;
+      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+      const json = atob(padded);
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  };
+
+  const payload = decodeJwtPayload(accessToken);
+
+  // Invalid token: force login
+  if (!payload) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Expired token: force login
+  const exp = typeof payload.exp === "number" ? payload.exp * 1000 : 0;
+  if (exp && Date.now() >= exp) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Role check: allow only ADMIN
+  const role: string | undefined = payload.role || payload.user?.role;
+  if (role !== "admin") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/user/:path*", "/learn/:path*"],
+  matcher: ["/admin/:path*"],
 };
