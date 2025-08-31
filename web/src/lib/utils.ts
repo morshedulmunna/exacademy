@@ -236,6 +236,7 @@ export function isAxiosError(error: any): boolean {
  * @returns Formatted error object
  */
 export function ErrorObj(error: any) {
+  console.error(error);
   return {
     success: false,
     message: extractErrorMessage(error),

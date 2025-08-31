@@ -18,7 +18,7 @@ impl CoursesRepository for PostgresCoursesRepository {
                     price, original_price, duration, featured, published, status, instructor_id, outcomes
                 ) VALUES (
                     $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
-                ) RETURNING id"#,
+                ) RETURNING slug"#,
         )
         .bind(&input.slug)
         .bind(&input.title)

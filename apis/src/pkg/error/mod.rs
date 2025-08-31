@@ -182,6 +182,13 @@ impl From<sqlx::Error> for AppError {
                                             "Username already exists".into(),
                                         );
                                     }
+                                    // courses.slug unique constraint created by migrations
+                                    // This ensures clients get a precise error when slug is duplicated
+                                    "courses_slug_key" | "idx_courses_slug" => {
+                                        return AppError::Conflict(
+                                            "Course slug already exists".into(),
+                                        );
+                                    }
                                     _ => {}
                                 }
                             }

@@ -8,6 +8,7 @@ import { DollarSign, Clock, Hash, Tag as TagIcon, X } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createCourseAction } from "@/actions/courses/create.action";
+import API from "@/configs/api.config";
 
 /**
  * NewCourseForm
@@ -21,6 +22,7 @@ export default function NewCourseForm() {
   const [tagInput, setTagInput] = React.useState("");
   const [outcomeInput, setOutcomeInput] = React.useState("");
   const [thumbnailFile, setThumbnailFile] = React.useState<File | null>(null);
+  const [slugStatus, setSlugStatus] = React.useState<"idle" | "checking" | "available" | "taken">("idle");
 
   const formik = useFormik({
     initialValues: {
@@ -68,6 +70,44 @@ export default function NewCourseForm() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.title, slugManual]);
+
+  // Debounced slug availability check against public course-by-slug endpoint
+  React.useEffect(() => {
+    if (!computedSlug) {
+      setSlugStatus("idle");
+      return;
+    }
+    let canceled = false;
+    setSlugStatus("checking");
+    const t = setTimeout(async () => {
+      try {
+        // 200 means slug exists -> taken
+        await API.get(`/api/course/${computedSlug}`);
+        if (canceled) return;
+        setSlugStatus("taken");
+        formik.setFieldError("slug", "Slug already in use");
+      } catch (e: any) {
+        const status = e?.response?.status as number | undefined;
+        // 404 means not found -> available; network errors also treated as available to avoid blocking
+        if (status === 404 || !status) {
+          if (canceled) return;
+          setSlugStatus("available");
+          // Clear error only if previously set
+          if (formik.errors.slug) {
+            formik.setFieldError("slug", undefined as any);
+          }
+        } else {
+          if (canceled) return;
+          setSlugStatus("idle");
+        }
+      }
+    }, 400);
+    return () => {
+      canceled = true;
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [computedSlug]);
   const parsedPrice = Number(formik.values.price || 0);
   const parsedOriginalPrice = formik.values.originalPrice ? Number(formik.values.originalPrice) : undefined;
 
@@ -75,6 +115,11 @@ export default function NewCourseForm() {
     setError(null);
     try {
       setLoading(true);
+      // Prevent submit if slug taken based on latest check
+      if (computedSlug && slugStatus === "taken") {
+        formik.setFieldError("slug", "Slug already in use");
+        throw new Error("Slug already in use");
+      }
       const payload: any = {
         title: formik.values.title.trim(),
         slug: computedSlug,
@@ -91,6 +136,17 @@ export default function NewCourseForm() {
       const generateFormData = generateFormDataFromObject(payload);
 
       const res = await createCourseAction(generateFormData);
+      if (!res?.success) {
+        if (
+          res?.status === 409 &&
+          String(res?.message || "")
+            .toLowerCase()
+            .includes("slug")
+        ) {
+          formik.setFieldError("slug", "Slug already in use");
+        }
+        throw new Error(res?.message || "Failed to create course");
+      }
       window.location.href = `/admin/courses/${res.data}/builder`;
     } catch (err: any) {
       setError(err?.message || "Failed to create course");
