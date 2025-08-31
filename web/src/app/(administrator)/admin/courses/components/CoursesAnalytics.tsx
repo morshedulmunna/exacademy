@@ -83,7 +83,9 @@ export const CoursesAnalytics: React.FC<CoursesAnalyticsProps> = ({ totalRevenue
         <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-            <p className="text-base font-semibold text-gray-900 dark:text-white">{enrollmentTotal}</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white">
+              {enrollmentTotal} <span className="font-light text-xs text-gray-500">Enrollments</span>{" "}
+            </p>
           </div>
           <div className="flex items-center space-x-2">
             <div className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${enrollmentMoM >= 0 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"}`}>
