@@ -8,7 +8,7 @@ import { DataObj, ErrorObj } from "@/lib/utils";
  * createCourseAction
  * Server action that creates a course and returns created id.
  */
-export async function createCourseAction(payload: { title: string; slug: string; description: string; duration: string; price: number; featured?: boolean; excerpt?: string }) {
+export async function createCourseAction(payload: any) {
   try {
     const res = await API.post(API_ENDPOINTS.COURSES.CREATE, payload, { responseType: "text" });
     return { success: true, id: String(res.data) } as const;

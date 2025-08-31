@@ -10,7 +10,7 @@ export interface Module {
   id: string;
   title: string;
   description?: string;
-  order: number;
+  position: number;
   lessons: Lesson[];
 }
 
@@ -19,12 +19,14 @@ export interface Lesson {
   title: string;
   description?: string;
   content?: string;
-  videoUrl?: string;
+  video_url?: string;
   duration: string;
-  order: number;
-  isFree: boolean;
+  position: number;
+  is_free: boolean;
   published: boolean;
   contents?: LessonContent[];
+  questions?: Question[];
+  assignment?: Assignment | null;
 }
 
 export interface LessonContent {
@@ -36,8 +38,26 @@ export interface LessonContent {
   filename: string;
 }
 
+export interface Question {
+  id: string;
+  text: string;
+  options: QuestionOption[];
+}
+
+export interface Assignment {
+  id: string;
+  title: string;
+  description?: string;
+}
+
+export interface QuestionOption {
+  id: string;
+  text: string;
+  is_correct: boolean;
+}
+
 export interface CourseBuilderProps {
-  courseId: string;
+  courseId?: string;
   onModulesChange?: (modules: Module[]) => void;
   className?: string;
 }
@@ -53,6 +73,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
   const [isLoading, setIsLoading] = useState(false);
   const [draggedModule, setDraggedModule] = useState<string | null>(null);
   const [draggedLesson, setDraggedLesson] = useState<{ moduleId: string; lessonId: string } | null>(null);
+  const [lessonActiveTab, setLessonActiveTab] = useState<Record<string, "resources" | "questions" | "assignment" | null>>({});
 
   // Load modules on component mount
   useEffect(() => {
@@ -117,7 +138,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     // Update order for all modules
     const updatedModules = newModules.map((module, index) => ({
       ...module,
-      order: index + 1,
+      position: index + 1,
     }));
 
     setModules(updatedModules);
@@ -181,7 +202,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     // Update order for lessons in the module
     newModules[sourceModuleIndex].lessons = newModules[sourceModuleIndex].lessons.map((lesson, index) => ({
       ...lesson,
-      order: index + 1,
+      position: index + 1,
     }));
 
     setModules(newModules);
@@ -193,7 +214,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
   const createModule = async () => {
     try {
       const id = crypto.randomUUID();
-      const newModule: Module = { id, title: "New Module", description: "", order: modules.length + 1, lessons: [] };
+      const newModule: Module = { id, title: "New Module", description: "", position: modules.length + 1, lessons: [] };
       const next = [...modules, newModule];
       setModules(next);
       setExpandedModules((prev) => new Set([...prev, newModule.id]));
@@ -231,9 +252,9 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
   const createLesson = async (moduleId: string) => {
     try {
       const module = modules.find((m) => m.id === moduleId);
-      const lessonOrder = module ? module.lessons.length + 1 : 1;
+      const lessonPosition = module ? module.lessons.length + 1 : 1;
       const id = crypto.randomUUID();
-      const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", videoUrl: "", duration: "0m", order: lessonOrder, isFree: false, published: false, contents: [] };
+      const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", video_url: "", duration: "0m", position: lessonPosition, is_free: false, published: false, contents: [], questions: [], assignment: null };
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m));
       setModules(next);
       onModulesChange?.(next);
@@ -298,6 +319,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
             : m
         )
       );
+      setLessonActiveTab((prev) => ({ ...prev, [lessonId]: "resources" }));
     } catch (error) {
       console.error("Error adding content to lesson:", error);
     }
@@ -313,6 +335,247 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
       default:
         return <FileText className="w-4 h-4 text-gray-500" />;
     }
+  };
+
+  const addQuestion = (moduleId: string, lessonId: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) =>
+                l.id === lessonId
+                  ? {
+                      ...l,
+                      questions: [
+                        ...(l.questions ?? []),
+                        {
+                          id: crypto.randomUUID(),
+                          text: "New question",
+                          options: [
+                            { id: crypto.randomUUID(), text: "Option 1", is_correct: true },
+                            { id: crypto.randomUUID(), text: "Option 2", is_correct: false },
+                          ],
+                        },
+                      ],
+                    }
+                  : l
+              ),
+            }
+          : m
+      )
+    );
+    setLessonActiveTab((prev) => ({ ...prev, [lessonId]: "questions" }));
+  };
+
+  const updateQuestion = (moduleId: string, lessonId: string, questionId: string, text: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, questions: (l.questions ?? []).map((q) => (q.id === questionId ? { ...q, text } : q)) } : l)),
+            }
+          : m
+      )
+    );
+  };
+
+  const deleteQuestion = (moduleId: string, lessonId: string, questionId: string) => {
+    let remaining = 0;
+    let hasAssignment = false;
+    let hasResources = false;
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) => {
+                if (l.id !== lessonId) return l;
+                const nextQuestions = (l.questions ?? []).filter((q) => q.id !== questionId);
+                remaining = nextQuestions.length;
+                hasAssignment = !!l.assignment;
+                hasResources = (l.contents?.length ?? 0) > 0;
+                return { ...l, questions: nextQuestions };
+              }),
+            }
+          : m
+      )
+    );
+    setLessonActiveTab((prev) => {
+      if (prev[lessonId] !== "questions") return prev;
+      if (remaining > 0) return prev;
+      const nextTab = hasAssignment ? "assignment" : hasResources ? "resources" : null;
+      return { ...prev, [lessonId]: nextTab } as Record<string, "resources" | "questions" | "assignment" | null>;
+    });
+  };
+
+  const addOption = (moduleId: string, lessonId: string, questionId: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) =>
+                l.id === lessonId
+                  ? {
+                      ...l,
+                      questions: (l.questions ?? []).map((q) =>
+                        q.id === questionId
+                          ? {
+                              ...q,
+                              options: [...q.options, { id: crypto.randomUUID(), text: "New option", is_correct: false }],
+                            }
+                          : q
+                      ),
+                    }
+                  : l
+              ),
+            }
+          : m
+      )
+    );
+  };
+
+  const updateOptionText = (moduleId: string, lessonId: string, questionId: string, optionId: string, text: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) =>
+                l.id === lessonId
+                  ? {
+                      ...l,
+                      questions: (l.questions ?? []).map((q) =>
+                        q.id === questionId
+                          ? {
+                              ...q,
+                              options: q.options.map((o) => (o.id === optionId ? { ...o, text } : o)),
+                            }
+                          : q
+                      ),
+                    }
+                  : l
+              ),
+            }
+          : m
+      )
+    );
+  };
+
+  const setCorrectOption = (moduleId: string, lessonId: string, questionId: string, optionId: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) =>
+                l.id === lessonId
+                  ? {
+                      ...l,
+                      questions: (l.questions ?? []).map((q) =>
+                        q.id === questionId
+                          ? {
+                              ...q,
+                              options: q.options.map((o) => ({ ...o, is_correct: o.id === optionId })),
+                            }
+                          : q
+                      ),
+                    }
+                  : l
+              ),
+            }
+          : m
+      )
+    );
+  };
+
+  const deleteOption = (moduleId: string, lessonId: string, questionId: string, optionId: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) =>
+                l.id === lessonId
+                  ? {
+                      ...l,
+                      questions: (l.questions ?? []).map((q) => {
+                        if (q.id !== questionId) return q;
+                        const remaining = q.options.filter((o) => o.id !== optionId);
+                        // Ensure at least one option remains marked correct
+                        if (remaining.length > 0 && !remaining.some((o) => o.is_correct)) {
+                          remaining[0] = { ...remaining[0], is_correct: true };
+                        }
+                        return { ...q, options: remaining };
+                      }),
+                    }
+                  : l
+              ),
+            }
+          : m
+      )
+    );
+  };
+
+  const enableAssignment = (moduleId: string, lessonId: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, assignment: { id: crypto.randomUUID(), title: "", description: "" } } : l)),
+            }
+          : m
+      )
+    );
+    setLessonActiveTab((prev) => ({ ...prev, [lessonId]: "assignment" }));
+  };
+
+  const removeAssignment = (moduleId: string, lessonId: string) => {
+    let hasQuestions = false;
+    let hasResources = false;
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) => {
+                if (l.id !== lessonId) return l;
+                hasQuestions = (l.questions?.length ?? 0) > 0;
+                hasResources = (l.contents?.length ?? 0) > 0;
+                return { ...l, assignment: null };
+              }),
+            }
+          : m
+      )
+    );
+    setLessonActiveTab((prev) => {
+      if (prev[lessonId] !== "assignment") return prev;
+      const nextTab = hasQuestions ? "questions" : hasResources ? "resources" : null;
+      return { ...prev, [lessonId]: nextTab } as Record<string, "resources" | "questions" | "assignment" | null>;
+    });
+  };
+
+  const updateAssignmentField = (moduleId: string, lessonId: string, field: "title" | "description", value: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === moduleId
+          ? {
+              ...m,
+              lessons: m.lessons.map((l) =>
+                l.id === lessonId
+                  ? {
+                      ...l,
+                      assignment: { id: l.assignment?.id ?? crypto.randomUUID(), title: field === "title" ? value : l.assignment?.title ?? "", description: field === "description" ? value : l.assignment?.description },
+                    }
+                  : l
+              ),
+            }
+          : m
+      )
+    );
   };
 
   if (isLoading) {
@@ -463,8 +726,8 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Video URL</label>
                             <input
                               type="url"
-                              defaultValue={lesson.videoUrl || ""}
-                              onBlur={(e) => updateLesson(module.id, lesson.id, { videoUrl: e.target.value })}
+                              defaultValue={lesson.video_url || ""}
+                              onBlur={(e) => updateLesson(module.id, lesson.id, { video_url: e.target.value })}
                               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                               placeholder="https://..."
                             />
@@ -486,8 +749,8 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                               <label className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
-                                  checked={lesson.isFree}
-                                  onChange={(e) => updateLesson(module.id, lesson.id, { isFree: e.target.checked })}
+                                  checked={lesson.is_free}
+                                  onChange={(e) => updateLesson(module.id, lesson.id, { is_free: e.target.checked })}
                                   className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
                                 />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">Free</span>
@@ -507,35 +770,174 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                         </div>
                       </div>
 
-                      {/* Lesson Content */}
-                      <div className="space-y-3">
-                        <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Content Files</h6>
+                      {/* Optional Sections Tabs */}
+                      <div className="mt-6 space-y-3">
+                        {(() => {
+                          const tabs: Array<{ key: "resources" | "questions" | "assignment"; label: string; count?: number }> = [];
+                          const resourcesCount = lesson.contents?.length ?? 0;
+                          const questionsCount = lesson.questions?.length ?? 0;
+                          const hasAssignment = !!lesson.assignment;
+                          if (resourcesCount > 0 || lessonActiveTab[lesson.id] === "resources") tabs.push({ key: "resources", label: `Resources${resourcesCount ? ` (${resourcesCount})` : ""}` });
+                          if (questionsCount > 0) tabs.push({ key: "questions", label: `Questions${questionsCount ? ` (${questionsCount})` : ""}` });
+                          if (hasAssignment) tabs.push({ key: "assignment", label: "Assignment" });
 
-                        {/* Existing Content */}
-                        {(lesson.contents?.length ?? 0) > 0 && (
-                          <div className="space-y-2">
-                            {(lesson.contents ?? []).map((content) => (
-                              <div key={content.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded">
-                                <div className="flex items-center space-x-2">
-                                  {getContentIcon(content.type)}
-                                  <span className="text-sm text-gray-900 dark:text-white">{content.title}</span>
+                          if (tabs.length === 0) {
+                            return (
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Add optional content to this lesson:</p>
+                                <div className="flex items-center gap-2">
+                                  <button onClick={() => setLessonActiveTab((p) => ({ ...p, [lesson.id]: "resources" }))} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600">
+                                    Add Resources
+                                  </button>
+                                  <button onClick={() => addQuestion(module.id, lesson.id)} className="px-2 py-1 text-xs rounded bg-blue-600 text-white">
+                                    Add Question
+                                  </button>
+                                  <button onClick={() => enableAssignment(module.id, lesson.id)} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600">
+                                    Add Assignment
+                                  </button>
                                 </div>
-                                <a href={content.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">
-                                  View
-                                </a>
                               </div>
-                            ))}
-                          </div>
-                        )}
+                            );
+                          }
 
-                        {/* Content Upload */}
-                        <CourseContentUpload
-                          courseId={courseId}
-                          lessonId={lesson.id}
-                          onFileUploaded={(result) => addContentToLesson(module.id, lesson.id, result)}
-                          className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4"
-                          placeholder="Upload lesson content..."
-                        />
+                          const active = lessonActiveTab[lesson.id] ?? tabs[0]?.key ?? null;
+
+                          return (
+                            <>
+                              <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-1">
+                                <div className="flex items-center gap-2">
+                                  {tabs.map((t) => (
+                                    <button key={t.key} onClick={() => setLessonActiveTab((p) => ({ ...p, [lesson.id]: t.key }))} className={`${active === t.key ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600"} text-sm px-2 py-1`}>
+                                      {t.label}
+                                    </button>
+                                  ))}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {resourcesCount === 0 && (
+                                    <button onClick={() => setLessonActiveTab((p) => ({ ...p, [lesson.id]: "resources" }))} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600">
+                                      Add Resources
+                                    </button>
+                                  )}
+                                  {questionsCount === 0 && (
+                                    <button onClick={() => addQuestion(module.id, lesson.id)} className="px-2 py-1 text-xs rounded bg-blue-600 text-white">
+                                      Add Question
+                                    </button>
+                                  )}
+                                  {!hasAssignment && (
+                                    <button onClick={() => enableAssignment(module.id, lesson.id)} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600">
+                                      Add Assignment
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {active === "resources" && (
+                                <div className="space-y-3">
+                                  {resourcesCount > 0 && (
+                                    <div className="space-y-2">
+                                      {(lesson.contents ?? []).map((content) => (
+                                        <div key={content.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded">
+                                          <div className="flex items-center space-x-2">
+                                            {getContentIcon(content.type)}
+                                            <span className="text-sm text-gray-900 dark:text-white">{content.title}</span>
+                                          </div>
+                                          <a href={content.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">
+                                            View
+                                          </a>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <CourseContentUpload
+                                    courseId={courseId ?? ""}
+                                    lessonId={lesson.id}
+                                    onFileUploaded={(result) => addContentToLesson(module.id, lesson.id, result)}
+                                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4"
+                                    placeholder="Upload lesson resources..."
+                                  />
+                                </div>
+                              )}
+
+                              {active === "questions" && (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Questions</h6>
+                                    <button onClick={() => addQuestion(module.id, lesson.id)} className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded">
+                                      <Plus className="w-3 h-3" />
+                                      <span>Add Question</span>
+                                    </button>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {(lesson.questions ?? []).map((q) => (
+                                      <div key={q.id} className="space-y-2 p-2 border border-gray-200 dark:border-gray-600 rounded">
+                                        <div className="flex items-center space-x-2">
+                                          <input
+                                            type="text"
+                                            defaultValue={q.text}
+                                            onBlur={(e) => updateQuestion(module.id, lesson.id, q.id, e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            placeholder="Enter question text"
+                                          />
+                                          <button onClick={() => deleteQuestion(module.id, lesson.id, q.id)} className="p-2 text-gray-400 hover:text-red-600">
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                        <div className="space-y-2 ml-4">
+                                          {(q.options ?? []).map((o) => (
+                                            <div key={o.id} className="flex items-center space-x-2">
+                                              <input type="radio" name={`correct-${q.id}`} checked={o.is_correct} onChange={() => setCorrectOption(module.id, lesson.id, q.id, o.id)} className="text-blue-600" />
+                                              <input
+                                                type="text"
+                                                defaultValue={o.text}
+                                                onBlur={(e) => updateOptionText(module.id, lesson.id, q.id, o.id, e.target.value)}
+                                                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                placeholder="Option text"
+                                              />
+                                              <button onClick={() => deleteOption(module.id, lesson.id, q.id, o.id)} className="p-2 text-gray-400 hover:text-red-600">
+                                                <Trash2 className="w-4 h-4" />
+                                              </button>
+                                            </div>
+                                          ))}
+                                          <button onClick={() => addOption(module.id, lesson.id, q.id)} className="text-xs text-blue-600 hover:text-blue-800">
+                                            + Add option
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    {(lesson.questions?.length ?? 0) === 0 && <p className="text-xs text-gray-500">No questions added.</p>}
+                                  </div>
+                                </div>
+                              )}
+
+                              {active === "assignment" && (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Assignment</h6>
+                                    <button onClick={() => removeAssignment(module.id, lesson.id)} className="text-xs text-red-600 hover:text-red-800">
+                                      Remove
+                                    </button>
+                                  </div>
+                                  <div className="grid grid-cols-1 gap-3">
+                                    <input
+                                      type="text"
+                                      defaultValue={lesson.assignment?.title ?? ""}
+                                      onBlur={(e) => updateAssignmentField(module.id, lesson.id, "title", e.target.value)}
+                                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                      placeholder="Assignment title"
+                                    />
+                                    <textarea
+                                      defaultValue={lesson.assignment?.description ?? ""}
+                                      onBlur={(e) => updateAssignmentField(module.id, lesson.id, "description", e.target.value)}
+                                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                      rows={3}
+                                      placeholder="Assignment instructions / description"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   ))}
