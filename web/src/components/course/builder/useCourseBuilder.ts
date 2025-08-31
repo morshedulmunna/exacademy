@@ -214,7 +214,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       const next = [...modules, composed];
       setModules(next);
       setExpandedModules((prev) => new Set([...prev, composed.id]));
-      setEditingLesson(newLesson.id);
+      setEditingModule(moduleId);
       onModulesChange?.(next);
       console.log("Created module with lesson (local):", composed);
     } catch (error) {

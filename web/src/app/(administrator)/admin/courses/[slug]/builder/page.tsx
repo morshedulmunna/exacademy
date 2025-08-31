@@ -20,13 +20,11 @@ export default async function CourseBuilderPage({ params }: Props) {
 
   return (
     <div className="py-6">
-      <MaxWidthWrapper>
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold">Course Builder</h1>
-          <p className="text-sm text-gray-500">Manage modules and lessons for: {slug}</p>
-        </div>
-        <CourseBuilder courseId={courseId} className="mb-10" />
-      </MaxWidthWrapper>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">Course Builder</h1>
+        <p className="text-sm text-gray-500">Manage modules and lessons for: {slug}</p>
+      </div>
+      <CourseBuilder courseId={courseId} className="mb-10" />
     </div>
   );
 }
