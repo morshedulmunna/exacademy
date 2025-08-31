@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import API from "@/configs/api.config";
 import type { Module, Lesson, LessonContent } from "./types";
 import type { FileUploadResult } from "@/hooks/useCourseContentUpload";
 
@@ -75,6 +76,15 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
 
     const updatedModules = newModules.map((module, index) => ({ ...module, position: index + 1 }));
     setModules(updatedModules);
+    try {
+      const payload = {
+        courseId,
+        modules: updatedModules.map((m) => ({ id: m.id, position: m.position })),
+      };
+      console.log("[DRAG&DROP] Update module positions (simulate backend):", payload);
+    } catch (err) {
+      console.error("Failed to log module positions", err);
+    }
     setDraggedModule(null);
   };
 
@@ -174,6 +184,44 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     }
   };
 
+  const createModuleWithLesson = async () => {
+    try {
+      const moduleId = `tmp_${crypto.randomUUID()}`;
+      const newModule: Module = {
+        id: moduleId,
+        title: "New Module",
+        description: "",
+        position: modules.length + 1,
+        lessons: [],
+      };
+      const lessonId = `tmp_${crypto.randomUUID()}`;
+      const newLesson: Lesson = {
+        id: lessonId,
+        title: "New Lesson",
+        description: "",
+        content: "",
+        video_url: "",
+        duration: "0m",
+        position: 1,
+        is_free: false,
+        published: false,
+        contents: [],
+        questions: [],
+        assignment: null,
+      };
+
+      const composed: Module = { ...newModule, lessons: [newLesson] };
+      const next = [...modules, composed];
+      setModules(next);
+      setExpandedModules((prev) => new Set([...prev, composed.id]));
+      setEditingLesson(newLesson.id);
+      onModulesChange?.(next);
+      console.log("Created module with lesson (local):", composed);
+    } catch (error) {
+      console.error("Error creating module with lesson:", error);
+    }
+  };
+
   const submitLessons = async (moduleId: string) => {
     try {
       const module = modules.find((m) => m.id === moduleId);
@@ -205,6 +253,49 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       console.log("Submitting lessons (local only):", consolePayload);
     } catch (error) {
       console.error("Error submitting lessons:", error);
+    } finally {
+      setSubmittingModuleId(null);
+    }
+  };
+
+  const createModuleAndAllLessons = async (moduleId: string) => {
+    try {
+      const module = modules.find((m) => m.id === moduleId);
+      if (!module || !courseId) return;
+      setSubmittingModuleId(moduleId);
+
+      // Create module in backend
+      const moduleRes = await API.post(`/api/courses/${courseId}/modules`, {
+        title: module.title,
+        description: module.description ?? "",
+        position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
+      });
+      const backendModule = moduleRes?.data?.data || moduleRes?.data || {};
+      const backendModuleId: string = backendModule?.id || backendModule?.module_id || backendModule?.moduleId;
+      if (!backendModuleId) throw new Error("Failed to create module: missing id in response");
+
+      // Create each lesson in backend
+      for (const lesson of module.lessons) {
+        await API.post(`/api/modules/${backendModuleId}/lessons`, {
+          module_id: backendModuleId,
+          title: lesson.title,
+          description: lesson.description ?? "",
+          content: lesson.content ?? "",
+          video_url: lesson.video_url ?? "",
+          duration: lesson.duration ?? "0m",
+          position: lesson.position,
+          is_free: !!lesson.is_free,
+          published: !!lesson.published,
+        });
+      }
+
+      // Optionally update local state to reflect persisted module id
+      const next = modules.map((m) => (m.id === moduleId ? { ...m, id: backendModuleId } : m));
+      setModules(next);
+      onModulesChange?.(next);
+    } catch (error) {
+      console.error("Error creating module and lessons:", error);
+      if (typeof window !== "undefined") alert("Failed to create module and lessons. Please try again.");
     } finally {
       setSubmittingModuleId(null);
     }
@@ -538,7 +629,9 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     updateModule,
     deleteModule,
     createLesson,
+    createModuleWithLesson,
     submitLessons,
+    createModuleAndAllLessons,
     updateLesson,
     deleteLesson,
     addContentToLesson,
