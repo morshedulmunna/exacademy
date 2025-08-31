@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import API from "@/configs/api.config";
 import type { Module, Lesson, LessonContent } from "./types";
 import type { FileUploadResult } from "@/hooks/useCourseContentUpload";
+// toast and API calls are intentionally not used when only logging payloads
 
 type LessonTab = "resources" | "questions" | "assignment" | null;
 
@@ -270,38 +270,33 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       if (!module || !courseId) return;
       setSubmittingModuleId(moduleId);
 
-      // Create module in backend
-      const moduleRes = await API.post(`/api/courses/${courseId}/modules`, {
-        title: module.title,
-        description: module.description ?? "",
-        position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
-      });
-      const backendModule = moduleRes?.data?.data || moduleRes?.data || {};
-      const backendModuleId: string = backendModule?.id || backendModule?.module_id || backendModule?.moduleId;
-      if (!backendModuleId) throw new Error("Failed to create module: missing id in response");
-
-      // Create each lesson in backend
-      for (const lesson of module.lessons) {
-        await API.post(`/api/modules/${backendModuleId}/lessons`, {
-          module_id: backendModuleId,
-          title: lesson.title,
-          description: lesson.description ?? "",
-          content: lesson.content ?? "",
-          video_url: lesson.video_url ?? "",
-          duration: lesson.duration ?? "0m",
-          position: lesson.position,
-          is_free: !!lesson.is_free,
-          published: !!lesson.published,
-        });
-      }
-
-      // Optionally update local state to reflect persisted module id
-      const next = modules.map((m) => (m.id === moduleId ? { ...m, id: backendModuleId } : m));
-      setModules(next);
-      onModulesChange?.(next);
+      // Console the full payload (module + lessons) from the front-end form
+      const payload = {
+        courseId,
+        module: {
+          id: module.id,
+          title: module.title,
+          description: module.description ?? "",
+          position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
+          lessons: (module.lessons ?? []).map((l) => ({
+            id: l.id,
+            title: l.title,
+            description: l.description ?? "",
+            content: l.content ?? "",
+            video_url: l.video_url ?? "",
+            duration: l.duration || "0m",
+            position: l.position,
+            is_free: !!l.is_free,
+            published: !!l.published,
+            contents: l.contents ?? [],
+            questions: l.questions ?? [],
+            assignment: l.assignment ?? null,
+          })),
+        },
+      };
+      console.log("[COURSE BUILDER] Module + lessons (console only):", payload);
     } catch (error) {
       console.error("Error creating module and lessons:", error);
-      if (typeof window !== "undefined") alert("Failed to create module and lessons. Please try again.");
     } finally {
       setSubmittingModuleId(null);
     }
