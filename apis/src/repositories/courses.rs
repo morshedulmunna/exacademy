@@ -7,6 +7,8 @@ pub struct InstructorSummary {
     pub username: String,
     pub full_name: Option<String>,
     pub avatar_url: Option<String>,
+    pub email: Option<String>,
+    pub role: Option<String>,
 }
 
 /// Domain model for a course as persisted in the database layer

@@ -61,7 +61,8 @@ impl CoursesRepository for PostgresCoursesRepository {
                        c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
-                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
+                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url,
+                       u.email as instructor_email, u.role as instructor_role
                FROM courses c
                LEFT JOIN users u ON u.id = c.instructor_id
                WHERE c.instructor_id = $1
@@ -100,7 +101,8 @@ impl CoursesRepository for PostgresCoursesRepository {
                        c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
-                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
+                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url,
+                       u.email as instructor_email, u.role as instructor_role
                FROM courses c
                LEFT JOIN users u ON u.id = c.instructor_id
                WHERE c.id = $1"#,
@@ -120,7 +122,8 @@ impl CoursesRepository for PostgresCoursesRepository {
                        c.instructor_id,
                        c.published_at, c.created_at, c.updated_at,
                        u.id as instructor_id_join, u.username as instructor_username,
-                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url
+                       u.full_name as instructor_full_name, u.avatar_url as instructor_avatar_url,
+                       u.email as instructor_email, u.role as instructor_role
                FROM courses c
                LEFT JOIN users u ON u.id = c.instructor_id
                WHERE c.slug = $1"#,
@@ -221,13 +224,21 @@ fn map_course_row_with_instructor(row: sqlx::postgres::PgRow) -> CourseRecord {
         row.try_get::<Option<String>, _>("instructor_avatar_url")
             .ok()
             .flatten(),
+        row.try_get::<Option<String>, _>("instructor_email")
+            .ok()
+            .flatten(),
+        row.try_get::<Option<String>, _>("instructor_role")
+            .ok()
+            .flatten(),
     ) {
-        (Some(id), Some(username), full_name, avatar_url) => {
+        (Some(id), Some(username), full_name, avatar_url, email, role) => {
             Some(crate::repositories::courses::InstructorSummary {
                 id,
                 username,
                 full_name,
                 avatar_url,
+                email,
+                role,
             })
         }
         _ => None,

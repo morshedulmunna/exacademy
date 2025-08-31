@@ -44,6 +44,8 @@ impl From<CourseRecord> for Course {
                 username: i.username,
                 full_name: i.full_name,
                 avatar_url: i.avatar_url,
+                email: i.email,
+                role: i.role,
             }),
             published_at: record.published_at,
             created_at: record.created_at,

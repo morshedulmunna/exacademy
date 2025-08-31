@@ -7,8 +7,11 @@ import type { AdminCourseItem } from "./components/CoursesTable";
  * Course Management Page
  * Clean, component-based admin interface for managing courses
  */
-export default async function CourseManagementPage() {
-  const { success, data } = await getInstructorCoursesAction({ page: 1, per_page: 50 });
+export default async function CourseManagementPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams;
+  const page = Number((params?.page as string) || 1);
+  const per_page = Number((params?.per_page as string) || 10);
+  const { success, data } = await getInstructorCoursesAction({ page, per_page });
 
   const parseDurationHours = (duration?: string): number => {
     if (!duration) return 0;
@@ -21,19 +24,28 @@ export default async function CourseManagementPage() {
     title: c.title,
     slug: c.slug,
     excerpt: c.excerpt || "",
-    instructor: { name: c.instructor?.full_name || c.instructor?.username || "Unknown" },
+    instructor: c.instructor
+      ? {
+          name: c.instructor?.full_name || c.instructor?.username || "Unknown",
+          email: c.instructor?.email || c.instructor?.email_address,
+          avatarUrl: c.instructor?.avatar_url || c.instructor?.avatar || c.instructor?.profile_picture || c.instructor?.profile_pic_url,
+          role: c.instructor?.role || c.instructor?.title || c.instructor?.position,
+        }
+      : undefined,
     status: (c.status as any) || (c.published ? "published" : "draft"),
     price: Number(c.price || 0),
     students: Number(c.students || 0),
+    tags: Array.isArray(c.tags) ? c.tags : typeof c.tags === "string" && c.tags.length > 0 ? [c.tags] : [],
     rating: 0,
     totalLessons: Number(c.lessons || 0),
     totalDuration: parseDurationHours(c.duration),
-    category: "",
+    category: c.category || undefined,
     createdAt: c.created_at,
     image: c.thumbnail || undefined,
   });
 
   const courses: AdminCourseItem[] = success ? (data?.items || []).map(toAdminCourseItem) : [];
+  const total = success ? data?.meta?.total || courses.length : courses.length;
 
   const stats = {
     totalCourses: courses.length,
@@ -49,7 +61,7 @@ export default async function CourseManagementPage() {
       <PageHeader title="Course Management" subtitle="Manage your courses, track enrollments, and monitor performance" newCourseUrl="/admin/courses/new" />
       <CoursesKpis totalCourses={stats.totalCourses} publishedCourses={stats.publishedCourses} draftCourses={stats.draftCourses} totalStudents={stats.totalStudents} totalRevenue={stats.totalRevenue} averageRating={stats.averageRating} />
       <CoursesAnalytics totalRevenue={stats.totalRevenue} />
-      <PaginatedCoursesTable courses={courses} pageSize={10} />
+      <PaginatedCoursesTable courses={courses} total={total} page={page} pageSize={per_page} />
     </div>
   );
 }

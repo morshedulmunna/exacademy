@@ -4,10 +4,13 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Calendar, User, Eye, Edit, Trash2, Wrench } from "lucide-react";
+import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 interface Instructor {
   name: string;
   email?: string;
+  avatarUrl?: string;
+  role?: string;
 }
 
 export interface AdminCourseItem {
@@ -15,14 +18,15 @@ export interface AdminCourseItem {
   title: string;
   slug: string;
   excerpt: string;
-  instructor: Instructor;
+  instructor?: Instructor;
   status: "draft" | "published" | "archived";
   price: number;
   students: number;
   rating: number;
   totalLessons: number;
   totalDuration: number; // hours
-  category: string;
+  category?: string;
+  tags?: string[];
   createdAt: string; // ISO date
   image?: string;
 }
@@ -96,17 +100,38 @@ const CourseRow: React.FC<{ course: AdminCourseItem; onEdit: (course: AdminCours
             <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">${course.price.toFixed(2)}</span>
             <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">★ {course.rating > 0 ? course.rating.toFixed(1) : "-"}</span>
             <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">{course.totalLessons} lessons</span>
+            <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">{course.totalDuration}h</span>
             {course.category && <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">{course.category}</span>}
+            {Array.isArray(course.tags) && course.tags.length > 0 && (
+              <>
+                {course.tags.slice(0, 2).map((tag) => (
+                  <span key={tag} className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">
+                    {tag}
+                  </span>
+                ))}
+                {course.tags.length > 3 && <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:text-gray-300">+{course.tags.length - 3}</span>}
+              </>
+            )}
           </div>
         </div>
       </div>
     </td>
     <td className="px-6 py-4 align-top">
       <div className="flex items-start">
-        <User className="w-4 h-4 text-gray-400 mr-2 mt-0.5" />
+        <div className="flex-shrink-0 mr-2">
+          <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden flex items-center justify-center">
+            {course.instructor?.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={course.instructor.avatarUrl} alt={course.instructor?.name || "Instructor"} className="h-8 w-8 object-cover" />
+            ) : (
+              <User className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+            )}
+          </div>
+        </div>
         <div className="min-w-0">
           <div className="text-sm text-gray-900 dark:text-white truncate">{course.instructor?.name || "Unknown"}</div>
           {course.instructor?.email && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{course.instructor.email}</div>}
+          {course.instructor?.role && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{course.instructor.role}</div>}
         </div>
       </div>
     </td>
@@ -121,7 +146,7 @@ const CourseRow: React.FC<{ course: AdminCourseItem; onEdit: (course: AdminCours
     <td className="px-6 py-4 align-top">
       <div className="flex items-center">
         <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-        <div className="text-sm text-gray-900 dark:text-white">{new Date(course.createdAt).toLocaleDateString()}</div>
+        <div className="text-sm  text-gray-900 dark:text-white"> {formatDate(course.createdAt)} </div>
       </div>
     </td>
     <td className="px-6 py-4 align-top text-sm font-medium">
