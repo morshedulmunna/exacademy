@@ -5,10 +5,11 @@ use crate::applications::courses as service;
 use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::auth::AuthUser;
-use crate::pkg::error::AppResult;
+use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::upload::{LocalFsStorage, Storage};
 use crate::pkg::utils::multipart::MultipartForm;
 use crate::types::course_types::CreateCourseRequest;
+use tokio::fs;
 use validator::Validate;
 
 /// Parsed fields for CreateCourse assembled from multipart form.
@@ -64,11 +65,18 @@ pub async fn create_course(
 
     // File handling: support keys "thumbnail" or "file"
     let mut thumbnail_url: Option<String> = None;
+    let mut saved_disk_path: Option<std::path::PathBuf> = None; // Track for cleanup on failure
     if let Some(file) = form.file("thumbnail").or_else(|| form.file("file")) {
         let storage = LocalFsStorage::new("./uploads/courses");
         let relative_path = storage
             .save_bytes(&file.data, file.file_name.as_deref())
             .await?;
+
+        // Derive on-disk path from returned relative path and known storage root
+        if let Some(filename) = relative_path.rsplit('/').next() {
+            saved_disk_path = Some(std::path::Path::new("./uploads/courses").join(filename));
+        }
+
         let base_url = format!("http://{}:{}", ctx.system.api_host, ctx.system.api_port);
         thumbnail_url = Some(format!("{}{}", base_url, relative_path));
     }
@@ -88,12 +96,25 @@ pub async fn create_course(
         outcomes: parsed.outcomes,
     };
 
-    // Validate according to struct annotations
-    input
-        .validate()
-        .map_err(|e| crate::pkg::error::AppError::BadRequest(e.to_string()))?;
+    // Validate according to struct annotations; cleanup uploaded file on failure
+    if let Err(e) = input.validate() {
+        if let Some(path) = saved_disk_path.as_ref() {
+            let _ = fs::remove_file(path).await; // best-effort cleanup
+        }
+        return Err(AppError::BadRequest(e.to_string()));
+    }
 
-    let id = service::create_course(ctx.repos.courses.as_ref(), auth_user.user_id, input).await?;
-    let body = Response::with_data("Course created", id, StatusCode::CREATED.as_u16());
-    Ok((StatusCode::CREATED, Json(body)))
+    // Persist course; if it fails, delete any previously saved file to avoid orphaned uploads
+    match service::create_course(ctx.repos.courses.as_ref(), auth_user.user_id, input).await {
+        Ok(id) => {
+            let body = Response::with_data("Course created", id, StatusCode::CREATED.as_u16());
+            Ok((StatusCode::CREATED, Json(body)))
+        }
+        Err(err) => {
+            if let Some(path) = saved_disk_path.as_ref() {
+                let _ = fs::remove_file(path).await; // best-effort cleanup
+            }
+            Err(err)
+        }
+    }
 }

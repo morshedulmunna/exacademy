@@ -22,7 +22,8 @@ pub async fn create_course(
             published: input.published,
             status: Some(input.status.unwrap_or("draft".to_string())),
             instructor_id,
-            outcomes: input.outcomes,
+            // Ensure NOT NULL constraint: default to empty array when missing
+            outcomes: Some(input.outcomes.unwrap_or_default()),
         })
         .await?;
     Ok(id)
