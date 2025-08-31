@@ -79,11 +79,11 @@ const CourseRow: React.FC<{ course: AdminCourseItem; onEdit: (course: AdminCours
   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
     <td className="px-6 py-4 align-top">
       <div className="flex items-start">
-        <div className="flex-shrink-0 h-10 w-10">
-          <div className="h-10 w-10 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
+        <div className="flex-shrink-0 h-16 w-16">
+          <div className="h-16 w-16 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
             {course.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={course.image} alt={course.title} className="h-10 w-10 object-cover" />
+              <img src={course.image} alt={course.title} className="h-16 w-16 object-cover" />
             ) : (
               <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{course.title.charAt(0).toUpperCase()}</span>
             )}
