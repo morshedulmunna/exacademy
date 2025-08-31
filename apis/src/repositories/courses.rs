@@ -70,7 +70,7 @@ pub struct UpdateCourseRecord {
 
 #[async_trait::async_trait]
 pub trait CoursesRepository: Send + Sync {
-    async fn create(&self, input: CreateCourseRecord) -> AppResult<uuid::Uuid>;
+    async fn create(&self, input: CreateCourseRecord) -> AppResult<String>;
 
     /// List courses created by a specific instructor with pagination; returns (items, total)
     async fn list_by_instructor_paginated(

@@ -7,8 +7,8 @@ pub async fn create_course(
     repo: &dyn CoursesRepository,
     instructor_id: uuid::Uuid,
     input: CreateCourseRequest,
-) -> AppResult<uuid::Uuid> {
-    let id = repo
+) -> AppResult<String> {
+    let slug = repo
         .create(CreateCourseRecord {
             slug: input.slug,
             title: input.title,
@@ -26,5 +26,5 @@ pub async fn create_course(
             outcomes: Some(input.outcomes.unwrap_or_default()),
         })
         .await?;
-    Ok(id)
+    Ok(slug)
 }

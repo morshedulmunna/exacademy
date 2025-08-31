@@ -58,7 +58,7 @@ pub async fn create_course(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     auth_user: AuthUser,
     multipart: Multipart,
-) -> AppResult<(StatusCode, Json<Response<uuid::Uuid>>)> {
+) -> AppResult<(StatusCode, Json<Response<String>>)> {
     // Use universal multipart parser with configured upload limit
     let form = MultipartForm::parse_with_limit(multipart, ctx.system.max_upload_bytes).await?;
     let parsed = ParsedCreateCourseFields::from_form(&form)?;

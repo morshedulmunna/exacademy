@@ -11,7 +11,7 @@ pub struct PostgresCoursesRepository {
 
 #[async_trait::async_trait]
 impl CoursesRepository for PostgresCoursesRepository {
-    async fn create(&self, input: CreateCourseRecord) -> AppResult<uuid::Uuid> {
+    async fn create(&self, input: CreateCourseRecord) -> AppResult<String> {
         let rec = sqlx::query(
             r#"INSERT INTO courses (
                     slug, title, description, excerpt, thumbnail,
@@ -36,7 +36,7 @@ impl CoursesRepository for PostgresCoursesRepository {
         .fetch_one(&self.pool)
         .await
         .map_err(AppError::from)?;
-        Ok(rec.get("id"))
+        Ok(rec.get("slug"))
     }
 
     async fn list_by_instructor_paginated(
