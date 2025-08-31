@@ -155,7 +155,7 @@ const CourseRow: React.FC<{ course: AdminCourseItem; onEdit: (course: AdminCours
         <Link href={`/admin/courses/${course.slug}/builder`} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" title="Builder">
           <Wrench className="w-4 h-4" />
         </Link>
-        <Link href={`/courses/${course.slug}`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="View">
+        <Link href={`/course/${course.slug}`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="View">
           <Eye className="w-4 h-4" />
         </Link>
         <button onClick={() => onEdit(course)} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" title="Edit">
