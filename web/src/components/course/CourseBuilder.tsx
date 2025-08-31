@@ -6,6 +6,7 @@ import LessonOptionalTabs from "./builder/LessonOptionalTabs";
 import type { Module, Lesson } from "./builder/types";
 import useCourseBuilder from "./builder/useCourseBuilder";
 import { getContentIcon } from "./builder/contentIcons";
+import ConfirmDialog from "@common/ConfirmDialog";
 
 // Types moved to ./builder/types
 
@@ -32,6 +33,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     lessonActiveTab,
     setLessonActiveTab,
     submittingModuleId,
+    deleteModal,
     toggleModuleExpansion,
     handleModuleDragStart,
     handleModuleDragEnd,
@@ -51,6 +53,10 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     createLesson,
     updateLesson,
     deleteLesson,
+    openDeleteModuleModal,
+    openDeleteLessonModal,
+    closeDeleteModal,
+    confirmDelete,
     addContentToLesson,
     addQuestion,
     updateQuestion,
@@ -164,9 +170,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm("Delete this module and all its lessons? This action cannot be undone.")) {
-                      deleteModule(module.id);
-                    }
+                    openDeleteModuleModal(module.id);
                   }}
                   className="p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400"
                   aria-label="Delete module"
@@ -291,9 +295,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                           <button
                             type="button"
                             onClick={() => {
-                              if (window.confirm("Delete this lesson? This action cannot be undone.")) {
-                                deleteLesson(module.id, lesson.id);
-                              }
+                              openDeleteLessonModal(module.id, lesson.id);
                             }}
                             className="p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400"
                             aria-label="Delete lesson"
@@ -435,6 +437,17 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
           <p>No modules created yet. Click "Add Module" to get started.</p>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deleteModal.isOpen}
+        title={deleteModal.target?.kind === "lesson" ? "Delete Lesson" : "Delete Module"}
+        description={deleteModal.target?.kind === "lesson" ? "Are you sure you want to delete this lesson? This action cannot be undone." : "Are you sure you want to delete this module and all its lessons? This action cannot be undone."}
+        variant="danger"
+        confirmText="Delete"
+        cancelText="Cancel"
+        onCancel={closeDeleteModal}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

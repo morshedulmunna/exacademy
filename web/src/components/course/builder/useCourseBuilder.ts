@@ -22,6 +22,9 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   const [draggedLesson, setDraggedLesson] = useState<{ moduleId: string; lessonId: string } | null>(null);
   const [lessonActiveTab, setLessonActiveTab] = useState<Record<string, LessonTab>>({});
   const [submittingModuleId, setSubmittingModuleId] = useState<string | null>(null);
+  // Delete confirmation modal state
+  type DeleteTarget = { kind: "module"; moduleId: string } | { kind: "lesson"; moduleId: string; lessonId: string };
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; target: DeleteTarget | null }>({ isOpen: false, target: null });
 
   useEffect(() => {
     loadModules();
@@ -158,8 +161,11 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     }
   };
 
+  /**
+   * Permanently remove a module and its lessons from local state.
+   * Caller is expected to confirm with the user before invoking.
+   */
   const deleteModule = async (moduleId: string) => {
-    if (!confirm("Are you sure you want to delete this module? This will also delete all lessons within it.")) return;
     try {
       const next = modules.filter((m) => m.id !== moduleId);
       setModules(next);
@@ -312,14 +318,55 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     }
   };
 
+  /**
+   * Permanently remove a lesson from a module in local state.
+   * Caller is expected to confirm with the user before invoking.
+   */
   const deleteLesson = async (moduleId: string, lessonId: string) => {
-    if (!confirm("Are you sure you want to delete this lesson?")) return;
     try {
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m));
       setModules(next);
       onModulesChange?.(next);
     } catch (error) {
       console.error("Error deleting lesson:", error);
+    }
+  };
+
+  /**
+   * Open the delete confirmation modal for a module.
+   */
+  const openDeleteModuleModal = (moduleId: string) => {
+    setDeleteModal({ isOpen: true, target: { kind: "module", moduleId } });
+  };
+
+  /**
+   * Open the delete confirmation modal for a lesson.
+   */
+  const openDeleteLessonModal = (moduleId: string, lessonId: string) => {
+    setDeleteModal({ isOpen: true, target: { kind: "lesson", moduleId, lessonId } });
+  };
+
+  /**
+   * Close the delete confirmation modal without taking action.
+   */
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, target: null });
+  };
+
+  /**
+   * Confirm current deletion in the modal and perform the action.
+   */
+  const confirmDelete = async () => {
+    const target = deleteModal.target;
+    if (!target) return;
+    try {
+      if (target.kind === "module") {
+        await deleteModule(target.moduleId);
+      } else {
+        await deleteLesson(target.moduleId, target.lessonId);
+      }
+    } finally {
+      setDeleteModal({ isOpen: false, target: null });
     }
   };
 
@@ -613,6 +660,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     lessonActiveTab,
     setLessonActiveTab,
     submittingModuleId,
+    deleteModal,
     // actions
     toggleModuleExpansion,
     handleModuleDragStart,
@@ -634,6 +682,10 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     createModuleAndAllLessons,
     updateLesson,
     deleteLesson,
+    openDeleteModuleModal,
+    openDeleteLessonModal,
+    closeDeleteModal,
+    confirmDelete,
     addContentToLesson,
     addQuestion,
     updateQuestion,
