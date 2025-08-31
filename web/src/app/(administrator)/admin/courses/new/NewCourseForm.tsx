@@ -2,9 +2,7 @@
 
 import React from "react";
 import RichTextEditor from "@/components/rich-text-editor";
-import { generateSlug } from "@/lib/utils";
-import API from "@/configs/api.config";
-import { API_ENDPOINTS } from "@/configs/api-path";
+import { generateFormDataFromObject, generateSlug } from "@/lib/utils";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { DollarSign, Clock, Hash, Tag as TagIcon, X } from "lucide-react";
 import { useFormik } from "formik";
@@ -22,6 +20,7 @@ export default function NewCourseForm() {
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagInput, setTagInput] = React.useState("");
   const [outcomeInput, setOutcomeInput] = React.useState("");
+  const [thumbnailFile, setThumbnailFile] = React.useState<File | null>(null);
 
   const formik = useFormik({
     initialValues: {
@@ -86,11 +85,12 @@ export default function NewCourseForm() {
         featured: formik.values.featured,
         published: publishFlag,
         excerpt: formik.values.excerpt.trim() || undefined,
-        thumbnail: formik.values.thumbnail.trim() || undefined,
+        thumbnail: formik.values.thumbnail || undefined,
         outcomes: formik.values.outcomes,
       };
-      console.log(payload, "New Course Payload _________ ");
-      const res = await createCourseAction(payload);
+      const generateFormData = generateFormDataFromObject(payload);
+
+      const res = await createCourseAction(generateFormData);
       console.log(res, "res_ create course");
       // window.location.href = `/admin/courses/${res.data.id}/builder`;
     } catch (err: any) {
@@ -364,8 +364,15 @@ export default function NewCourseForm() {
               aspectRatio="video"
               showPreview={true}
               placeholder="Drag & drop image here or click to upload"
-              onImageUploaded={(file) => formik.setFieldValue("thumbnail", file.original)}
-              onImageRemoved={() => formik.setFieldValue("thumbnail", "")}
+              onImageUploaded={(file) => {
+                console.log(file);
+                formik.setFieldValue("thumbnail", file.file as File);
+                if (file?.file) setThumbnailFile(file.file as File);
+              }}
+              onImageRemoved={() => {
+                formik.setFieldValue("thumbnail", "");
+                setThumbnailFile(null);
+              }}
             />
             {(formik.touched.thumbnail || formik.submitCount > 0) && formik.errors.thumbnail && <p className="mt-2 text-xs text-red-600">{String(formik.errors.thumbnail)}</p>}
           </div>

@@ -64,7 +64,7 @@ export default function ImageUpload({ category = "blog", onImageUploaded, onImag
       setPreviewUrl(url);
       setFileMeta({ filename: file.name, size: file.size });
       setError(null);
-      onImageUploaded?.({ original: url, webp: url, filename: file.name, size: file.size });
+      onImageUploaded?.({ file, original: url, webp: url, filename: file.name, size: file.size, type: file.type });
     }
   };
 
@@ -81,7 +81,7 @@ export default function ImageUpload({ category = "blog", onImageUploaded, onImag
       setPreviewUrl(url);
       setFileMeta({ filename: file.name, size: file.size });
       setError(null);
-      onImageUploaded?.({ original: url, webp: url, filename: file.name, size: file.size });
+      onImageUploaded?.({ file, original: url, webp: url, filename: file.name, size: file.size, type: file.type });
     }
   };
 

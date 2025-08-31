@@ -6,6 +6,41 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Convert a JS object into FormData
+ * Supports nested objects and arrays
+ */
+export function generateFormDataFromObject(obj: Record<string, any>, form?: FormData, namespace?: string): FormData {
+  const formData = form || new FormData();
+
+  for (let key in obj) {
+    if (!obj.hasOwnProperty(key)) continue;
+
+    const value = obj[key];
+    const formKey = namespace ? `${namespace}[${key}]` : key;
+
+    if (value instanceof Date) {
+      formData.append(formKey, value.toISOString());
+    } else if (value instanceof File || value instanceof Blob) {
+      formData.append(formKey, value);
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        if (typeof item === "object" && !(item instanceof File)) {
+          generateFormDataFromObject(item, formData, `${formKey}[${index}]`);
+        } else {
+          formData.append(`${formKey}[${index}]`, item);
+        }
+      });
+    } else if (typeof value === "object" && value !== null) {
+      generateFormDataFromObject(value, formData, formKey);
+    } else if (value !== undefined && value !== null) {
+      formData.append(formKey, value);
+    }
+  }
+
+  return formData;
+}
+
+/**
  * Generate a URL-friendly slug from a string
  */
 export function generateSlug(text: string): string {

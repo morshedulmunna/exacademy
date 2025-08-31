@@ -10,7 +10,11 @@ import { DataObj, ErrorObj } from "@/lib/utils";
  */
 export async function createCourseAction(payload: any) {
   try {
-    const res = await API.post(API_ENDPOINTS.COURSES.CREATE, payload);
+    const res = await API.post(API_ENDPOINTS.COURSES.CREATE, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return DataObj(res) as any;
   } catch (error) {
     return ErrorObj(error) as any;
