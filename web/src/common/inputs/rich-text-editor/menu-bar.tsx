@@ -4,7 +4,7 @@ import type {} from "@tiptap/extension-text-align";
 import type {} from "@tiptap/extension-highlight";
 import type {} from "@tiptap/extension-underline";
 import type {} from "@tiptap/extension-link";
-import { Toggle } from "../ui/toggle";
+import { Toggle } from "@/components/ui/toggle";
 
 export default function MenuBar({ editor }: { editor: Editor | null }) {
   if (!editor) {

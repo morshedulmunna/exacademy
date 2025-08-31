@@ -1,16 +1,23 @@
 "use client";
 
 import React from "react";
-import RichTextEditor from "@/components/rich-text-editor";
 import { generateFormDataFromObject, generateSlug } from "@/lib/utils";
-import ImageUpload from "@/components/ui/ImageUpload";
-import { DollarSign, Clock, Hash, Tag as TagIcon, X } from "lucide-react";
+import ImageUpload from "@/common/inputs/ImageUpload";
+import { DollarSign, Clock } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createCourseAction } from "@/actions/courses/create.action";
 import { updateCourseAction } from "@/actions/courses/update.action";
 import API from "@/configs/api.config";
 import { useRouter } from "next/navigation";
+import TextInput from "@/common/inputs/TextInput";
+import TextArea from "@/common/inputs/TextArea";
+import TagInput from "@/common/inputs/TagInput";
+import ChipsInput from "@/common/inputs/ChipsInput";
+import SlugInput from "@/common/inputs/SlugInput";
+import Checkbox from "@/common/inputs/Checkbox";
+import Select from "@/common/inputs/Select";
+import RichTextEditor from "@/common/inputs/rich-text-editor";
 
 /**
  * NewCourseForm
@@ -39,8 +46,6 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [tags, setTags] = React.useState<string[]>(course?.tags || []);
-  const [tagInput, setTagInput] = React.useState("");
-  const [outcomeInput, setOutcomeInput] = React.useState("");
   const [thumbnailFile, setThumbnailFile] = React.useState<File | null>(null);
   const [slugStatus, setSlugStatus] = React.useState<"idle" | "checking" | "available" | "taken">("idle");
 
@@ -253,90 +258,40 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
             <p className="text-sm text-gray-500 mt-1">Title, slug and a short summary.</p>
           </div>
           <div className="p-6 space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
-              <input
-                name="title"
-                value={formik.values.title}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                required
-                placeholder="Course title"
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {(formik.touched.title || formik.submitCount > 0) && formik.errors.title && <p className="mt-1 text-xs text-red-600">{formik.errors.title}</p>}
-            </div>
+            <TextInput name="title" label="Title" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} required placeholder="Course title" error={formik.touched.title || formik.submitCount > 0 ? (formik.errors.title as string) : undefined} />
             <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Slug</label>
-                <input
+                <SlugInput
                   name="slug"
+                  label="Slug"
                   value={formik.values.slug}
-                  onChange={(e) => {
-                    const v = sanitizeSlugInput(e.target.value);
-                    formik.setFieldValue("slug", v);
-                    setSlugManual(v.length > 0);
+                  onChange={(v) => {
+                    const sanitized = sanitizeSlugInput(v);
+                    formik.setFieldValue("slug", sanitized);
+                    setSlugManual(sanitized.length > 0);
                   }}
-                  onBlur={(e) => {
-                    formik.handleBlur(e);
-                    if (formik.values.slug) {
-                      const fixed = finalizeSlug(formik.values.slug);
-                      if (fixed !== formik.values.slug) formik.setFieldValue("slug", fixed);
-                    }
-                    if (!formik.values.slug) setSlugManual(false);
+                  onBlurFinalize={(val) => {
+                    const fixed = finalizeSlug(val);
+                    if (!fixed) setSlugManual(false);
+                    return fixed;
                   }}
-                  placeholder="auto-from-title if empty"
-                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  preview={computedSlug}
+                  error={formik.touched.slug || formik.submitCount > 0 ? (formik.errors.slug as string) : undefined}
                 />
-                <p className="mt-1 text-[11px] text-gray-500">Preview: {computedSlug || "(empty)"}</p>
-                {(formik.touched.slug || formik.submitCount > 0) && formik.errors.slug && <p className="mt-1 text-xs text-red-600">{String(formik.errors.slug)}</p>}
               </div>
 
-              <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Tags</label>
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && tagInput.trim()) {
-                          e.preventDefault();
-                          if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
-                          setTagInput("");
-                        }
-                      }}
-                      placeholder="Add a tag and press Enter"
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-                {tags.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {tags.map((t, i) => (
-                      <span key={`${t}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 text-xs">
-                        #{t}
-                        <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Remove ${t}`} className="ml-1 text-blue-500 hover:text-blue-700">
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <TagInput label="Tags" tags={tags} onChange={setTags} />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Excerpt</label>
-              <textarea
+              <TextArea
                 name="excerpt"
+                label="Excerpt"
                 value={formik.values.excerpt}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="Short summary (optional)"
-                className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                error={formik.touched.excerpt || formik.submitCount > 0 ? (formik.errors.excerpt as string) : undefined}
               />
-              {(formik.touched.excerpt || formik.submitCount > 0) && formik.errors.excerpt && <p className="mt-1 text-xs text-red-600">{formik.errors.excerpt}</p>}
             </div>
           </div>
         </section>
@@ -348,116 +303,56 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
           </div>
           <div className="p-6 space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Price (USD)</label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    name="price"
-                    value={formik.values.price}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    required
-                    placeholder="99.00"
-                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {(formik.touched.price || formik.submitCount > 0) && formik.errors.price && <p className="mt-1 text-xs text-red-600">{String(formik.errors.price)}</p>}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Original price (optional)</label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    name="originalPrice"
-                    value={formik.values.originalPrice}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="129.00"
-                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {(formik.touched.originalPrice || formik.submitCount > 0) && formik.errors.originalPrice && <p className="mt-1 text-xs text-red-600">{String(formik.errors.originalPrice)}</p>}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Duration</label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    name="duration"
-                    value={formik.values.duration}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    required
-                    placeholder="e.g. 12h"
-                    className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {(formik.touched.duration || formik.submitCount > 0) && formik.errors.duration && <p className="mt-1 text-xs text-red-600">{formik.errors.duration}</p>}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Category</label>
-                <input
-                  name="category"
-                  value={formik.values.category}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  placeholder="e.g. Web Development"
-                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm"
-                />
-                {(formik.touched.category || formik.submitCount > 0) && formik.errors.category && <p className="mt-1 text-xs text-red-600">{String(formik.errors.category)}</p>}
-              </div>
+              <TextInput
+                name="price"
+                label="Price (USD)"
+                value={formik.values.price}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur as any}
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                placeholder="99.00"
+                leftIcon={<DollarSign className="h-4 w-4 text-gray-400" />}
+                error={formik.touched.price || formik.submitCount > 0 ? (formik.errors.price as any) : undefined}
+              />
+              <TextInput
+                name="originalPrice"
+                label="Original price (optional)"
+                value={formik.values.originalPrice as any}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur as any}
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="129.00"
+                leftIcon={<DollarSign className="h-4 w-4 text-gray-400" />}
+                error={formik.touched.originalPrice || formik.submitCount > 0 ? (formik.errors.originalPrice as any) : undefined}
+              />
+              <TextInput
+                name="duration"
+                label="Duration"
+                value={formik.values.duration}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                required
+                placeholder="e.g. 12h"
+                leftIcon={<Clock className="h-4 w-4 text-gray-400" />}
+                error={formik.touched.duration || formik.submitCount > 0 ? (formik.errors.duration as string) : undefined}
+              />
+              <TextInput
+                name="category"
+                label="Category"
+                value={formik.values.category}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="e.g. Web Development"
+                error={formik.touched.category || formik.submitCount > 0 ? (formik.errors.category as any) : undefined}
+              />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Learning outcomes</label>
-              <div className="mt-1 flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    value={outcomeInput}
-                    onChange={(e) => setOutcomeInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && outcomeInput.trim()) {
-                        e.preventDefault();
-                        formik.setFieldValue("outcomes", [...(formik.values.outcomes || []), outcomeInput.trim()]);
-                        setOutcomeInput("");
-                      }
-                    }}
-                    placeholder="Add an outcome and press Enter"
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              {formik.values.outcomes.length > 0 && (
-                <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {formik.values.outcomes.map((o, i) => (
-                    <li key={`${o}-${i}`} className="text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-md px-3 py-2 flex items-start justify-between gap-2">
-                      <span className="truncate">{o}</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          formik.setFieldValue(
-                            "outcomes",
-                            formik.values.outcomes.filter((_, idx) => idx !== i)
-                          )
-                        }
-                        aria-label={`Remove ${o}`}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            <ChipsInput label="Learning outcomes" values={formik.values.outcomes} onChange={(next) => formik.setFieldValue("outcomes", next)} inputPlaceholder="Add an outcome and press Enter" />
             {/* Featured toggle moved to the right-side panel */}
           </div>
         </section>
@@ -507,18 +402,18 @@ export default function NewCourseForm({ mode = "create", course }: { mode?: "cre
           </div>
           <div className="p-5 space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">Featured</span>
-                <input id="featured" checked={formik.values.featured} onChange={(e) => formik.setFieldValue("featured", e.target.checked)} name="featured" type="checkbox" className="h-4 w-4" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                <select name="status" value={formik.values.status} onChange={(e) => formik.setFieldValue("status", e.target.value)} className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm">
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
+              <Checkbox id="featured" name="featured" label="Featured" checked={formik.values.featured} onChange={(e) => formik.setFieldValue("featured", e.target.checked)} />
+              <Select
+                name="status"
+                label="Status"
+                value={formik.values.status}
+                onChange={(e) => formik.setFieldValue("status", e.target.value)}
+                options={[
+                  { value: "draft", label: "Draft" },
+                  { value: "published", label: "Published" },
+                  { value: "archived", label: "Archived" },
+                ]}
+              />
             </div>
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
               <div>

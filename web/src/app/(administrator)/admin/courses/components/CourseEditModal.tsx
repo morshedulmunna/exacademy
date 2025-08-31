@@ -4,7 +4,7 @@ import React from "react";
 import Modal from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { updateCourseAction } from "@/actions/courses/update.action";
-import ImageUpload from "@/components/ui/ImageUpload";
+import ImageUpload from "@/common/inputs/ImageUpload";
 
 interface CourseEditModalProps {
   isOpen: boolean;
