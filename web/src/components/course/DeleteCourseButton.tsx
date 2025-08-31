@@ -57,32 +57,6 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
         <Trash2 className="w-4 h-4" />
       </button>
 
-      {/* Success Message */}
-      {success && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0">
-                <div className="h-6 w-6 text-green-600">✓</div>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Success</h3>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-sm text-gray-600 dark:text-gray-400">{success}</p>
-            </div>
-
-            <div className="flex justify-end">
-              <button onClick={() => router.refresh()} className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Confirmation Modal */}
       {showConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -120,6 +94,16 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
                 {isDeleting ? "Deleting..." : "Delete Course"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Loader Overlay */}
+      {isDeleting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="flex flex-col items-center space-y-3">
+            <div className="h-10 w-10 rounded-full border-4 border-white/30 border-t-white animate-spin" aria-hidden="true" />
+            <p className="text-white text-sm">Deleting "{courseTitle}"...</p>
           </div>
         </div>
       )}
