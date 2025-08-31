@@ -91,8 +91,7 @@ export default function NewCourseForm() {
       const generateFormData = generateFormDataFromObject(payload);
 
       const res = await createCourseAction(generateFormData);
-      console.log(res, "res_ create course");
-      // window.location.href = `/admin/courses/${res.data.id}/builder`;
+      window.location.href = `/admin/courses/${res.data}/builder`;
     } catch (err: any) {
       setError(err?.message || "Failed to create course");
     } finally {
