@@ -142,7 +142,18 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                     }}
                   />
                 ) : (
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">{module.title}</h3>
+                  <h3
+                    className="text-lg font-medium text-gray-900 dark:text-white cursor-text"
+                    onClick={() => setEditingModule(module.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") setEditingModule(module.id);
+                    }}
+                    title="Click to rename module"
+                  >
+                    {module.title}
+                  </h3>
                 )}
               </div>
 
@@ -249,9 +260,27 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
                               }}
                               className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                               autoFocus
+                              onFocus={(e) => {
+                                requestAnimationFrame(() => {
+                                  try {
+                                    e.currentTarget.select();
+                                  } catch {}
+                                });
+                              }}
                             />
                           ) : (
-                            <h5 className="font-medium text-gray-900 dark:text-white">{lesson.title}</h5>
+                            <h5
+                              className="font-medium text-gray-900 dark:text-white cursor-text"
+                              onClick={() => setEditingLesson(lesson.id)}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") setEditingLesson(lesson.id);
+                              }}
+                              title="Click to rename lesson"
+                            >
+                              {lesson.title}
+                            </h5>
                           )}
                         </div>
 
