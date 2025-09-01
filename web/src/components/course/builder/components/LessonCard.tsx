@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Edit, Trash2, Play, GripVertical } from "lucide-react";
+import { Edit, Trash2, Play, GripVertical, ChevronDown, ChevronRight } from "lucide-react";
 import type { Lesson } from "../types";
 import LessonOptionalTabs from "../LessonOptionalTabs";
 
@@ -9,6 +9,7 @@ export interface LessonCardProps {
   courseId?: string;
   moduleId: string;
   lesson: Lesson;
+  isExpanded: boolean;
   isDragging: boolean;
   editingLessonId: string | null;
   setEditingLesson: (id: string | null) => void;
@@ -18,6 +19,8 @@ export interface LessonCardProps {
   handleLessonDragOver: (e: React.DragEvent) => void;
   handleLessonDragLeave: (e: React.DragEvent) => void;
   handleLessonDrop: (e: React.DragEvent, targetModuleId: string, targetLessonId: string) => void;
+  // Expansion
+  toggleLessonExpansion: (lessonId: string) => void;
   // CRUD
   updateLesson: (moduleId: string, lessonId: string, data: Partial<Lesson>) => void;
   openDeleteLessonModal: (moduleId: string, lessonId: string) => void;
@@ -43,6 +46,7 @@ export default function LessonCard({
   courseId,
   moduleId,
   lesson,
+  isExpanded,
   isDragging,
   editingLessonId,
   setEditingLesson,
@@ -51,6 +55,7 @@ export default function LessonCard({
   handleLessonDragOver,
   handleLessonDragLeave,
   handleLessonDrop,
+  toggleLessonExpansion,
   updateLesson,
   openDeleteLessonModal,
   lessonActiveTab,
@@ -82,6 +87,17 @@ export default function LessonCard({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
           <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-move hover:text-gray-600 dark:hover:text-gray-300 transition-colors" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => toggleLessonExpansion(lesson.id)}
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            aria-expanded={isExpanded}
+            aria-controls={`lesson-${lesson.id}`}
+            aria-label={`${isExpanded ? "Collapse" : "Expand"} lesson ${lesson.title}`}
+            title={`${isExpanded ? "Collapse" : "Expand"} lesson`}
+          >
+            {isExpanded ? <ChevronDown className="w-4 h-4" aria-hidden="true" /> : <ChevronRight className="w-4 h-4" aria-hidden="true" />}
+          </button>
           <Play className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
           {editingLessonId === lesson.id ? (
             <input
@@ -132,142 +148,146 @@ export default function LessonCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-          <textarea
-            defaultValue={lesson.description || ""}
-            onBlur={(e) => updateLesson(moduleId, lesson.id, { description: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            rows={7}
-            placeholder="Enter lesson description..."
-          />
-        </div>
-
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex items-center gap-2">
-              <input type="radio" name={`video_source_${lesson.id}`} checked={(lesson.video_source ?? "url") === "url"} onChange={() => updateLesson(moduleId, lesson.id, { video_source: "url", video_file: null })} className="text-blue-600" />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Use Video URL</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" name={`video_source_${lesson.id}`} checked={(lesson.video_source ?? "url") === "file"} onChange={() => updateLesson(moduleId, lesson.id, { video_source: "file" })} className="text-blue-600" />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Upload Video File</span>
-            </label>
-          </div>
-
-          {(lesson.video_source ?? "url") === "url" ? (
+      {isExpanded && (
+        <div id={`lesson-${lesson.id}`} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Video URL</label>
-              <input
-                type="url"
-                defaultValue={lesson.video_url || ""}
-                onBlur={(e) => updateLesson(moduleId, lesson.id, { video_url: e.target.value })}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <textarea
+                defaultValue={lesson.description || ""}
+                onBlur={(e) => updateLesson(moduleId, lesson.id, { description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="https://..."
-              />
-            </div>
-          ) : (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Video File</label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => {
-                  const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-                  updateLesson(moduleId, lesson.id, { video_file: file });
-                }}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-              {lesson.video_file ? (
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  Selected: {lesson.video_file.name} ({Math.round(lesson.video_file.size / 1024)} KB)
-                </p>
-              ) : null}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration</label>
-              <input
-                type="text"
-                defaultValue={lesson.duration}
-                onBlur={(e) => updateLesson(moduleId, lesson.id, { duration: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="5m"
+                rows={7}
+                placeholder="Enter lesson description..."
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" checked={lesson.is_free} onChange={(e) => updateLesson(moduleId, lesson.id, { is_free: e.target.checked })} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Free</span>
-              </label>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex items-center gap-2">
+                  <input type="radio" name={`video_source_${lesson.id}`} checked={(lesson.video_source ?? "url") === "url"} onChange={() => updateLesson(moduleId, lesson.id, { video_source: "url", video_file: null })} className="text-blue-600" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Use Video URL</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="radio" name={`video_source_${lesson.id}`} checked={(lesson.video_source ?? "url") === "file"} onChange={() => updateLesson(moduleId, lesson.id, { video_source: "file" })} className="text-blue-600" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Upload Video File</span>
+                </label>
+              </div>
 
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" checked={lesson.published} onChange={(e) => updateLesson(moduleId, lesson.id, { published: e.target.checked })} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Published</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
+              {(lesson.video_source ?? "url") === "url" ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Video URL</label>
+                  <input
+                    type="url"
+                    defaultValue={lesson.video_url || ""}
+                    onBlur={(e) => updateLesson(moduleId, lesson.id, { video_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="https://..."
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Video File</label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => {
+                      const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+                      updateLesson(moduleId, lesson.id, { video_file: file });
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                  {lesson.video_file ? (
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      Selected: {lesson.video_file.name} ({Math.round(lesson.video_file.size / 1024)} KB)
+                    </p>
+                  ) : null}
+                </div>
+              )}
 
-      <div className="mt-6 space-y-3">
-        {(() => {
-          const tabs: Array<{ key: "resources" | "questions" | "assignment"; label: string; count?: number }> = [];
-          const resourcesCount = lesson.contents?.length ?? 0;
-          const questionsCount = lesson.questions?.length ?? 0;
-          const hasAssignment = !!lesson.assignment;
-          if (resourcesCount > 0 || lessonActiveTab[lesson.id] === "resources") tabs.push({ key: "resources", label: `Resources${resourcesCount ? ` (${resourcesCount})` : ""}` });
-          if (questionsCount > 0) tabs.push({ key: "questions", label: `Questions${questionsCount ? ` (${questionsCount})` : ""}` });
-          if (hasAssignment) tabs.push({ key: "assignment", label: "Assignment" });
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration</label>
+                  <input
+                    type="text"
+                    defaultValue={lesson.duration}
+                    onBlur={(e) => updateLesson(moduleId, lesson.id, { duration: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="5m"
+                  />
+                </div>
 
-          if (tabs.length === 0) {
-            return (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Add optional content to this lesson:</p>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setLessonActiveTab((p) => ({ ...p, [lesson.id]: "resources" }))} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600" aria-label="Add resources">
-                    Add Resources
-                  </button>
-                  <button type="button" onClick={() => addQuestion(moduleId, lesson.id)} className="px-2 py-1 text-xs rounded bg-blue-600 text-white" aria-label="Add question">
-                    Add Question
-                  </button>
-                  <button type="button" onClick={() => enableAssignment(moduleId, lesson.id)} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600" aria-label="Add assignment">
-                    Add Assignment
-                  </button>
+                <div className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" checked={lesson.is_free} onChange={(e) => updateLesson(moduleId, lesson.id, { is_free: e.target.checked })} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Free</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" checked={lesson.published} onChange={(e) => updateLesson(moduleId, lesson.id, { published: e.target.checked })} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Published</span>
+                  </label>
                 </div>
               </div>
-            );
-          }
+            </div>
+          </div>
 
-          const active = lessonActiveTab[lesson.id] ?? tabs[0]?.key ?? null;
+          <div className="mt-6 space-y-3">
+            {(() => {
+              const tabs: Array<{ key: "resources" | "questions" | "assignment"; label: string; count?: number }> = [];
+              const resourcesCount = lesson.contents?.length ?? 0;
+              const questionsCount = lesson.questions?.length ?? 0;
+              const hasAssignment = !!lesson.assignment;
+              if (resourcesCount > 0 || lessonActiveTab[lesson.id] === "resources") tabs.push({ key: "resources", label: `Resources${resourcesCount ? ` (${resourcesCount})` : ""}` });
+              if (questionsCount > 0) tabs.push({ key: "questions", label: `Questions${questionsCount ? ` (${questionsCount})` : ""}` });
+              if (hasAssignment) tabs.push({ key: "assignment", label: "Assignment" });
 
-          return (
-            <LessonOptionalTabs
-              courseId={courseId}
-              moduleId={moduleId}
-              lesson={lesson}
-              activeTab={active}
-              onChangeActiveTab={(lessonId, tab) => setLessonActiveTab((p) => ({ ...p, [lessonId]: tab }))}
-              addContentToLesson={addContentToLesson}
-              addQuestion={addQuestion}
-              updateQuestion={updateQuestion}
-              deleteQuestion={deleteQuestion}
-              addOption={addOption}
-              updateOptionText={updateOptionText}
-              setCorrectOption={setCorrectOption}
-              deleteOption={deleteOption}
-              enableAssignment={enableAssignment}
-              removeAssignment={removeAssignment}
-              updateAssignmentField={updateAssignmentField}
-              getContentIcon={getContentIcon}
-            />
-          );
-        })()}
-      </div>
+              if (tabs.length === 0) {
+                return (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Add optional content to this lesson:</p>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => setLessonActiveTab((p) => ({ ...p, [lesson.id]: "resources" }))} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600" aria-label="Add resources">
+                        Add Resources
+                      </button>
+                      <button type="button" onClick={() => addQuestion(moduleId, lesson.id)} className="px-2 py-1 text-xs rounded bg-blue-600 text-white" aria-label="Add question">
+                        Add Question
+                      </button>
+                      <button type="button" onClick={() => enableAssignment(moduleId, lesson.id)} className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600" aria-label="Add assignment">
+                        Add Assignment
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              const active = lessonActiveTab[lesson.id] ?? tabs[0]?.key ?? null;
+
+              return (
+                <LessonOptionalTabs
+                  courseId={courseId}
+                  moduleId={moduleId}
+                  lesson={lesson}
+                  activeTab={active}
+                  onChangeActiveTab={(lessonId, tab) => setLessonActiveTab((p) => ({ ...p, [lessonId]: tab }))}
+                  addContentToLesson={addContentToLesson}
+                  addQuestion={addQuestion}
+                  updateQuestion={updateQuestion}
+                  deleteQuestion={deleteQuestion}
+                  addOption={addOption}
+                  updateOptionText={updateOptionText}
+                  setCorrectOption={setCorrectOption}
+                  deleteOption={deleteOption}
+                  enableAssignment={enableAssignment}
+                  removeAssignment={removeAssignment}
+                  updateAssignmentField={updateAssignmentField}
+                  getContentIcon={getContentIcon}
+                />
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

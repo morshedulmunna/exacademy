@@ -33,6 +33,7 @@ use utoipa::{Modify, OpenApi};
         crate::interfaces::http::handlers::courses::delete_course::delete_course,
         // Modules
         crate::interfaces::http::handlers::modules::list_modules::list_modules,
+        crate::interfaces::http::handlers::modules::list_modules_deep::list_modules_deep,
         crate::interfaces::http::handlers::modules::create_module::create_module,
         crate::interfaces::http::handlers::modules::update_module::update_module,
         crate::interfaces::http::handlers::modules::delete_module::delete_module,

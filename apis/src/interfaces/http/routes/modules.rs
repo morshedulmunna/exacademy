@@ -11,7 +11,7 @@ pub fn router() -> Router {
         .route("/api/courses/:course_id/modules", post(h::create_module))
         .route(
             "/api/courses/:course_id/modules/deep",
-            post(h::create_module_deep),
+            get(h::list_modules_deep).post(h::create_module_deep),
         )
         .route("/api/modules/:id", patch(h::update_module))
         .route("/api/modules/:id", delete(h::delete_module))

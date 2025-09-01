@@ -12,17 +12,17 @@ import ModuleCard from "./builder/components/ModuleCard";
 
 export interface CourseBuilderProps {
   courseId?: string;
-  onModulesChange?: (modules: Module[]) => void;
   className?: string;
 }
 
 /**
  * Comprehensive course builder component with drag-and-drop functionality
  */
-export default function CourseBuilder({ courseId, onModulesChange, className = "" }: CourseBuilderProps) {
+export default function CourseBuilder({ courseId, className = "" }: CourseBuilderProps) {
   const {
     modules,
     expandedModules,
+    expandedLessons,
     editingModule,
     setEditingModule,
     editingLesson,
@@ -35,6 +35,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     submittingModuleId,
     deleteModal,
     toggleModuleExpansion,
+    toggleLessonExpansion,
     handleModuleDragStart,
     handleModuleDragEnd,
     handleModuleDragOver,
@@ -45,14 +46,11 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     handleLessonDragOver,
     handleLessonDragLeave,
     handleLessonDrop,
-    createModule,
     createModuleWithLesson,
     createModuleAndAllLessons,
     updateModule,
-    deleteModule,
     createLesson,
     updateLesson,
-    deleteLesson,
     openDeleteModuleModal,
     openDeleteLessonModal,
     closeDeleteModal,
@@ -68,7 +66,7 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
     enableAssignment,
     removeAssignment,
     updateAssignmentField,
-  } = useCourseBuilder({ courseId, onModulesChange });
+  } = useCourseBuilder({ courseId });
 
   if (isLoading) {
     return (
@@ -107,6 +105,8 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
             handleModuleDragLeave={handleModuleDragLeave}
             handleModuleDrop={handleModuleDrop}
             toggleModuleExpansion={toggleModuleExpansion}
+            expandedLessons={expandedLessons}
+            toggleLessonExpansion={toggleLessonExpansion}
             editingModuleId={editingModule}
             setEditingModule={setEditingModule}
             updateModule={updateModule}
@@ -141,9 +141,17 @@ export default function CourseBuilder({ courseId, onModulesChange, className = "
         ))}
       </div>
 
-      {modules.length === 0 && (
+      {modules.length === 0 && !isLoading && (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <p>No modules created yet. Click "Add Module" to get started.</p>
+        </div>
+      )}
+
+      {modules.length > 0 && (
+        <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+          <p>
+            {modules.length} module{modules.length !== 1 ? "s" : ""} loaded. You can edit existing modules or create new ones.
+          </p>
         </div>
       )}
 

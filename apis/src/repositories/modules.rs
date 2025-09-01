@@ -115,4 +115,7 @@ pub trait ModulesRepository: Send + Sync {
     /// Create a module and all of its nested lessons (plus lesson contents, questions/options,
     /// and optional assignment) within a single ACID transaction, returning the full created graph.
     async fn create_deep(&self, input: CreateModuleDeepRecord) -> AppResult<ModuleDeepRecord>;
+
+    /// List all modules for a course with their nested lessons, contents, questions, and assignments.
+    async fn list_by_course_deep(&self, course_id: uuid::Uuid) -> AppResult<Vec<ModuleDeepRecord>>;
 }

@@ -19,6 +19,9 @@ export interface ModuleCardProps {
   handleModuleDrop: (e: React.DragEvent, targetModuleId: string) => void;
   // Expansion
   toggleModuleExpansion: (moduleId: string) => void;
+  // Lesson expansion
+  expandedLessons: Set<string>;
+  toggleLessonExpansion: (lessonId: string) => void;
   // Module edit state/actions
   editingModuleId: string | null;
   setEditingModule: (id: string | null) => void;
@@ -66,6 +69,8 @@ export default function ModuleCard({
   handleModuleDragLeave,
   handleModuleDrop,
   toggleModuleExpansion,
+  expandedLessons,
+  toggleLessonExpansion,
   editingModuleId,
   setEditingModule,
   updateModule,
@@ -192,13 +197,13 @@ export default function ModuleCard({
               dark:bg-green-600 dark:text-white dark:border-green-500
               dark:hover:bg-green-700
             `}
-            aria-label="Create module with all lessons"
-            title="Create module + all lessons"
+            aria-label="Create or update module with all lessons"
+            title="Create or update module + all lessons"
             disabled={submittingModuleId === module.id}
             aria-busy={submittingModuleId === module.id}
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
-            <span className="font-medium">Create Module</span>
+            <span className="font-medium">{module.lessons.length > 0 ? "Update Module" : "Create Module"}</span>
           </button>
         </div>
       </div>
@@ -233,6 +238,7 @@ export default function ModuleCard({
                 courseId={courseId}
                 moduleId={module.id}
                 lesson={lesson}
+                isExpanded={expandedLessons.has(lesson.id)}
                 isDragging={draggedLesson?.lessonId === lesson.id}
                 editingLessonId={editingLessonId}
                 setEditingLesson={setEditingLesson}
@@ -241,6 +247,7 @@ export default function ModuleCard({
                 handleLessonDragOver={handleLessonDragOver}
                 handleLessonDragLeave={handleLessonDragLeave}
                 handleLessonDrop={handleLessonDrop}
+                toggleLessonExpansion={toggleLessonExpansion}
                 updateLesson={updateLesson}
                 openDeleteLessonModal={openDeleteLessonModal}
                 lessonActiveTab={lessonActiveTab}

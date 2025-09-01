@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Module, Lesson, LessonContent } from "./types";
 import type { FileUploadResult } from "@/hooks/useCourseContentUpload";
 import { createDeepModules } from "@/actions/modules/deep-modules-action";
+import { listModulesDeep } from "@/actions/modules/list-modules-deep-action";
 import * as yup from "yup";
 import toast from "react-hot-toast";
 // toast and API calls are intentionally not used when only logging payloads
@@ -63,12 +64,12 @@ const moduleSchema = yup.object({
 
 export interface UseCourseBuilderArgs {
   courseId?: string;
-  onModulesChange?: (modules: Module[]) => void;
 }
 
-export default function useCourseBuilder({ courseId, onModulesChange }: UseCourseBuilderArgs) {
+export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const [modules, setModules] = useState<Module[]>([]);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
   const [editingModule, setEditingModule] = useState<string | null>(null);
   const [editingLesson, setEditingLesson] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,12 +86,77 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
-  const loadModules = () => {
+  const loadModules = async () => {
+    if (!courseId) {
+      setModules([]);
+      return;
+    }
+
     setIsLoading(true);
-    const initial: Module[] = [];
-    setModules(initial);
-    onModulesChange?.(initial);
-    setIsLoading(false);
+    try {
+      const response = await listModulesDeep(courseId);
+
+      if (!response.data || !response.data.data) {
+        setModules([]);
+        return;
+      }
+
+      // Transform the API response to match our frontend types
+      const transformedModules: Module[] = response.data.data.map((moduleDeep: any) => ({
+        id: moduleDeep.module.id,
+        title: moduleDeep.module.title,
+        description: moduleDeep.module.description,
+        position: moduleDeep.module.position,
+        lessons: moduleDeep.lessons.map((lessonDeep: any) => ({
+          id: lessonDeep.lesson.id,
+          title: lessonDeep.lesson.title,
+          description: lessonDeep.lesson.description,
+          content: lessonDeep.lesson.content,
+          video_url: lessonDeep.lesson.video_url,
+          duration: lessonDeep.lesson.duration,
+          position: lessonDeep.lesson.position,
+          is_free: lessonDeep.lesson.is_free,
+          published: lessonDeep.lesson.published,
+          contents:
+            lessonDeep.contents?.map((content: any) => ({
+              id: content.id,
+              title: content.title,
+              type: content.content_type,
+              url: content.url,
+              size: content.file_size,
+              filename: content.filename,
+            })) || [],
+          questions:
+            lessonDeep.questions?.map((questionWithOptions: any) => ({
+              id: questionWithOptions.question.id,
+              text: questionWithOptions.question.question_text,
+              options: questionWithOptions.options.map((option: any) => ({
+                id: option.id,
+                text: option.option_text,
+                is_correct: option.is_correct,
+              })),
+            })) || [],
+          assignment: lessonDeep.assignment
+            ? {
+                id: lessonDeep.assignment.lesson_id,
+                title: lessonDeep.assignment.title,
+                description: lessonDeep.assignment.description,
+              }
+            : null,
+        })),
+      }));
+
+      setModules(transformedModules);
+
+      // Auto-expand modules that have lessons
+      const modulesWithLessons = new Set(transformedModules.filter((module) => module.lessons.length > 0).map((module) => module.id));
+      setExpandedModules(modulesWithLessons);
+    } catch (error) {
+      console.error("Error loading modules:", error);
+      setModules([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleModuleExpansion = (moduleId: string) => {
@@ -98,6 +164,13 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     if (newExpanded.has(moduleId)) newExpanded.delete(moduleId);
     else newExpanded.add(moduleId);
     setExpandedModules(newExpanded);
+  };
+
+  const toggleLessonExpansion = (lessonId: string) => {
+    const newExpanded = new Set(expandedLessons);
+    if (newExpanded.has(lessonId)) newExpanded.delete(lessonId);
+    else newExpanded.add(lessonId);
+    setExpandedLessons(newExpanded);
   };
 
   // Drag & Drop: Modules
@@ -197,7 +270,6 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       const next = [...modules, newModule];
       setModules(next);
       setExpandedModules((prev) => new Set([...prev, newModule.id]));
-      onModulesChange?.(next);
       console.log("Created module (local):", newModule);
     } catch (error) {
       console.error("Error creating module:", error);
@@ -208,7 +280,6 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     try {
       const next = modules.map((m) => (m.id === moduleId ? { ...m, ...data } : m));
       setModules(next);
-      onModulesChange?.(next);
       setEditingModule(null);
     } catch (error) {
       console.error("Error updating module:", error);
@@ -223,7 +294,6 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     try {
       const next = modules.filter((m) => m.id !== moduleId);
       setModules(next);
-      onModulesChange?.(next);
     } catch (error) {
       console.error("Error deleting module:", error);
     }
@@ -237,7 +307,6 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", video_url: "", video_source: "url", video_file: null, duration: "0m", position: lessonPosition, is_free: false, published: false, contents: [], questions: [], assignment: null };
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m));
       setModules(next);
-      onModulesChange?.(next);
       setEditingLesson(newLesson.id);
     } catch (error) {
       console.error("Error creating lesson:", error);
@@ -277,7 +346,6 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       setModules(next);
       setExpandedModules((prev) => new Set([...prev, composed.id]));
       setEditingModule(moduleId);
-      onModulesChange?.(next);
 
       // Compose and log payload in requested format (snake_case keys)
       const payload: any = {
@@ -369,10 +437,35 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const createModuleAndAllLessons = async (moduleId: string) => {
+    // Prevent multiple simultaneous calls
+    if (submittingModuleId === moduleId) {
+      console.log("Already submitting module:", moduleId);
+      return;
+    }
+
     try {
       const module = modules.find((m) => m.id === moduleId);
       if (!module || !courseId) return;
       setSubmittingModuleId(moduleId);
+
+      console.log("Creating module and lessons for:", moduleId, "with lessons count:", module.lessons.length);
+
+      // Filter out any lessons that might have invalid data
+      const validLessons = (module.lessons ?? []).filter((l) => {
+        if (!l || !l.id || !l.title || typeof l.title !== "string" || l.title.trim().length === 0) {
+          return false;
+        }
+
+        // Check for any File objects or other non-serializable data
+        if (l.video_file && l.video_file instanceof File) {
+          console.warn("Skipping lesson with File object:", l.id);
+          return false;
+        }
+
+        return true;
+      });
+
+      console.log("Valid lessons count:", validLessons.length);
 
       // Build payload in requested snake_case format (no nested "module" key)
       const payload = {
@@ -380,7 +473,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
         title: module.title,
         description: module.description ?? "",
         position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
-        lessons: (module.lessons ?? []).map((l, lessonIndex) => ({
+        lessons: validLessons.map((l, lessonIndex) => ({
           title: l.title,
           description: l.description ?? null,
           content: l.content ?? null,
@@ -414,14 +507,113 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
             : null,
         })),
       };
+
+      // Sanitize payload to remove any potential circular references and problematic data
+      const sanitizedPayload = (() => {
+        try {
+          // First, create a clean copy without any potential circular references
+          const cleanPayload = {
+            course_id: payload.course_id,
+            title: String(payload.title || ""),
+            description: payload.description ? String(payload.description) : "",
+            position: Number(payload.position) || 1,
+            lessons: payload.lessons.map((lesson: any) => ({
+              title: String(lesson.title || ""),
+              description: lesson.description ? String(lesson.description) : null,
+              content: lesson.content ? String(lesson.content) : null,
+              video_url: lesson.video_url ? String(lesson.video_url) : null,
+              duration: String(lesson.duration || "0m"),
+              position: Number(lesson.position) || 1,
+              is_free: Boolean(lesson.is_free),
+              published: Boolean(lesson.published),
+              contents: (lesson.contents || []).map((content: any) => ({
+                title: String(content.title || ""),
+                content_type: String(content.content_type || ""),
+                url: String(content.url || ""),
+                file_size: content.file_size ? Number(content.file_size) : undefined,
+                filename: content.filename ? String(content.filename) : undefined,
+                position: Number(content.position) || 1,
+              })),
+              questions: (lesson.questions || []).map((question: any) => ({
+                question_text: String(question.question_text || ""),
+                position: Number(question.position) || 1,
+                options: (question.options || []).map((option: any) => ({
+                  option_text: String(option.option_text || ""),
+                  is_correct: Boolean(option.is_correct),
+                  position: Number(option.position) || 1,
+                })),
+              })),
+              assignment: lesson.assignment
+                ? {
+                    title: String(lesson.assignment.title || ""),
+                    description: lesson.assignment.description ? String(lesson.assignment.description) : "",
+                  }
+                : null,
+            })),
+          };
+
+          // Test serialization to ensure no circular references
+          JSON.stringify(cleanPayload);
+          return cleanPayload;
+        } catch (error) {
+          console.error("Error sanitizing payload:", error);
+          // Return a minimal safe payload
+          return {
+            course_id: payload.course_id,
+            title: String(payload.title || ""),
+            description: "",
+            position: 1,
+            lessons: [],
+          };
+        }
+      })();
+
       try {
-        await moduleSchema.validate(payload, { abortEarly: false });
+        console.log("Payload prepared:", JSON.stringify(sanitizedPayload, null, 2));
+      } catch (serializeError) {
+        console.error("Error serializing payload:", serializeError);
+        console.log("Payload structure:", {
+          course_id: sanitizedPayload.course_id,
+          title: sanitizedPayload.title,
+          lessons_count: sanitizedPayload.lessons.length,
+          lessons: sanitizedPayload.lessons.map((l: any) => ({ id: l.title, title: l.title })),
+        });
+      }
+
+      try {
+        await moduleSchema.validate(sanitizedPayload, { abortEarly: false });
+        console.log("Validation passed");
       } catch (err: any) {
         const msg = (err?.errors as string[])?.[0] || "Validation failed";
+        console.error("Validation failed:", err);
         toast.error(msg);
         throw err;
       }
-      const res = await createDeepModules(payload.course_id, payload);
+
+      console.log("Calling createDeepModules API...");
+
+      // Final check - ensure no undefined values in the payload
+      const finalPayload = JSON.parse(
+        JSON.stringify(sanitizedPayload, (key, value) => {
+          if (value === undefined) {
+            return null;
+          }
+          return value;
+        })
+      );
+
+      console.log("Final payload size:", JSON.stringify(finalPayload).length, "characters");
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("API call timeout")), 30000); // 30 seconds timeout
+      });
+
+      const apiPromise = createDeepModules(finalPayload.course_id, finalPayload);
+      const res = await Promise.race([apiPromise, timeoutPromise]);
+
+      console.log("API response:", res);
+
       if (res?.success === false) {
         toast.error(res.message || "Failed to create module");
       } else {
@@ -429,6 +621,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       }
     } catch (error) {
       console.error("Error creating module and lessons:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
     } finally {
       setSubmittingModuleId(null);
     }
@@ -436,9 +629,9 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
 
   const updateLesson = async (moduleId: string, lessonId: string, data: Partial<Lesson>) => {
     try {
+      console.log("Updating lesson:", lessonId, "in module:", moduleId, "with data:", data);
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m));
       setModules(next);
-      onModulesChange?.(next);
       setEditingLesson(null);
     } catch (error) {
       console.error("Error updating lesson:", error);
@@ -451,9 +644,11 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
    */
   const deleteLesson = async (moduleId: string, lessonId: string) => {
     try {
+      console.log("Deleting lesson:", lessonId, "from module:", moduleId);
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m));
+      console.log("Updated modules after deletion:", next);
+
       setModules(next);
-      onModulesChange?.(next);
     } catch (error) {
       console.error("Error deleting lesson:", error);
     }
@@ -507,26 +702,17 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
         size: fileResult.size,
         filename: fileResult.filename,
       };
-      setModules((prev) =>
-        prev.map((m) =>
+      setModules((prev) => {
+        const updatedModules = prev.map((m) =>
           m.id === moduleId
             ? {
                 ...m,
                 lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
               }
             : m
-        )
-      );
-      onModulesChange?.(
-        modules.map((m) =>
-          m.id === moduleId
-            ? {
-                ...m,
-                lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
-              }
-            : m
-        )
-      );
+        );
+        return updatedModules;
+      });
       setLessonActiveTab((prev) => ({ ...prev, [lessonId]: "resources" }));
     } catch (error) {
       console.error("Error adding content to lesson:", error);
@@ -777,6 +963,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     // state
     modules,
     expandedModules,
+    expandedLessons,
     editingModule,
     setEditingModule,
     editingLesson,
@@ -790,6 +977,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     deleteModal,
     // actions
     toggleModuleExpansion,
+    toggleLessonExpansion,
     handleModuleDragStart,
     handleModuleDragEnd,
     handleModuleDragOver,
@@ -804,11 +992,11 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     updateModule,
     deleteModule,
     createLesson,
+    deleteLesson,
     createModuleWithLesson,
     submitLessons,
     createModuleAndAllLessons,
     updateLesson,
-    deleteLesson,
     openDeleteModuleModal,
     openDeleteLessonModal,
     closeDeleteModal,

@@ -192,6 +192,19 @@ impl ModulesRepository for PostgresModulesRepository {
             };
 
             // contents
+            // Prune contents that are no longer present by position
+            let desired_content_positions: Vec<i32> =
+                lesson.contents.iter().map(|c| c.position).collect();
+            sqlx::query(
+                r#"DELETE FROM lesson_contents
+                   WHERE lesson_id = $1 AND NOT (position = ANY($2))"#,
+            )
+            .bind(lesson_id)
+            .bind(&desired_content_positions)
+            .execute(&mut **tx)
+            .await
+            .map_err(AppError::from)?;
+
             let mut contents_created: Vec<LessonContentRecord> = Vec::new();
             for c in &lesson.contents {
                 let row = sqlx::query(
@@ -232,6 +245,19 @@ impl ModulesRepository for PostgresModulesRepository {
             }
 
             // questions and options
+            // Prune questions not present by position (options cascade)
+            let desired_question_positions: Vec<i32> =
+                lesson.questions.iter().map(|q| q.position).collect();
+            sqlx::query(
+                r#"DELETE FROM lesson_questions
+                   WHERE lesson_id = $1 AND NOT (position = ANY($2))"#,
+            )
+            .bind(lesson_id)
+            .bind(&desired_question_positions)
+            .execute(&mut **tx)
+            .await
+            .map_err(AppError::from)?;
+
             let mut questions_created: Vec<(LessonQuestionRecord, Vec<QuestionOptionRecord>)> =
                 Vec::new();
             for q in &lesson.questions {
@@ -259,6 +285,19 @@ impl ModulesRepository for PostgresModulesRepository {
                     created_at: q_row.get("created_at"),
                     updated_at: q_row.try_get("updated_at").ok(),
                 };
+
+                // Prune options not present by position for this question
+                let desired_option_positions: Vec<i32> =
+                    q.options.iter().map(|o| o.position).collect();
+                sqlx::query(
+                    r#"DELETE FROM question_options
+                       WHERE question_id = $1 AND NOT (position = ANY($2))"#,
+                )
+                .bind(question_id)
+                .bind(&desired_option_positions)
+                .execute(&mut **tx)
+                .await
+                .map_err(AppError::from)?;
 
                 let mut option_records: Vec<QuestionOptionRecord> = Vec::new();
                 for o in &q.options {
@@ -314,6 +353,13 @@ impl ModulesRepository for PostgresModulesRepository {
                     created_at: row.get("created_at"),
                     updated_at: row.try_get("updated_at").ok(),
                 });
+            } else {
+                // Prune assignment if it exists but not provided in payload
+                sqlx::query(r#"DELETE FROM lesson_assignments WHERE lesson_id = $1"#)
+                    .bind(lesson_id)
+                    .execute(&mut **tx)
+                    .await
+                    .map_err(AppError::from)?;
             }
 
             Ok((
@@ -325,6 +371,19 @@ impl ModulesRepository for PostgresModulesRepository {
         }
 
         let mut lessons_created: Vec<LessonDeepRecord> = Vec::new();
+
+        // Prune lessons for this module that are no longer present by position
+        let desired_lesson_positions: Vec<i32> = input.lessons.iter().map(|l| l.position).collect();
+        sqlx::query(
+            r#"DELETE FROM lessons
+               WHERE module_id = $1 AND NOT (position = ANY($2))"#,
+        )
+        .bind(module_id)
+        .bind(&desired_lesson_positions)
+        .execute(&mut *tx)
+        .await
+        .map_err(AppError::from)?;
+
         for lesson in &input.lessons {
             let (lrec, contents, questions, assignment) =
                 insert_lesson(&mut tx, module_id, lesson).await?;
@@ -341,6 +400,174 @@ impl ModulesRepository for PostgresModulesRepository {
             module: module_record,
             lessons: lessons_created,
         })
+    }
+
+    async fn list_by_course_deep(&self, course_id: uuid::Uuid) -> AppResult<Vec<ModuleDeepRecord>> {
+        // Get all modules for the course
+        let module_rows = sqlx::query(
+            r#"SELECT id, course_id, title, description, position, created_at, updated_at
+               FROM course_modules 
+               WHERE course_id = $1 
+               ORDER BY position, created_at"#,
+        )
+        .bind(course_id)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(AppError::from)?;
+
+        let mut modules_deep: Vec<ModuleDeepRecord> = Vec::new();
+
+        for module_row in module_rows {
+            let module_id: uuid::Uuid = module_row.get("id");
+            let module_record = map_module_row(module_row);
+
+            // Get lessons for this module
+            let lesson_rows = sqlx::query(
+                r#"SELECT id, module_id, title, description, content, video_url, duration, position, is_free, published, created_at, updated_at
+                   FROM lessons 
+                   WHERE module_id = $1 
+                   ORDER BY position, created_at"#,
+            )
+            .bind(module_id)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(AppError::from)?;
+
+            let mut lessons_deep: Vec<LessonDeepRecord> = Vec::new();
+
+            for lesson_row in lesson_rows {
+                let lesson_id: uuid::Uuid = lesson_row.get("id");
+                let lesson_record = LessonRecord {
+                    id: lesson_id,
+                    module_id,
+                    title: lesson_row.get("title"),
+                    description: lesson_row.try_get("description").ok(),
+                    content: lesson_row.try_get("content").ok(),
+                    video_url: lesson_row.try_get("video_url").ok(),
+                    duration: lesson_row.get("duration"),
+                    position: lesson_row.get("position"),
+                    is_free: lesson_row.get("is_free"),
+                    published: lesson_row.get("published"),
+                    created_at: lesson_row.get("created_at"),
+                    updated_at: lesson_row.try_get("updated_at").ok(),
+                };
+
+                // Get lesson contents
+                let content_rows = sqlx::query(
+                    r#"SELECT id, lesson_id, title, content_type, url, file_size, filename, position, created_at, updated_at
+                       FROM lesson_contents 
+                       WHERE lesson_id = $1 
+                       ORDER BY position, created_at"#,
+                )
+                .bind(lesson_id)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(AppError::from)?;
+
+                let contents: Vec<LessonContentRecord> = content_rows
+                    .into_iter()
+                    .map(|row| LessonContentRecord {
+                        id: row.get("id"),
+                        lesson_id,
+                        title: row.get("title"),
+                        content_type: row.get("content_type"),
+                        url: row.get("url"),
+                        file_size: row.try_get("file_size").ok(),
+                        filename: row.try_get("filename").ok(),
+                        position: row.get("position"),
+                        created_at: row.get("created_at"),
+                        updated_at: row.try_get("updated_at").ok(),
+                    })
+                    .collect();
+
+                // Get lesson questions with options
+                let question_rows = sqlx::query(
+                    r#"SELECT id, lesson_id, question_text, position, created_at, updated_at
+                       FROM lesson_questions 
+                       WHERE lesson_id = $1 
+                       ORDER BY position, created_at"#,
+                )
+                .bind(lesson_id)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(AppError::from)?;
+
+                let mut questions: Vec<(LessonQuestionRecord, Vec<QuestionOptionRecord>)> =
+                    Vec::new();
+
+                for question_row in question_rows {
+                    let question_id: uuid::Uuid = question_row.get("id");
+                    let question_record = LessonQuestionRecord {
+                        id: question_id,
+                        lesson_id,
+                        question_text: question_row.get("question_text"),
+                        position: question_row.get("position"),
+                        created_at: question_row.get("created_at"),
+                        updated_at: question_row.try_get("updated_at").ok(),
+                    };
+
+                    // Get options for this question
+                    let option_rows = sqlx::query(
+                        r#"SELECT id, question_id, option_text, is_correct, position, created_at, updated_at
+                           FROM question_options 
+                           WHERE question_id = $1 
+                           ORDER BY position, created_at"#,
+                    )
+                    .bind(question_id)
+                    .fetch_all(&self.pool)
+                    .await
+                    .map_err(AppError::from)?;
+
+                    let options: Vec<QuestionOptionRecord> = option_rows
+                        .into_iter()
+                        .map(|row| QuestionOptionRecord {
+                            id: row.get("id"),
+                            question_id,
+                            option_text: row.get("option_text"),
+                            is_correct: row.get("is_correct"),
+                            position: row.get("position"),
+                            created_at: row.get("created_at"),
+                            updated_at: row.try_get("updated_at").ok(),
+                        })
+                        .collect();
+
+                    questions.push((question_record, options));
+                }
+
+                // Get lesson assignment
+                let assignment_row = sqlx::query(
+                    r#"SELECT lesson_id, title, description, created_at, updated_at
+                       FROM lesson_assignments 
+                       WHERE lesson_id = $1"#,
+                )
+                .bind(lesson_id)
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(AppError::from)?;
+
+                let assignment = assignment_row.map(|row| LessonAssignmentRecord {
+                    lesson_id,
+                    title: row.get("title"),
+                    description: row.try_get("description").ok(),
+                    created_at: row.get("created_at"),
+                    updated_at: row.try_get("updated_at").ok(),
+                });
+
+                lessons_deep.push(LessonDeepRecord {
+                    lesson: lesson_record,
+                    contents,
+                    questions,
+                    assignment,
+                });
+            }
+
+            modules_deep.push(ModuleDeepRecord {
+                module: module_record,
+                lessons: lessons_deep,
+            });
+        }
+
+        Ok(modules_deep)
     }
 }
 
