@@ -8,7 +8,8 @@ use crate::types::course_types::{
     LessonDeep, LessonQuestion, ModuleDeep, QuestionOption, QuestionWithOptions,
 };
 
-/// Create a module with nested lessons/contents/questions/assignment in one ACID operation
+/// Create or update a module with nested lessons/contents/questions/assignment in one ACID operation
+/// If a module with the same position already exists for the course, it will be updated instead
 pub async fn create_deep(
     repo: &dyn crate::repositories::modules::ModulesRepository,
     course_id: uuid::Uuid,

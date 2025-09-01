@@ -13,7 +13,7 @@ use crate::types::course_types::{CreateModuleDeepRequest, ModuleDeep};
     path = "/api/courses/:course_id/modules/deep",
     security(("bearerAuth" = [])),
     request_body = CreateModuleDeepRequest,
-    responses((status = 201, description = "Created module with nested lessons", body = ModuleDeep)),
+    responses((status = 201, description = "Created or updated module with nested lessons", body = ModuleDeep)),
     tag = "Courses"
 )]
 pub async fn create_module_deep(
@@ -27,7 +27,7 @@ pub async fn create_module_deep(
 
     let result = service::create_deep(ctx.repos.modules.as_ref(), course_id, input).await?;
     let body = Response::with_data(
-        "Module and nested data created",
+        "Module and nested data created or updated",
         result,
         StatusCode::CREATED.as_u16(),
     );
