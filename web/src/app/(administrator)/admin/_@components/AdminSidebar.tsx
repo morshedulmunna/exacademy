@@ -6,6 +6,13 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "./SidebarContext";
 import { useThemeGradients } from "@/components/ui/ThemeGradients";
 import { Shield, FileText, BookOpen, Tag, Users, Settings, BarChart3, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import Logo from "./Logo";
+
+/**
+ * Logo Component for Admin Sidebar
+ * Displays the ExAcademy logo with text and optional image
+ */
 
 /**
  * Admin Sidebar Component
@@ -66,7 +73,8 @@ export default function AdminSidebar() {
   return (
     <aside className={`bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 transition-all duration-300 h-full overflow-y-auto ${isCollapsed ? "w-16" : "w-64"}`}>
       {/* Toggle button */}
-      <div className="flex justify-end p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+      <div className="flex justify-between p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+        <Logo isCollapsed={isCollapsed} />
         <button onClick={() => setIsCollapsed(!isCollapsed)} className={`p-2 rounded-lg ${gradients.bgGradient} text-white transition-all duration-200 ${gradients.hoverBgGradient}`}>
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
