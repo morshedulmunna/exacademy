@@ -4,9 +4,62 @@ import { useEffect, useState } from "react";
 import type { Module, Lesson, LessonContent } from "./types";
 import type { FileUploadResult } from "@/hooks/useCourseContentUpload";
 import { createDeepModules } from "@/actions/modules/deep-modules-action";
+import * as yup from "yup";
+import toast from "react-hot-toast";
 // toast and API calls are intentionally not used when only logging payloads
 
 type LessonTab = "resources" | "questions" | "assignment" | null;
+
+// Client-side validation schemas
+const optionSchema = yup.object({
+  option_text: yup.string().min(1, "Option text is required").required(),
+  is_correct: yup.boolean().required(),
+  position: yup.number().integer().min(1).required(),
+});
+const questionSchema = yup
+  .object({
+    question_text: yup.string().min(1, "Question text is required").required(),
+    position: yup.number().integer().min(1).required(),
+    options: yup.array().of(optionSchema).min(1, "At least one option is required").required(),
+  })
+  .test("one-correct", "Each question must have one correct option", (q) => {
+    if (!q || !q.options) return false;
+    return q.options.some((o) => o.is_correct === true);
+  });
+const contentSchema = yup.object({
+  title: yup.string().min(1).required(),
+  content_type: yup.string().min(1).required(),
+  url: yup.string().min(1).required(),
+  file_size: yup.number().integer().min(0).nullable().optional(),
+  filename: yup.string().nullable().optional(),
+  position: yup.number().integer().min(1).required(),
+});
+const lessonSchema = yup.object({
+  title: yup.string().min(1, "Lesson title is required").required(),
+  description: yup.string().nullable().optional(),
+  content: yup.string().nullable().optional(),
+  video_url: yup.string().url("Video URL must be valid").nullable().optional(),
+  duration: yup.string().min(1, "Duration is required").required(),
+  position: yup.number().integer().min(1).required(),
+  is_free: yup.boolean().required(),
+  published: yup.boolean().required(),
+  contents: yup.array().of(contentSchema).required(),
+  questions: yup.array().of(questionSchema).required(),
+  assignment: yup
+    .object({
+      title: yup.string().min(1, "Assignment title is required").required(),
+      description: yup.string().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+});
+const moduleSchema = yup.object({
+  course_id: yup.string().uuid("Invalid course id").required(),
+  title: yup.string().min(1, "Module title is required").required(),
+  description: yup.string().nullable().optional(),
+  position: yup.number().integer().min(1).required(),
+  lessons: yup.array().of(lessonSchema).required(),
+});
 
 export interface UseCourseBuilderArgs {
   courseId?: string;
@@ -227,7 +280,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       onModulesChange?.(next);
 
       // Compose and log payload in requested format (snake_case keys)
-      const payload = {
+      const payload: any = {
         course_id: courseId ?? "",
         title: composed.title,
         description: composed.description ?? "",
@@ -266,6 +319,13 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
             : null,
         })),
       };
+      try {
+        await moduleSchema.validate(payload, { abortEarly: false });
+      } catch (err: any) {
+        // Do not block creation of the local draft, only warn
+        const msg = (err?.errors as string[])?.[0] || "Validation failed";
+        toast.error(msg);
+      }
       console.log("[COURSE BUILDER] Create Module payload:", payload);
     } catch (error) {
       console.error("Error creating module with lesson:", error);
@@ -353,9 +413,20 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
               }
             : null,
         })),
-      } as const;
+      };
+      try {
+        await moduleSchema.validate(payload, { abortEarly: false });
+      } catch (err: any) {
+        const msg = (err?.errors as string[])?.[0] || "Validation failed";
+        toast.error(msg);
+        throw err;
+      }
       const res = await createDeepModules(payload.course_id, payload);
-      console.log("[COURSE BUILDER] Create Module payload:", res);
+      if (res?.success === false) {
+        toast.error(res.message || "Failed to create module");
+      } else {
+        toast.success("Module created successfully");
+      }
     } catch (error) {
       console.error("Error creating module and lessons:", error);
     } finally {

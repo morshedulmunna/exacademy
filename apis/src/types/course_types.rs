@@ -386,7 +386,6 @@ pub struct CreateLessonDeepRequest {
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
 pub struct CreateModuleDeepRequest {
-    pub course_id: Uuid,
     #[validate(length(min = 1))]
     pub title: String,
     pub description: Option<String>,

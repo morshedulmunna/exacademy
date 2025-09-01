@@ -28,7 +28,7 @@ pub async fn login(
 
     // access_token cookie
     let access_cookie = format!(
-        "access_token={}; Path=/; HttpOnly; SameSite=Lax; {}Domain=localhost; Max-Age={}",
+        "access_token={}; Path=/; HttpOnly; SameSite=Lax; {}Max-Age={}",
         output.access_token,
         if is_prod { "Secure; " } else { "" },
         ctx.auth.access_ttl_seconds
@@ -37,7 +37,7 @@ pub async fn login(
 
     // refresh_token cookie
     let refresh_cookie = format!(
-        "refresh_token={}; Path=/; HttpOnly; SameSite=Lax; {}Domain=localhost; Max-Age={}",
+        "refresh_token={}; Path=/; HttpOnly; SameSite=Lax; {}Max-Age={}",
         output.refresh_token,
         if is_prod { "Secure; " } else { "" },
         ctx.auth.refresh_ttl_seconds

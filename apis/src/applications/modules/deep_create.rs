@@ -11,11 +11,12 @@ use crate::types::course_types::{
 /// Create a module with nested lessons/contents/questions/assignment in one ACID operation
 pub async fn create_deep(
     repo: &dyn crate::repositories::modules::ModulesRepository,
+    course_id: uuid::Uuid,
     req: CreateModuleDeepRequest,
 ) -> AppResult<ModuleDeep> {
     let record = repo
         .create_deep(CreateModuleDeepRecord {
-            course_id: req.course_id,
+            course_id: course_id,
             title: req.title,
             description: req.description,
             position: req.position,
