@@ -1,9 +1,18 @@
 use crate::pkg::error::AppResult;
-use crate::repositories::modules::{CreateLessonAssignmentData, CreateLessonDeepData, CreateLessonQuestionData, CreateLessonQuestionOptionData, CreateModuleDeepRecord, ModuleDeepRecord};
-use crate::types::course_types::{CreateLessonDeepRequest, CreateModuleDeepRequest, Lesson, LessonContent, LessonDeep, LessonQuestion, ModuleDeep, QuestionOption, QuestionWithOptions};
+use crate::repositories::modules::{
+    CreateLessonAssignmentData, CreateLessonDeepData, CreateLessonQuestionData,
+    CreateLessonQuestionOptionData, CreateModuleDeepRecord, LessonDeepRecord, ModuleDeepRecord,
+};
+use crate::types::course_types::{
+    CourseModule, CreateLessonDeepRequest, CreateModuleDeepRequest, Lesson, LessonContent,
+    LessonDeep, LessonQuestion, ModuleDeep, QuestionOption, QuestionWithOptions,
+};
 
 /// Create a module with nested lessons/contents/questions/assignment in one ACID operation
-pub async fn create_deep(repo: &dyn crate::repositories::modules::ModulesRepository, req: CreateModuleDeepRequest) -> AppResult<ModuleDeep> {
+pub async fn create_deep(
+    repo: &dyn crate::repositories::modules::ModulesRepository,
+    req: CreateModuleDeepRequest,
+) -> AppResult<ModuleDeep> {
     let record = repo
         .create_deep(CreateModuleDeepRecord {
             course_id: req.course_id,
@@ -68,7 +77,7 @@ fn map_lesson_deep_request(r: CreateLessonDeepRequest) -> CreateLessonDeepData {
 
 fn map_module_deep(r: ModuleDeepRecord) -> ModuleDeep {
     ModuleDeep {
-        module: crate::types::course_types::CourseModule {
+        module: CourseModule {
             id: r.module.id,
             course_id: r.module.course_id,
             title: r.module.title,
@@ -81,7 +90,7 @@ fn map_module_deep(r: ModuleDeepRecord) -> ModuleDeep {
     }
 }
 
-fn map_lesson_deep(r: crate::repositories::modules::LessonDeepRecord) -> LessonDeep {
+fn map_lesson_deep(r: LessonDeepRecord) -> LessonDeep {
     LessonDeep {
         lesson: Lesson {
             id: r.lesson.id,
@@ -139,14 +148,14 @@ fn map_lesson_deep(r: crate::repositories::modules::LessonDeepRecord) -> LessonD
                     .collect(),
             })
             .collect(),
-        assignment: r.assignment.map(|a| crate::types::course_types::LessonAssignment {
-            lesson_id: a.lesson_id,
-            title: a.title,
-            description: a.description,
-            created_at: a.created_at,
-            updated_at: a.updated_at,
-        }),
+        assignment: r
+            .assignment
+            .map(|a| crate::types::course_types::LessonAssignment {
+                lesson_id: a.lesson_id,
+                title: a.title,
+                description: a.description,
+                created_at: a.created_at,
+                updated_at: a.updated_at,
+            }),
     }
 }
-
-
