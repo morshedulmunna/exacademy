@@ -3,64 +3,14 @@
 import { useEffect, useState } from "react";
 import type { Module, Lesson, LessonContent } from "./types";
 import type { FileUploadResult } from "@/hooks/useCourseContentUpload";
-import { createDeepModules } from "@/actions/modules/deep-modules-action";
-import { listModulesDeep } from "@/actions/modules/list-modules-deep-action";
-import * as yup from "yup";
+import { apiCreateDeepModules, apiListModulesDeep } from "./services/api";
+import { moduleSchema } from "./services/schemas";
+import { transformDeepModulesResponse } from "./services/transformers";
+import { buildCreateModulePayload, sanitizePayload } from "./services/payload";
 import toast from "react-hot-toast";
 // toast and API calls are intentionally not used when only logging payloads
 
 type LessonTab = "resources" | "questions" | "assignment" | null;
-
-// Client-side validation schemas
-const optionSchema = yup.object({
-  option_text: yup.string().min(1, "Option text is required").required(),
-  is_correct: yup.boolean().required(),
-  position: yup.number().integer().min(1).required(),
-});
-const questionSchema = yup
-  .object({
-    question_text: yup.string().min(1, "Question text is required").required(),
-    position: yup.number().integer().min(1).required(),
-    options: yup.array().of(optionSchema).min(1, "At least one option is required").required(),
-  })
-  .test("one-correct", "Each question must have one correct option", (q) => {
-    if (!q || !q.options) return false;
-    return q.options.some((o) => o.is_correct === true);
-  });
-const contentSchema = yup.object({
-  title: yup.string().min(1).required(),
-  content_type: yup.string().min(1).required(),
-  url: yup.string().min(1).required(),
-  file_size: yup.number().integer().min(0).nullable().optional(),
-  filename: yup.string().nullable().optional(),
-  position: yup.number().integer().min(1).required(),
-});
-const lessonSchema = yup.object({
-  title: yup.string().min(1, "Lesson title is required").required(),
-  description: yup.string().nullable().optional(),
-  content: yup.string().nullable().optional(),
-  video_url: yup.string().url("Video URL must be valid").nullable().optional(),
-  duration: yup.string().min(1, "Duration is required").required(),
-  position: yup.number().integer().min(1).required(),
-  is_free: yup.boolean().required(),
-  published: yup.boolean().required(),
-  contents: yup.array().of(contentSchema).required(),
-  questions: yup.array().of(questionSchema).required(),
-  assignment: yup
-    .object({
-      title: yup.string().min(1, "Assignment title is required").required(),
-      description: yup.string().nullable().optional(),
-    })
-    .nullable()
-    .optional(),
-});
-const moduleSchema = yup.object({
-  course_id: yup.string().uuid("Invalid course id").required(),
-  title: yup.string().min(1, "Module title is required").required(),
-  description: yup.string().nullable().optional(),
-  position: yup.number().integer().min(1).required(),
-  lessons: yup.array().of(lessonSchema).required(),
-});
 
 export interface UseCourseBuilderArgs {
   courseId?: string;
@@ -94,58 +44,8 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
 
     setIsLoading(true);
     try {
-      const response = await listModulesDeep(courseId);
-
-      if (!response.data || !response.data.data) {
-        setModules([]);
-        return;
-      }
-
-      // Transform the API response to match our frontend types
-      const transformedModules: Module[] = response.data.data.map((moduleDeep: any) => ({
-        id: moduleDeep.module.id,
-        title: moduleDeep.module.title,
-        description: moduleDeep.module.description,
-        position: moduleDeep.module.position,
-        lessons: moduleDeep.lessons.map((lessonDeep: any) => ({
-          id: lessonDeep.lesson.id,
-          title: lessonDeep.lesson.title,
-          description: lessonDeep.lesson.description,
-          content: lessonDeep.lesson.content,
-          video_url: lessonDeep.lesson.video_url,
-          duration: lessonDeep.lesson.duration,
-          position: lessonDeep.lesson.position,
-          is_free: lessonDeep.lesson.is_free,
-          published: lessonDeep.lesson.published,
-          contents:
-            lessonDeep.contents?.map((content: any) => ({
-              id: content.id,
-              title: content.title,
-              type: content.content_type,
-              url: content.url,
-              size: content.file_size,
-              filename: content.filename,
-            })) || [],
-          questions:
-            lessonDeep.questions?.map((questionWithOptions: any) => ({
-              id: questionWithOptions.question.id,
-              text: questionWithOptions.question.question_text,
-              options: questionWithOptions.options.map((option: any) => ({
-                id: option.id,
-                text: option.option_text,
-                is_correct: option.is_correct,
-              })),
-            })) || [],
-          assignment: lessonDeep.assignment
-            ? {
-                id: lessonDeep.assignment.lesson_id,
-                title: lessonDeep.assignment.title,
-                description: lessonDeep.assignment.description,
-              }
-            : null,
-        })),
-      }));
-
+      const response = await apiListModulesDeep(courseId);
+      const transformedModules: Module[] = transformDeepModulesResponse(response);
       setModules(transformedModules);
 
       // Auto-expand modules that have lessons
@@ -450,123 +350,12 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
 
       console.log("Creating module and lessons for:", moduleId, "with lessons count:", module.lessons.length);
 
-      // Filter out any lessons that might have invalid data
-      const validLessons = (module.lessons ?? []).filter((l) => {
-        if (!l || !l.id || !l.title || typeof l.title !== "string" || l.title.trim().length === 0) {
-          return false;
-        }
-
-        // Check for any File objects or other non-serializable data
-        if (l.video_file && l.video_file instanceof File) {
-          console.warn("Skipping lesson with File object:", l.id);
-          return false;
-        }
-
-        return true;
-      });
-
-      console.log("Valid lessons count:", validLessons.length);
-
-      // Build payload in requested snake_case format (no nested "module" key)
-      const payload = {
-        course_id: courseId,
-        title: module.title,
-        description: module.description ?? "",
+      const payload = buildCreateModulePayload(courseId, {
+        ...module,
         position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
-        lessons: validLessons.map((l, lessonIndex) => ({
-          title: l.title,
-          description: l.description ?? null,
-          content: l.content ?? null,
-          video_url: l.video_url ?? null,
-          duration: l.duration || "0m",
-          position: l.position ?? lessonIndex + 1,
-          is_free: !!l.is_free,
-          published: !!l.published,
-          contents: (l.contents ?? []).map((c, contentIndex) => ({
-            title: c.title,
-            content_type: c.type,
-            url: c.url,
-            file_size: c.size ?? undefined,
-            filename: c.filename,
-            position: contentIndex + 1,
-          })),
-          questions: (l.questions ?? []).map((q, qIndex) => ({
-            question_text: q.text,
-            position: qIndex + 1,
-            options: (q.options ?? []).map((o, oIndex) => ({
-              option_text: o.text,
-              is_correct: !!o.is_correct,
-              position: oIndex + 1,
-            })),
-          })),
-          assignment: l.assignment
-            ? {
-                title: l.assignment.title,
-                description: l.assignment.description ?? "",
-              }
-            : null,
-        })),
-      };
+      } as Module);
 
-      // Sanitize payload to remove any potential circular references and problematic data
-      const sanitizedPayload = (() => {
-        try {
-          // First, create a clean copy without any potential circular references
-          const cleanPayload = {
-            course_id: payload.course_id,
-            title: String(payload.title || ""),
-            description: payload.description ? String(payload.description) : "",
-            position: Number(payload.position) || 1,
-            lessons: payload.lessons.map((lesson: any) => ({
-              title: String(lesson.title || ""),
-              description: lesson.description ? String(lesson.description) : null,
-              content: lesson.content ? String(lesson.content) : null,
-              video_url: lesson.video_url ? String(lesson.video_url) : null,
-              duration: String(lesson.duration || "0m"),
-              position: Number(lesson.position) || 1,
-              is_free: Boolean(lesson.is_free),
-              published: Boolean(lesson.published),
-              contents: (lesson.contents || []).map((content: any) => ({
-                title: String(content.title || ""),
-                content_type: String(content.content_type || ""),
-                url: String(content.url || ""),
-                file_size: content.file_size ? Number(content.file_size) : undefined,
-                filename: content.filename ? String(content.filename) : undefined,
-                position: Number(content.position) || 1,
-              })),
-              questions: (lesson.questions || []).map((question: any) => ({
-                question_text: String(question.question_text || ""),
-                position: Number(question.position) || 1,
-                options: (question.options || []).map((option: any) => ({
-                  option_text: String(option.option_text || ""),
-                  is_correct: Boolean(option.is_correct),
-                  position: Number(option.position) || 1,
-                })),
-              })),
-              assignment: lesson.assignment
-                ? {
-                    title: String(lesson.assignment.title || ""),
-                    description: lesson.assignment.description ? String(lesson.assignment.description) : "",
-                  }
-                : null,
-            })),
-          };
-
-          // Test serialization to ensure no circular references
-          JSON.stringify(cleanPayload);
-          return cleanPayload;
-        } catch (error) {
-          console.error("Error sanitizing payload:", error);
-          // Return a minimal safe payload
-          return {
-            course_id: payload.course_id,
-            title: String(payload.title || ""),
-            description: "",
-            position: 1,
-            lessons: [],
-          };
-        }
-      })();
+      const sanitizedPayload = sanitizePayload(payload);
 
       try {
         console.log("Payload prepared:", JSON.stringify(sanitizedPayload, null, 2));
@@ -592,15 +381,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
 
       console.log("Calling createDeepModules API...");
 
-      // Final check - ensure no undefined values in the payload
-      const finalPayload = JSON.parse(
-        JSON.stringify(sanitizedPayload, (key, value) => {
-          if (value === undefined) {
-            return null;
-          }
-          return value;
-        })
-      );
+      const finalPayload = sanitizePayload(sanitizedPayload);
 
       console.log("Final payload size:", JSON.stringify(finalPayload).length, "characters");
 
@@ -609,7 +390,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
         setTimeout(() => reject(new Error("API call timeout")), 30000); // 30 seconds timeout
       });
 
-      const apiPromise = createDeepModules(finalPayload.course_id, finalPayload);
+      const apiPromise = apiCreateDeepModules(finalPayload.course_id, finalPayload);
       const res = await Promise.race([apiPromise, timeoutPromise]);
 
       console.log("API response:", res);
