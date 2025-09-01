@@ -17,7 +17,7 @@ services:
 
   api:
     build:
-      context: ./api-server
+      context: ./apis
       dockerfile: Dockerfile
     container_name: execute_academy-api
     depends_on:
