@@ -19,6 +19,8 @@ pub async fn create_module_deep(
     Path(_course_id): Path<uuid::Uuid>,
     ValidatedJson(input): ValidatedJson<CreateModuleDeepRequest>,
 ) -> AppResult<(StatusCode, Json<Response<ModuleDeep>>)> {
+    dbg!(&input);
+
     let result = service::create_deep(ctx.repos.modules.as_ref(), input).await?;
     let body = Response::with_data(
         "Module and nested data created",

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Module, Lesson, LessonContent } from "./types";
 import type { FileUploadResult } from "@/hooks/useCourseContentUpload";
+import { createDeepModules } from "@/actions/modules/deep-modules-action";
 // toast and API calls are intentionally not used when only logging payloads
 
 type LessonTab = "resources" | "questions" | "assignment" | null;
@@ -224,7 +225,48 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       setExpandedModules((prev) => new Set([...prev, composed.id]));
       setEditingModule(moduleId);
       onModulesChange?.(next);
-      console.log("Created module with lesson (local):", composed);
+
+      // Compose and log payload in requested format (snake_case keys)
+      const payload = {
+        course_id: courseId ?? "",
+        title: composed.title,
+        description: composed.description ?? "",
+        position: composed.position,
+        lessons: (composed.lessons ?? []).map((l, lessonIndex) => ({
+          title: l.title,
+          description: l.description ?? null,
+          content: l.content ?? null,
+          video_url: l.video_url ?? null,
+          duration: l.duration,
+          position: l.position ?? lessonIndex + 1,
+          is_free: !!l.is_free,
+          published: !!l.published,
+          contents: (l.contents ?? []).map((c, contentIndex) => ({
+            title: c.title,
+            content_type: c.type,
+            url: c.url,
+            file_size: c.size ?? undefined,
+            filename: c.filename,
+            position: contentIndex + 1,
+          })),
+          questions: (l.questions ?? []).map((q, qIndex) => ({
+            question_text: q.text,
+            position: qIndex + 1,
+            options: (q.options ?? []).map((o, oIndex) => ({
+              option_text: o.text,
+              is_correct: !!o.is_correct,
+              position: oIndex + 1,
+            })),
+          })),
+          assignment: l.assignment
+            ? {
+                title: l.assignment.title,
+                description: l.assignment.description ?? "",
+              }
+            : null,
+        })),
+      };
+      console.log("[COURSE BUILDER] Create Module payload:", payload);
     } catch (error) {
       console.error("Error creating module with lesson:", error);
     }
@@ -272,31 +314,48 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       if (!module || !courseId) return;
       setSubmittingModuleId(moduleId);
 
-      // Console the full payload (module + lessons) from the front-end form
+      // Build payload in requested snake_case format (no nested "module" key)
       const payload = {
-        courseId,
-        module: {
-          id: module.id,
-          title: module.title,
-          description: module.description ?? "",
-          position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
-          lessons: (module.lessons ?? []).map((l) => ({
-            id: l.id,
-            title: l.title,
-            description: l.description ?? "",
-            content: l.content ?? "",
-            video_url: l.video_url ?? "",
-            duration: l.duration || "0m",
-            position: l.position,
-            is_free: !!l.is_free,
-            published: !!l.published,
-            contents: l.contents ?? [],
-            questions: l.questions ?? [],
-            assignment: l.assignment ?? null,
+        course_id: courseId,
+        title: module.title,
+        description: module.description ?? "",
+        position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
+        lessons: (module.lessons ?? []).map((l, lessonIndex) => ({
+          title: l.title,
+          description: l.description ?? null,
+          content: l.content ?? null,
+          video_url: l.video_url ?? null,
+          duration: l.duration || "0m",
+          position: l.position ?? lessonIndex + 1,
+          is_free: !!l.is_free,
+          published: !!l.published,
+          contents: (l.contents ?? []).map((c, contentIndex) => ({
+            title: c.title,
+            content_type: c.type,
+            url: c.url,
+            file_size: c.size ?? undefined,
+            filename: c.filename,
+            position: contentIndex + 1,
           })),
-        },
-      };
-      console.log("[COURSE BUILDER] Module + lessons (console only):", payload);
+          questions: (l.questions ?? []).map((q, qIndex) => ({
+            question_text: q.text,
+            position: qIndex + 1,
+            options: (q.options ?? []).map((o, oIndex) => ({
+              option_text: o.text,
+              is_correct: !!o.is_correct,
+              position: oIndex + 1,
+            })),
+          })),
+          assignment: l.assignment
+            ? {
+                title: l.assignment.title,
+                description: l.assignment.description ?? "",
+              }
+            : null,
+        })),
+      } as const;
+      const res = await createDeepModules(payload.course_id, payload);
+      console.log("[COURSE BUILDER] Create Module payload:", res);
     } catch (error) {
       console.error("Error creating module and lessons:", error);
     } finally {
