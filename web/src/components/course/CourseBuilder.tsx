@@ -68,15 +68,6 @@ export default function CourseBuilder({ courseId, className = "" }: CourseBuilde
     updateAssignmentField,
   } = useCourseBuilder({ courseId });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8" role="status" aria-live="polite" aria-busy="true">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" aria-hidden="true"></div>
-        <span className="ml-2 text-gray-600 dark:text-gray-400">Loading course structure...</span>
-      </div>
-    );
-  }
-
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}

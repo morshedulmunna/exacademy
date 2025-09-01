@@ -25,7 +25,7 @@ impl AuthConfig {
         let access_ttl_seconds = env::var("JWT_ACCESS_TTL_SECONDS")
             .ok()
             .and_then(|v| v.parse::<i64>().ok())
-            .unwrap_or(900);
+            .unwrap_or(2000);
         let refresh_ttl_seconds = env::var("JWT_REFRESH_TTL_SECONDS")
             .ok()
             .and_then(|v| v.parse::<i64>().ok())

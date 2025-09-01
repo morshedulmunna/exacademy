@@ -1,5 +1,4 @@
 import React from "react";
-import MaxWidthWrapper from "@/common/MaxWidthWrapper";
 import CourseBuilder from "@/components/course/CourseBuilder";
 
 type Props = { params: Promise<{ slug: string }> };

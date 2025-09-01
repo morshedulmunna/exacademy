@@ -10,6 +10,15 @@ import { buildCreateModulePayload, sanitizePayload } from "./services/payload";
 import toast from "react-hot-toast";
 // toast and API calls are intentionally not used when only logging payloads
 
+// Ensure crypto.randomUUID is available
+const generateId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+};
+
 type LessonTab = "resources" | "questions" | "assignment" | null;
 
 export interface UseCourseBuilderArgs {
@@ -36,6 +45,35 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
+  // Safety check to ensure modules are serializable
+  const safeSetModules = (newModules: Module[]) => {
+    try {
+      // Test serialization to catch any non-serializable data
+      JSON.stringify(newModules);
+      setModules(newModules);
+    } catch (error) {
+      console.error("Modules contain non-serializable data:", error);
+      // Fallback to empty array if serialization fails
+      setModules([]);
+    }
+  };
+
+  // Safe version of functional setModules
+  const safeSetModulesFn = (updater: (prev: Module[]) => Module[]) => {
+    setModules((prev) => {
+      try {
+        const newModules = updater(prev);
+        // Test serialization to catch any non-serializable data
+        JSON.stringify(newModules);
+        return newModules;
+      } catch (error) {
+        console.error("Modules contain non-serializable data:", error);
+        // Fallback to previous state if serialization fails
+        return prev;
+      }
+    });
+  };
+
   const loadModules = async () => {
     if (!courseId) {
       setModules([]);
@@ -45,12 +83,23 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     setIsLoading(true);
     try {
       const response = await apiListModulesDeep(courseId);
-      const transformedModules: Module[] = transformDeepModulesResponse(response);
-      setModules(transformedModules);
 
-      // Auto-expand modules that have lessons
-      const modulesWithLessons = new Set(transformedModules.filter((module) => module.lessons.length > 0).map((module) => module.id));
-      setExpandedModules(modulesWithLessons);
+      // Validate response structure
+      if (response && typeof response === "object" && "success" in response) {
+        if (response.success && response.data) {
+          const transformedModules: Module[] = transformDeepModulesResponse(response);
+          safeSetModules(transformedModules);
+        } else {
+          console.error("API returned error:", response.message);
+          setModules([]);
+        }
+      } else {
+        console.error("Unexpected response format:", response);
+        setModules([]);
+      }
+
+      // Keep all modules collapsed by default after load
+      setExpandedModules(new Set());
     } catch (error) {
       console.error("Error loading modules:", error);
       setModules([]);
@@ -105,13 +154,12 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     newModules.splice(targetIndex, 0, draggedModuleData);
 
     const updatedModules = newModules.map((module, index) => ({ ...module, position: index + 1 }));
-    setModules(updatedModules);
+    safeSetModules(updatedModules);
     try {
       const payload = {
         courseId,
         modules: updatedModules.map((m) => ({ id: m.id, position: m.position })),
       };
-      console.log("[DRAG&DROP] Update module positions (simulate backend):", payload);
     } catch (err) {
       console.error("Failed to log module positions", err);
     }
@@ -156,21 +204,21 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     const sourceModuleIndex = newModules.findIndex((m) => m.id === sourceModuleId);
     const [movedLesson] = newModules[sourceModuleIndex].lessons.splice(sourceLessonIndex, 1);
     newModules[sourceModuleIndex].lessons.splice(targetLessonIndex, 0, movedLesson);
+    // Re-index lessons positions within the module after drop
     newModules[sourceModuleIndex].lessons = newModules[sourceModuleIndex].lessons.map((lesson, index) => ({ ...lesson, position: index + 1 }));
 
-    setModules(newModules);
+    safeSetModules(newModules);
     setDraggedLesson(null);
   };
 
   const createModule = async () => {
     try {
       const payload = { title: "New Module", description: "", position: modules.length + 1 } as any;
-      const backendId = `tmp_${crypto.randomUUID()}`;
+      const backendId = `tmp_${generateId()}`;
       const newModule: Module = { id: backendId, title: payload.title, description: payload.description, position: payload.position, lessons: [] };
       const next = [...modules, newModule];
-      setModules(next);
+      safeSetModules(next);
       setExpandedModules((prev) => new Set([...prev, newModule.id]));
-      console.log("Created module (local):", newModule);
     } catch (error) {
       console.error("Error creating module:", error);
     }
@@ -179,7 +227,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const updateModule = async (moduleId: string, data: Partial<Module>) => {
     try {
       const next = modules.map((m) => (m.id === moduleId ? { ...m, ...data } : m));
-      setModules(next);
+      safeSetModules(next);
       setEditingModule(null);
     } catch (error) {
       console.error("Error updating module:", error);
@@ -193,7 +241,9 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const deleteModule = async (moduleId: string) => {
     try {
       const next = modules.filter((m) => m.id !== moduleId);
-      setModules(next);
+      // Re-index remaining modules' positions starting from 1
+      const reindexed = next.map((module, index) => ({ ...module, position: index + 1 }));
+      safeSetModules(reindexed);
     } catch (error) {
       console.error("Error deleting module:", error);
     }
@@ -203,10 +253,10 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     try {
       const module = modules.find((m) => m.id === moduleId);
       const lessonPosition = module ? module.lessons.length + 1 : 1;
-      const id = `tmp_${crypto.randomUUID()}`;
+      const id = `tmp_${generateId()}`;
       const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", video_url: "", video_source: "url", video_file: null, duration: "0m", position: lessonPosition, is_free: false, published: false, contents: [], questions: [], assignment: null };
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m));
-      setModules(next);
+      safeSetModules(next);
       setEditingLesson(newLesson.id);
     } catch (error) {
       console.error("Error creating lesson:", error);
@@ -215,7 +265,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
 
   const createModuleWithLesson = async () => {
     try {
-      const moduleId = `tmp_${crypto.randomUUID()}`;
+      const moduleId = `tmp_${generateId()}`;
       const newModule: Module = {
         id: moduleId,
         title: "New Module",
@@ -223,7 +273,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
         position: modules.length + 1,
         lessons: [],
       };
-      const lessonId = `tmp_${crypto.randomUUID()}`;
+      const lessonId = `tmp_${generateId()}`;
       const newLesson: Lesson = {
         id: lessonId,
         title: "New Lesson",
@@ -243,7 +293,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
 
       const composed: Module = { ...newModule, lessons: [newLesson] };
       const next = [...modules, composed];
-      setModules(next);
+      safeSetModules(next);
       setExpandedModules((prev) => new Set([...prev, composed.id]));
       setEditingModule(moduleId);
 
@@ -294,7 +344,6 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
         const msg = (err?.errors as string[])?.[0] || "Validation failed";
         toast.error(msg);
       }
-      console.log("[COURSE BUILDER] Create Module payload:", payload);
     } catch (error) {
       console.error("Error creating module with lesson:", error);
     }
@@ -328,7 +377,6 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
           })),
         },
       };
-      console.log("Submitting lessons (local only):", consolePayload);
     } catch (error) {
       console.error("Error submitting lessons:", error);
     } finally {
@@ -339,7 +387,6 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const createModuleAndAllLessons = async (moduleId: string) => {
     // Prevent multiple simultaneous calls
     if (submittingModuleId === moduleId) {
-      console.log("Already submitting module:", moduleId);
       return;
     }
 
@@ -347,8 +394,6 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
       const module = modules.find((m) => m.id === moduleId);
       if (!module || !courseId) return;
       setSubmittingModuleId(moduleId);
-
-      console.log("Creating module and lessons for:", moduleId, "with lessons count:", module.lessons.length);
 
       const payload = buildCreateModulePayload(courseId, {
         ...module,
@@ -358,20 +403,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
       const sanitizedPayload = sanitizePayload(payload);
 
       try {
-        console.log("Payload prepared:", JSON.stringify(sanitizedPayload, null, 2));
-      } catch (serializeError) {
-        console.error("Error serializing payload:", serializeError);
-        console.log("Payload structure:", {
-          course_id: sanitizedPayload.course_id,
-          title: sanitizedPayload.title,
-          lessons_count: sanitizedPayload.lessons.length,
-          lessons: sanitizedPayload.lessons.map((l: any) => ({ id: l.title, title: l.title })),
-        });
-      }
-
-      try {
         await moduleSchema.validate(sanitizedPayload, { abortEarly: false });
-        console.log("Validation passed");
       } catch (err: any) {
         const msg = (err?.errors as string[])?.[0] || "Validation failed";
         console.error("Validation failed:", err);
@@ -379,11 +411,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
         throw err;
       }
 
-      console.log("Calling createDeepModules API...");
-
       const finalPayload = sanitizePayload(sanitizedPayload);
-
-      console.log("Final payload size:", JSON.stringify(finalPayload).length, "characters");
 
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => {
@@ -393,12 +421,23 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
       const apiPromise = apiCreateDeepModules(finalPayload.course_id, finalPayload);
       const res = await Promise.race([apiPromise, timeoutPromise]);
 
-      console.log("API response:", res);
-
-      if (res?.success === false) {
-        toast.error(res.message || "Failed to create module");
+      // Handle the response
+      if (res && typeof res === "object" && "success" in res) {
+        if (res.success) {
+          // Success - you can handle the response data here if needed
+          console.log("Module created successfully:", res.data);
+          toast.success("Module created successfully!");
+        } else {
+          // API returned an error
+          const errorMessage = res.message || "Failed to create module";
+          toast.error(errorMessage);
+          throw new Error(errorMessage);
+        }
       } else {
-        toast.success("Module created successfully");
+        // Unexpected response format
+        console.error("Unexpected API response format:", res);
+        toast.error("Unexpected response from server");
+        throw new Error("Unexpected response format");
       }
     } catch (error) {
       console.error("Error creating module and lessons:", error);
@@ -410,9 +449,8 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
 
   const updateLesson = async (moduleId: string, lessonId: string, data: Partial<Lesson>) => {
     try {
-      console.log("Updating lesson:", lessonId, "in module:", moduleId, "with data:", data);
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m));
-      setModules(next);
+      safeSetModules(next);
       setEditingLesson(null);
     } catch (error) {
       console.error("Error updating lesson:", error);
@@ -425,11 +463,14 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
    */
   const deleteLesson = async (moduleId: string, lessonId: string) => {
     try {
-      console.log("Deleting lesson:", lessonId, "from module:", moduleId);
-      const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m));
-      console.log("Updated modules after deletion:", next);
+      const next = modules.map((m) => {
+        if (m.id !== moduleId) return m;
+        // Remove lesson and re-index positions starting from 1
+        const reindexedLessons = m.lessons.filter((l) => l.id !== lessonId).map((lesson, index) => ({ ...lesson, position: index + 1 }));
+        return { ...m, lessons: reindexedLessons };
+      });
 
-      setModules(next);
+      safeSetModules(next);
     } catch (error) {
       console.error("Error deleting lesson:", error);
     }
@@ -476,14 +517,14 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const addContentToLesson = async (moduleId: string, lessonId: string, fileResult: FileUploadResult) => {
     try {
       const newContent: LessonContent = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         title: fileResult.originalName,
         type: fileResult.type,
         url: fileResult.url,
         size: fileResult.size,
         filename: fileResult.filename,
       };
-      setModules((prev) => {
+      safeSetModulesFn((prev) => {
         const updatedModules = prev.map((m) =>
           m.id === moduleId
             ? {
@@ -501,7 +542,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const addQuestion = (moduleId: string, lessonId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -513,11 +554,11 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
                       questions: [
                         ...(l.questions ?? []),
                         {
-                          id: crypto.randomUUID(),
+                          id: generateId(),
                           text: "New question",
                           options: [
-                            { id: crypto.randomUUID(), text: "Option 1", is_correct: true },
-                            { id: crypto.randomUUID(), text: "Option 2", is_correct: false },
+                            { id: generateId(), text: "Option 1", is_correct: true },
+                            { id: generateId(), text: "Option 2", is_correct: false },
                           ],
                         },
                       ],
@@ -532,7 +573,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const updateQuestion = (moduleId: string, lessonId: string, questionId: string, text: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -548,7 +589,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     let remaining = 0;
     let hasAssignment = false;
     let hasResources = false;
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -574,7 +615,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const addOption = (moduleId: string, lessonId: string, questionId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -587,7 +628,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
                         q.id === questionId
                           ? {
                               ...q,
-                              options: [...q.options, { id: crypto.randomUUID(), text: "New option", is_correct: false }],
+                              options: [...q.options, { id: generateId(), text: "New option", is_correct: false }],
                             }
                           : q
                       ),
@@ -601,7 +642,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const updateOptionText = (moduleId: string, lessonId: string, questionId: string, optionId: string, text: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -628,7 +669,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const setCorrectOption = (moduleId: string, lessonId: string, questionId: string, optionId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -655,7 +696,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const deleteOption = (moduleId: string, lessonId: string, questionId: string, optionId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -682,12 +723,12 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const enableAssignment = (moduleId: string, lessonId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
               ...m,
-              lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, assignment: { id: crypto.randomUUID(), title: "", description: "" } } : l)),
+              lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, assignment: { id: generateId(), title: "", description: "" } } : l)),
             }
           : m
       )
@@ -698,7 +739,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const removeAssignment = (moduleId: string, lessonId: string) => {
     let hasQuestions = false;
     let hasResources = false;
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -721,7 +762,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   };
 
   const updateAssignmentField = (moduleId: string, lessonId: string, field: "title" | "description", value: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -730,7 +771,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
                 l.id === lessonId
                   ? {
                       ...l,
-                      assignment: { id: l.assignment?.id ?? crypto.randomUUID(), title: field === "title" ? value : l.assignment?.title ?? "", description: field === "description" ? value : l.assignment?.description },
+                      assignment: { id: l.assignment?.id ?? generateId(), title: field === "title" ? value : l.assignment?.title ?? "", description: field === "description" ? value : l.assignment?.description },
                     }
                   : l
               ),

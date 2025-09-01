@@ -1,6 +1,7 @@
 "use server";
 
 import API from "@/configs/api.config";
+import { DataObj, ErrorObj } from "@/lib/utils";
 
 /**
  * Create or update a module with nested lessons via backend API
@@ -10,9 +11,8 @@ import API from "@/configs/api.config";
 export async function createDeepModules(courseId: string, payload: any): Promise<any> {
   try {
     const res = await API.post(`/api/courses/${courseId}/modules/deep`, payload);
-    return res;
+    return DataObj(res);
   } catch (error: any) {
-    const message: string = error?.response?.data?.message || error?.message || "Failed to create or update module";
-    return { success: false, message };
+    return ErrorObj(error);
   }
 }
