@@ -1,4 +1,5 @@
 use crate::pkg::error::AppResult;
+use crate::types::course_types::LessonPositionUpdate;
 
 #[derive(Debug, Clone)]
 pub struct LessonRecord {
@@ -52,6 +53,11 @@ pub trait LessonsRepository: Send + Sync {
         input: UpdateLessonRecord,
     ) -> AppResult<Option<LessonRecord>>;
     async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()>;
+
+    /// Bulk update lesson positions for a module
+    async fn bulk_update_positions(
+        &self,
+        module_id: uuid::Uuid,
+        lessons: Vec<LessonPositionUpdate>,
+    ) -> AppResult<Vec<LessonRecord>>;
 }
-
-

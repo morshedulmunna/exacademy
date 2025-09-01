@@ -330,6 +330,26 @@ paths:
               schema:
                 type: string
                 format: uuid
+  /api/modules/{module_id}/lessons/positions:
+    patch:
+      tags:
+      - Courses
+      operationId: bulk_update_lesson_positions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkUpdateLessonPositionsRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated lesson positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lesson'
   /api/users:
     get:
       tags:
@@ -892,6 +912,35 @@ components:
           type: integer
           format: int32
           description: The new position of the module
+    BulkUpdateLessonPositionsRequest:
+      type: object
+      required:
+      - module_id
+      - lessons
+      properties:
+        module_id:
+          type: string
+          format: uuid
+          description: The ID of the module
+        lessons:
+          type: array
+          items:
+            $ref: '#/components/schemas/LessonPositionUpdate'
+          description: Array of lesson position updates
+    LessonPositionUpdate:
+      type: object
+      required:
+      - id
+      - position
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the lesson
+        position:
+          type: integer
+          format: int32
+          description: The new position of the lesson
     UpdateUserRequest:
       type: object
       properties:

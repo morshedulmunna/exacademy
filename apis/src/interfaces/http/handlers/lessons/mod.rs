@@ -6,6 +6,7 @@ pub mod upload_lesson_video;
 pub mod contents;
 pub mod questions;
 pub mod assignment;
+pub mod bulk_update_positions;
 
 pub use list_lessons::list_lessons;
 pub use create_lesson::create_lesson;
@@ -15,5 +16,6 @@ pub use upload_lesson_video::upload_lesson_video;
 pub use contents::*;
 pub use questions::*;
 pub use assignment::*;
+pub use bulk_update_positions::bulk_update_lesson_positions;
 
 

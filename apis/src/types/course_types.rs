@@ -197,6 +197,18 @@ pub struct ModulePositionUpdate {
 }
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct BulkUpdateLessonPositionsRequest {
+    pub module_id: Uuid,
+    pub lessons: Vec<LessonPositionUpdate>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct LessonPositionUpdate {
+    pub id: Uuid,
+    pub position: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
 pub struct CreateLessonRequest {
     pub module_id: Uuid,
     #[validate(length(min = 1))]

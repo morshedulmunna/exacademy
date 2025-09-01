@@ -10,6 +10,7 @@ import { buildCreateModulePayload, sanitizePayload } from "./services/payload";
 import { deleteModuleAction } from "@/actions/modules/delete-module-action";
 import { deleteLessonAction } from "@/actions/lessons/delete-lesson-action";
 import { bulkUpdateModulePositions } from "@/actions/modules/bulk-update-positions";
+import { bulkUpdateLessonPositions } from "@/actions/lessons/bulk-update-positions";
 import toast from "react-hot-toast";
 // toast and API calls are intentionally not used when only logging payloads
 
@@ -173,7 +174,19 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
           return;
         }
 
-        const response = await bulkUpdateModulePositions(courseId, modulesPayload);
+        // Filter out modules with temporary IDs (they haven't been saved to backend yet)
+        const validModules = modulesPayload.filter((module) => !module.id.startsWith("tmp_"));
+
+        if (validModules.length === 0) {
+          console.log("No valid modules to update (all are temporary)");
+          return;
+        }
+
+        if (validModules.length !== modulesPayload.length) {
+          console.log(`Skipping ${modulesPayload.length - validModules.length} temporary modules`);
+        }
+
+        const response = await bulkUpdateModulePositions(courseId, validModules);
 
         if (!response.success) {
           console.error("Failed to update module positions:", response.message);
@@ -181,6 +194,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
           // Optionally revert the local state if the backend update fails
           // For now, we'll keep the local state and just log the error
         } else {
+          toast.success("Module order updated successfully");
         }
       } catch (err) {
         console.error("Failed to update module positions", err);
@@ -210,7 +224,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const handleLessonDragLeave = (e: React.DragEvent) => {
     e.currentTarget.classList.remove("border-green-400", "bg-green-50", "dark:bg-green-900/20");
   };
-  const handleLessonDrop = (e: React.DragEvent, targetModuleId: string, targetLessonId: string) => {
+  const handleLessonDrop = async (e: React.DragEvent, targetModuleId: string, targetLessonId: string) => {
     e.preventDefault();
     if (!draggedLesson) return;
     const { moduleId: sourceModuleId, lessonId: sourceLessonId } = draggedLesson;
@@ -234,6 +248,45 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     newModules[sourceModuleIndex].lessons = newModules[sourceModuleIndex].lessons.map((lesson, index) => ({ ...lesson, position: index + 1 }));
 
     safeSetModules(newModules);
+
+    // Call backend API to update lesson positions
+    try {
+      const lessonsPayload = newModules[sourceModuleIndex].lessons.map((l) => ({ id: l.id, position: l.position }));
+
+      // Validate payload before sending
+      const positions = new Set(lessonsPayload.map((l) => l.position));
+      if (positions.size !== lessonsPayload.length) {
+        console.error("Duplicate positions detected, reverting local state");
+        // Revert to original state if we have duplicate positions
+        safeSetModules(modules);
+        return;
+      }
+
+      // Filter out lessons with temporary IDs (they haven't been saved to backend yet)
+      const validLessons = lessonsPayload.filter((lesson) => !lesson.id.startsWith("tmp_"));
+
+      if (validLessons.length === 0) {
+        console.log("No valid lessons to update (all are temporary)");
+        return;
+      }
+
+      if (validLessons.length !== lessonsPayload.length) {
+        console.log(`Skipping ${lessonsPayload.length - validLessons.length} temporary lessons`);
+      }
+
+      const response = await bulkUpdateLessonPositions(sourceModuleId, validLessons);
+
+      if (!response.success) {
+        console.error("Failed to update lesson positions:", response.message);
+        toast.error("Failed to save lesson order. Please try again.");
+      } else {
+        toast.success("Lesson order updated successfully");
+      }
+    } catch (err) {
+      console.error("Failed to update lesson positions", err);
+      toast.error("Failed to save lesson order. Please try again.");
+    }
+
     setDraggedLesson(null);
   };
 
