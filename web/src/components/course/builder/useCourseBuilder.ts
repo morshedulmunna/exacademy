@@ -9,6 +9,7 @@ import { transformDeepModulesResponse } from "./services/transformers";
 import { buildCreateModulePayload, sanitizePayload } from "./services/payload";
 import { deleteModuleAction } from "@/actions/modules/delete-module-action";
 import { deleteLessonAction } from "@/actions/lessons/delete-lesson-action";
+import { bulkUpdateModulePositions } from "@/actions/modules/bulk-update-positions";
 import toast from "react-hot-toast";
 // toast and API calls are intentionally not used when only logging payloads
 
@@ -142,7 +143,7 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const handleModuleDragLeave = (e: React.DragEvent) => {
     e.currentTarget.classList.remove("border-blue-400", "bg-blue-50", "dark:bg-blue-900/20");
   };
-  const handleModuleDrop = (e: React.DragEvent, targetModuleId: string) => {
+  const handleModuleDrop = async (e: React.DragEvent, targetModuleId: string) => {
     e.preventDefault();
     e.currentTarget.classList.remove("border-blue-400", "bg-blue-50", "dark:bg-blue-900/20");
     if (!draggedModule || draggedModule === targetModuleId) return;
@@ -157,13 +158,36 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
 
     const updatedModules = newModules.map((module, index) => ({ ...module, position: index + 1 }));
     safeSetModules(updatedModules);
-    try {
-      const payload = {
-        courseId,
-        modules: updatedModules.map((m) => ({ id: m.id, position: m.position })),
-      };
-    } catch (err) {
-      console.error("Failed to log module positions", err);
+
+    // Call backend API to update module positions
+    if (courseId) {
+      try {
+        const modulesPayload = updatedModules.map((m) => ({ id: m.id, position: m.position }));
+
+        // Validate payload before sending
+        const positions = new Set(modulesPayload.map((m) => m.position));
+        if (positions.size !== modulesPayload.length) {
+          console.error("Duplicate positions detected, reverting local state");
+          // Revert to original state if we have duplicate positions
+          safeSetModules(modules);
+          return;
+        }
+
+        const response = await bulkUpdateModulePositions(courseId, modulesPayload);
+
+        if (!response.success) {
+          console.error("Failed to update module positions:", response.message);
+          toast.error("Failed to save module order. Please try again.");
+          // Optionally revert the local state if the backend update fails
+          // For now, we'll keep the local state and just log the error
+        } else {
+        }
+      } catch (err) {
+        console.error("Failed to update module positions", err);
+        toast.error("Failed to save module order. Please try again.");
+        // Optionally revert the local state if the backend update fails
+        // For now, we'll keep the local state and just log the error
+      }
     }
     setDraggedModule(null);
   };

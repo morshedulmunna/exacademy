@@ -1,4 +1,5 @@
 use crate::pkg::error::AppResult;
+use crate::types::course_types::ModulePositionUpdate;
 
 #[derive(Debug, Clone)]
 pub struct ModuleRecord {
@@ -111,6 +112,13 @@ pub trait ModulesRepository: Send + Sync {
         input: UpdateModuleRecord,
     ) -> AppResult<Option<ModuleRecord>>;
     async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()>;
+
+    /// Bulk update module positions for a course
+    async fn bulk_update_positions(
+        &self,
+        course_id: uuid::Uuid,
+        modules: Vec<ModulePositionUpdate>,
+    ) -> AppResult<Vec<ModuleRecord>>;
 
     /// Create a module and all of its nested lessons (plus lesson contents, questions/options,
     /// and optional assignment) within a single ACID transaction, returning the full created graph.

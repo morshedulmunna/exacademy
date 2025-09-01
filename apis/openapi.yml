@@ -278,6 +278,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CourseModule'
+  /api/courses/{course_id}/modules/positions:
+    patch:
+      tags:
+      - Courses
+      operationId: bulk_update_module_positions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkUpdateModulePositionsRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated module positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseModule'
   /api/modules/:module_id/lessons:
     get:
       tags:
@@ -843,6 +863,35 @@ components:
         title:
           type: string
           nullable: true
+    BulkUpdateModulePositionsRequest:
+      type: object
+      required:
+      - course_id
+      - modules
+      properties:
+        course_id:
+          type: string
+          format: uuid
+          description: The ID of the course
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModulePositionUpdate'
+          description: Array of module position updates
+    ModulePositionUpdate:
+      type: object
+      required:
+      - id
+      - position
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the module
+        position:
+          type: integer
+          format: int32
+          description: The new position of the module
     UpdateUserRequest:
       type: object
       properties:

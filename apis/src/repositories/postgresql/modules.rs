@@ -569,6 +569,92 @@ impl ModulesRepository for PostgresModulesRepository {
 
         Ok(modules_deep)
     }
+
+    async fn bulk_update_positions(
+        &self,
+        course_id: uuid::Uuid,
+        modules: Vec<crate::types::course_types::ModulePositionUpdate>,
+    ) -> AppResult<Vec<ModuleRecord>> {
+        // Validate input
+        if modules.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        // Check for duplicate positions
+        let mut positions: std::collections::HashSet<i32> = std::collections::HashSet::new();
+        for module_update in &modules {
+            if !positions.insert(module_update.position) {
+                return Err(AppError::BadRequest(format!(
+                    "Duplicate position {} found in module updates",
+                    module_update.position
+                )));
+            }
+        }
+
+        // Start a transaction to ensure all position updates are atomic
+        let mut tx = self.pool.begin().await.map_err(AppError::from)?;
+
+        // Get the current maximum position in the course to use as a safe offset
+        let max_pos_row = sqlx::query(
+            "SELECT COALESCE(MAX(position), 0) as max_pos FROM course_modules WHERE course_id = $1",
+        )
+        .bind(course_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(AppError::from)?;
+
+        let max_pos: i32 = max_pos_row.get("max_pos");
+        let safe_offset = max_pos + 10000; // Use a very high offset to avoid conflicts
+
+        // First, move all modules to very high temporary positions
+        for module_update in &modules {
+            sqlx::query(
+                r#"UPDATE course_modules 
+                   SET position = $1, updated_at = NOW()
+                   WHERE id = $2 AND course_id = $3"#,
+            )
+            .bind(safe_offset + module_update.position)
+            .bind(module_update.id)
+            .bind(course_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(AppError::from)?;
+        }
+
+        // Now update to the final positions
+        for module_update in &modules {
+            sqlx::query(
+                r#"UPDATE course_modules 
+                   SET position = $1, updated_at = NOW()
+                   WHERE id = $2 AND course_id = $3"#,
+            )
+            .bind(module_update.position)
+            .bind(module_update.id)
+            .bind(course_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(AppError::from)?;
+        }
+
+        // Fetch all updated modules
+        let rows = sqlx::query(
+            r#"SELECT id, course_id, title, description, position, created_at, updated_at
+               FROM course_modules 
+               WHERE course_id = $1 
+               ORDER BY position ASC, created_at ASC"#,
+        )
+        .bind(course_id)
+        .fetch_all(&mut *tx)
+        .await
+        .map_err(AppError::from)?;
+
+        let updated_modules: Vec<ModuleRecord> = rows.into_iter().map(map_module_row).collect();
+
+        // Commit the transaction
+        tx.commit().await.map_err(AppError::from)?;
+
+        Ok(updated_modules)
+    }
 }
 
 fn map_module_row(row: sqlx::postgres::PgRow) -> ModuleRecord {
