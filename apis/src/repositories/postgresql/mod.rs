@@ -2,3 +2,8 @@ pub mod users;
 pub mod courses;
 pub mod modules;
 pub mod lessons;
+pub mod lesson_contents;
+pub mod lesson_questions;
+pub mod lesson_assignments;
+pub mod categories;
+pub mod course_categories;

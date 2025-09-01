@@ -4,6 +4,7 @@ pub mod create;
 pub mod delete_by_id;
 pub mod list_by_course;
 pub mod update_by_id;
+pub mod deep_create;
 
 pub use create::create_module;
 pub use delete_by_id::delete_module_by_id as delete_module;

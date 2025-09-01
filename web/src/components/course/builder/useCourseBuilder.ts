@@ -180,7 +180,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
       const module = modules.find((m) => m.id === moduleId);
       const lessonPosition = module ? module.lessons.length + 1 : 1;
       const id = `tmp_${crypto.randomUUID()}`;
-      const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", video_url: "", duration: "0m", position: lessonPosition, is_free: false, published: false, contents: [], questions: [], assignment: null };
+      const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", video_url: "", video_source: "url", video_file: null, duration: "0m", position: lessonPosition, is_free: false, published: false, contents: [], questions: [], assignment: null };
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m));
       setModules(next);
       onModulesChange?.(next);
@@ -207,6 +207,8 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
         description: "",
         content: "",
         video_url: "",
+        video_source: "url",
+        video_file: null,
         duration: "0m",
         position: 1,
         is_free: false,

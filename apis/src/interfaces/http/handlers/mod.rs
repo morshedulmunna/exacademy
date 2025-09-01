@@ -7,3 +7,5 @@ pub mod courses;
 pub mod modules;
 pub mod lessons;
 pub mod media;
+pub mod categories;
+pub mod course_categories;

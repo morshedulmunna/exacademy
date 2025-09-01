@@ -4,6 +4,9 @@ pub mod create;
 pub mod delete_by_id;
 pub mod list_by_module;
 pub mod update_by_id;
+pub mod contents;
+pub mod questions;
+pub mod assignment;
 
 pub use create::create_lesson;
 pub use delete_by_id::delete_lesson_by_id as delete_lesson;
