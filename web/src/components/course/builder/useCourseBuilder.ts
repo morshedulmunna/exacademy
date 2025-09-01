@@ -7,6 +7,8 @@ import { apiCreateDeepModules, apiListModulesDeep } from "./services/api";
 import { moduleSchema } from "./services/schemas";
 import { transformDeepModulesResponse } from "./services/transformers";
 import { buildCreateModulePayload, sanitizePayload } from "./services/payload";
+import { deleteModuleAction } from "@/actions/modules/delete-module-action";
+import { deleteLessonAction } from "@/actions/lessons/delete-lesson-action";
 import toast from "react-hot-toast";
 // toast and API calls are intentionally not used when only logging payloads
 
@@ -240,12 +242,18 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
    */
   const deleteModule = async (moduleId: string) => {
     try {
+      // Call the backend API to delete the module
+      await deleteModuleAction(moduleId);
+
+      // Update local state after successful deletion
       const next = modules.filter((m) => m.id !== moduleId);
       // Re-index remaining modules' positions starting from 1
       const reindexed = next.map((module, index) => ({ ...module, position: index + 1 }));
       safeSetModules(reindexed);
     } catch (error) {
       console.error("Error deleting module:", error);
+      // Re-throw the error so the UI can handle it appropriately
+      throw error;
     }
   };
 
@@ -463,6 +471,10 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
    */
   const deleteLesson = async (moduleId: string, lessonId: string) => {
     try {
+      // Call the backend API to delete the lesson
+      await deleteLessonAction(lessonId);
+
+      // Update local state after successful deletion
       const next = modules.map((m) => {
         if (m.id !== moduleId) return m;
         // Remove lesson and re-index positions starting from 1
@@ -473,6 +485,8 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
       safeSetModules(next);
     } catch (error) {
       console.error("Error deleting lesson:", error);
+      // Re-throw the error so the UI can handle it appropriately
+      throw error;
     }
   };
 
@@ -506,9 +520,14 @@ export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
     try {
       if (target.kind === "module") {
         await deleteModule(target.moduleId);
+        toast.success("Module deleted successfully!");
       } else {
         await deleteLesson(target.moduleId, target.lessonId);
+        toast.success("Lesson deleted successfully!");
       }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setDeleteModal({ isOpen: false, target: null });
     }
