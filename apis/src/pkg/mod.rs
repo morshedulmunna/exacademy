@@ -6,7 +6,6 @@ pub mod rate_limit;
 pub mod redis;
 pub mod response;
 pub mod security;
-pub mod spaces;
 pub mod upload;
 pub mod utils;
 pub mod validators;

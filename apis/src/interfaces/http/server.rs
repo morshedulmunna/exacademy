@@ -2,8 +2,6 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::{Extension, Router, middleware};
-use http::header::{AUTHORIZATION, CONTENT_TYPE};
-use http::{HeaderValue, Method};
 use tower::ServiceBuilder;
 use tower_http::{
     compression::CompressionLayer, cors::CorsLayer, services::ServeDir, trace::TraceLayer,
@@ -21,18 +19,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 /// Build the Axum application router with middlewares and routes
 fn build_app(ctx: Arc<AppContext>) -> Router {
-    let cors = CorsLayer::new()
-        .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
-        .allow_origin("http://localhost:3001".parse::<HeaderValue>().unwrap())
-        .allow_methods([
-            Method::GET,
-            Method::POST,
-            Method::PUT,
-            Method::DELETE,
-            Method::OPTIONS,
-        ])
-        .allow_headers([AUTHORIZATION, CONTENT_TYPE])
-        .allow_credentials(true);
+    let cors = CorsLayer::permissive();
     let trace = TraceLayer::new_for_http();
     let compression = CompressionLayer::new();
 

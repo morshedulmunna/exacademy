@@ -1,27 +1,25 @@
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
-pub mod categories;
-pub mod course_categories;
 pub mod courses;
 pub mod lesson_assignments;
 pub mod lesson_contents;
 pub mod lesson_questions;
 pub mod lessons;
+pub mod categories;
+pub mod course_categories;
 pub mod modules;
 pub mod postgresql;
 pub mod users;
-pub mod videos;
 
-use categories::CategoriesRepository;
-use course_categories::CourseCategoriesRepository;
 use courses::CoursesRepository;
 use lesson_assignments::LessonAssignmentsRepository;
 use lesson_contents::LessonContentsRepository;
 use lesson_questions::LessonQuestionsRepository;
 use lessons::LessonsRepository;
+use categories::CategoriesRepository;
+use course_categories::CourseCategoriesRepository;
 use modules::ModulesRepository;
 use users::UsersRepository;
-use videos::VideoRepository;
 
 /// Central registry for all repositories.
 ///
@@ -38,7 +36,6 @@ pub struct Repositories {
     pub lesson_assignments: Arc<dyn LessonAssignmentsRepository>,
     pub categories: Arc<dyn CategoriesRepository>,
     pub course_categories: Arc<dyn CourseCategoriesRepository>,
-    pub videos: Arc<VideoRepository>,
 }
 
 impl Repositories {
@@ -84,11 +81,9 @@ impl Repositories {
         );
         let course_categories: Arc<dyn CourseCategoriesRepository> = Arc::new(
             crate::repositories::postgresql::course_categories::PostgresCourseCategoriesRepository {
-                pool: pool.clone(),
+                pool,
             },
         );
-
-        let videos: Arc<VideoRepository> = Arc::new(VideoRepository::new(pool));
 
         Self {
             users,
@@ -100,7 +95,6 @@ impl Repositories {
             lesson_assignments,
             categories,
             course_categories,
-            videos,
         }
     }
 }
