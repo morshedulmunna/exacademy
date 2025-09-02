@@ -224,7 +224,7 @@ pub struct CreateLessonRequest {
     pub published: bool,
 }
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, Validate, Default)]
 pub struct UpdateLessonRequest {
     pub title: Option<String>,
     pub description: Option<String>,

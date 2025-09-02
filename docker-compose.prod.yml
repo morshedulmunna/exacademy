@@ -1,71 +1,112 @@
 services:
   nginx:
+    build:
+      context: ./nginex
+      dockerfile: Dockerfile
+    container_name: execute_academy-nginx
+    depends_on:
+      api:
+        condition: service_started
     ports:
-      - "80:80"
-    restart: unless-stopped
-    networks:
-      - app
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   api:
-    env_file:
-      - .env.production
+    build:
+      context: ./apis
+      dockerfile: Dockerfile
+    container_name: execute_academy-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
+      # Bind HTTP server to all interfaces inside the container
       API_HOST: "0.0.0.0"
       API_PORT: "9098"
-      DATABASE_URL: ${DATABASE_URL:-postgres://execute_academy:${POSTGRES_PASSWORD}@postgres:5432/execute_academy?sslmode=disable}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      JWT_SECRET: ${JWT_SECRET:?set in .env.production}
-      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set in .env.production}
-      VIMEO_TOKEN: ${VIMEO_TOKEN:-}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USERNAME: ${SMTP_USERNAME:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
-      EMAIL_FROM: ${EMAIL_FROM:-no-reply@example.com}
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Execute Academy}
-    volumes:
-      - uploads_data:/app/uploads
-    restart: unless-stopped
-    networks:
-      - app
+      DATABASE_URL: "postgres://execute_academy@postgres:5432/execute_academy?sslmode=disable"
+      REDIS_URL: "redis://redis:6379/0"
+      # Vimeo token required by runtime (dummy for local)
+      VIMEO_TOKEN: "dummy-local-token"
+      # Kafka configuration for email queue
+      KAFKA_BROKERS: "kafka:9092"
+      KAFKA_EMAIL_TOPIC: "emails"
+      KAFKA_CLIENT_ID: "execute_academy_api"
+      # Optional: seed admin defaults (use env or secrets in production)
+      ADMIN_USERNAME: "admin"
+      ADMIN_EMAIL: "admin@execute_academy.local"
+      ADMIN_PASSWORD: "admin123"
+      # DigitalOcean Spaces configuration - PRODUCTION
+      SPACES_ENDPOINT: "https://sfo3.digitaloceanspaces.com"
+      SPACES_REGION: "sfo3"
+      SPACES_ACCESS_KEY_ID: "DO00VBT4UACL8XQHX9YU"
+      SPACES_SECRET_ACCESS_KEY: "MXLMXyf6uBUmsyPeJODggQlQ7pNPhAaQeZ8W7GENPp8"
+      SPACES_BUCKET_NAME: "prod-storage0"
+      SPACES_PUBLIC_URL: "https://prod-storage0.sfo3.digitaloceanspaces.com"
+    ports:
+      - "9098:9098"
+    entrypoint: ["/bin/sh", "-lc"]
+    command: ["execute_academy migrate && execute_academy seed && exec execute_academy execute_academy-apis"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9098/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        # Optional: bake API base URL into SSG assets if used
+        API_BASE_URL: "http://api:9098"
+    container_name: execute_academy-web
+    depends_on:
+      api:
+        condition: service_started
     environment:
       NODE_ENV: production
-      API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://api:9098}
+      API_BASE_URL: "http://api:9098"
       PORT: 3000
       HOSTNAME: 0.0.0.0
-    restart: unless-stopped
-    networks:
-      - app
+    expose:
+      - "3000"
 
   postgres:
+    image: postgres:16-alpine
+    container_name: execute_academy-postgres
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env.production}
-      POSTGRES_HOST_AUTH_METHOD: ""
-    ports: []
+      POSTGRES_USER: execute_academy
+      POSTGRES_DB: execute_academy
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    networks:
-      - app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U execute_academy"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
-    ports: []
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    networks:
-      - app
+    image: redis:7.2-alpine
+    container_name: execute_academy-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
-  uploads_data:
   postgres_data:
   redis_data:
-
-networks:
-  app:
-    driver: bridge

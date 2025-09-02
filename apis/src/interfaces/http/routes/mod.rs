@@ -5,6 +5,7 @@ pub mod media;
 pub mod modules;
 pub mod users;
 pub mod categories;
+pub mod video;
 pub use crate::interfaces::http::handlers::root::handler;
 
 use crate::interfaces::http::handlers::health;
@@ -22,4 +23,5 @@ pub fn router() -> Router {
         .merge(lessons::router())
         .merge(media::router())
         .merge(categories::router())
+        .merge(video::router())
 }

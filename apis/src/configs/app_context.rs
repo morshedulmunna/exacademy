@@ -9,6 +9,7 @@ use crate::configs::db_config::DatabaseConfig;
 // Kafka is not used
 use crate::configs::email_config::EmailConfig;
 use crate::configs::redis_config::RedisConfig;
+use crate::configs::spaces_config::SpacesConfig;
 use crate::configs::system_config::SystemConfig;
 use crate::configs::vimeo_config::VimeoConfig;
 // Email is sent directly where needed; no producer required
@@ -19,6 +20,7 @@ use crate::repositories::Repositories;
 
 use crate::pkg::redis::RedisManager;
 use crate::pkg::redis::RedisOps;
+use crate::pkg::spaces::SpacesClient;
 use crate::pkg::vimeo::VimeoClient;
 use tokio::sync::OnceCell;
 
@@ -37,6 +39,8 @@ pub struct AppContext {
     pub email_sender: Arc<dyn crate::pkg::email::EmailSender>,
     pub vimeo: VimeoConfig,
     pub vimeo_client: Arc<VimeoClient>,
+    pub spaces: SpacesConfig,
+    pub spaces_client: Arc<SpacesClient>,
 }
 
 impl AppContext {
@@ -50,6 +54,7 @@ impl AppContext {
         let auth = AuthConfig::load_from_env()?;
         let email_cfg = EmailConfig::load_from_env()?;
         let vimeo_cfg = VimeoConfig::load_from_env()?;
+        let spaces_cfg = SpacesConfig::load_from_env()?;
 
         let db_pool = PgPoolOptions::new()
             .max_connections(10)
@@ -79,6 +84,10 @@ impl AppContext {
         // Vimeo client
         let vimeo_client: Arc<VimeoClient> = Arc::new(VimeoClient::new(&vimeo_cfg.token));
 
+        // Spaces client
+        let spaces_client: Arc<SpacesClient> =
+            Arc::new(SpacesClient::new(spaces_cfg.clone()).await?);
+
         Ok(Self {
             system,
             db_pool: db_pool.clone(),
@@ -92,6 +101,8 @@ impl AppContext {
             email_sender,
             vimeo: vimeo_cfg,
             vimeo_client,
+            spaces: spaces_cfg,
+            spaces_client,
         })
     }
 

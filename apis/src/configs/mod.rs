@@ -27,3 +27,7 @@ pub mod email_config;
 // Vimeo config
 #[path = "vimeo.config.rs"]
 pub mod vimeo_config;
+
+// DigitalOcean Spaces config
+#[path = "spaces.config.rs"]
+pub mod spaces_config;
