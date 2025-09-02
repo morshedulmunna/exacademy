@@ -50,7 +50,7 @@ migrate:
 
 # Revert the last applied migration using sqlx-cli
 migrate-down:
-	sqlx migrate revert -y
+	sqlx migrate revert
 
 # Helper to install sqlx-cli if you don't have it
 sqlx-install:

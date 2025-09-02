@@ -2,6 +2,7 @@ use crate::pkg::error::AppResult;
 use crate::repositories::modules::{
     CreateLessonAssignmentData, CreateLessonDeepData, CreateLessonQuestionData,
     CreateLessonQuestionOptionData, CreateModuleDeepRecord, LessonDeepRecord, ModuleDeepRecord,
+    ModulesRepository,
 };
 use crate::types::course_types::{
     CourseModule, CreateLessonDeepRequest, CreateModuleDeepRequest, Lesson, LessonContent,
@@ -11,7 +12,7 @@ use crate::types::course_types::{
 /// Create or update a module with nested lessons/contents/questions/assignment in one ACID operation
 /// If a module with the same position already exists for the course, it will be updated instead
 pub async fn create_deep(
-    repo: &dyn crate::repositories::modules::ModulesRepository,
+    repo: &dyn ModulesRepository,
     course_id: uuid::Uuid,
     req: CreateModuleDeepRequest,
 ) -> AppResult<ModuleDeep> {
