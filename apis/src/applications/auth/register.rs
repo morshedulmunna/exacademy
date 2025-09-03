@@ -2,7 +2,8 @@ use super::utils::{generate_otp_code, send_otp_email, store_otp};
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::repositories::users::CreateUserRecord;
-use crate::types::user_types::{RegisterRequest, RegisterResponse};
+use crate::types::user_types::RegisterResponse;
+use crate::types::users::request_type::RegisterRequest;
 use std::time::Duration;
 
 /// Register a new user and send an email verification OTP.

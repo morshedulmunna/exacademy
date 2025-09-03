@@ -31,6 +31,7 @@ fn build_app(ctx: Arc<AppContext>) -> Router {
         .merge(api)
         .nest_service("/uploads", ServeDir::new("./uploads"))
         .fallback(super::handlers::not_found::handler)
+        .layer(Extension(ctx))
         .layer(
             ServiceBuilder::new()
                 .layer(trace)
@@ -42,8 +43,7 @@ fn build_app(ctx: Arc<AppContext>) -> Router {
         .route_layer(middleware::from_fn_with_state(
             rate_limit_state.clone(),
             rate_limit_mw,
-        ))
-        .layer(Extension(ctx));
+        ));
 
     // Build OpenAPI doc and mount Swagger UI at /docs
     let openapi = crate::interfaces::http::swagger::ApiDoc::openapi();

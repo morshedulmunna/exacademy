@@ -12,7 +12,8 @@ use utoipa::{Modify, OpenApi};
         description = "REST API for execute_academy. See category, product, auth, and user endpoints."
     ),
     servers(
-        (url = "http://localhost:9098", description = "Local dev")
+        (url = "http://localhost:9098", description = "Local dev"),
+        (url = "https://api.executeacademy.com", description = "Production")
     ),
     paths(
         // Auth
@@ -47,7 +48,7 @@ use utoipa::{Modify, OpenApi};
             // Shared
             crate::pkg::response::ApiErrorResponse,
             // Users
-            crate::types::user_types::RegisterRequest,
+            crate::types::users::request_type::RegisterRequest,
             crate::types::user_types::RegisterResponse,
             crate::types::user_types::LoginRequest,
             crate::types::user_types::LoginResponse,

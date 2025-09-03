@@ -13,45 +13,6 @@ use validator::Validate;
 // ========================
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]
-pub struct RegisterRequest {
-    #[validate(length(min = 1, max = 50))]
-    #[schema(min_length = 1, max_length = 50, nullable = true)]
-    pub first_name: Option<String>,
-
-    #[validate(length(min = 1, max = 50))]
-    #[schema(min_length = 1, max_length = 50, nullable = true)]
-    pub last_name: Option<String>,
-
-    #[validate(length(min = 3, max = 30))]
-    #[schema(
-        min_length = 3,
-        max_length = 30,
-        pattern = "^[a-zA-Z0-9_]+$",
-        nullable = false
-    )]
-    pub username: String,
-
-    #[validate(email)]
-    #[schema(format = "email", nullable = false)]
-    pub email: String,
-
-    /// Password must be at least 8 characters, contain uppercase, lowercase, digit, and special character.
-    #[validate(
-        length(min = 8),
-        regex(
-            path = "crate::types::PASSWORD_COMPLEXITY_REGEX",
-            message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
-        )
-    )]
-    #[schema(
-        min_length = 8,
-        pattern = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$",
-        nullable = false
-    )]
-    pub password: String,
-}
-
-#[derive(Debug, Deserialize, ToSchema, Validate)]
 pub struct LoginRequest {
     #[validate(email)]
     pub email: String,
