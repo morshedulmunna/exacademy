@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ApiErrorResponse {
     /// Stable machine-readable error code
-    pub code: String,
+    pub types: String,
     /// Human-readable error message
     pub message: String,
     /// Timestamp at which the error was produced
@@ -26,9 +26,9 @@ pub struct ApiErrorResponse {
 
 impl ApiErrorResponse {
     /// Create a minimal error body
-    pub fn new(code: impl Into<String>, message: impl Into<String>) -> Self {
+    pub fn new(types: impl Into<String>, message: impl Into<String>) -> Self {
         Self {
-            code: code.into(),
+            types: types.into(),
             message: message.into(),
             timestamp: Utc::now(),
             trace_id: Some(uuid::Uuid::new_v4().to_string()),

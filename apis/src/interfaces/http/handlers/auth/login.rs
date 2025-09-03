@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::pkg::validators::ValidatedJson;
 use axum::{Json, extract::Extension, http::StatusCode};
 
@@ -18,12 +20,13 @@ use axum::http::{HeaderMap, header};
     tag = "Auth"
 )]
 pub async fn login(
-    Extension(ctx): Extension<std::sync::Arc<AppContext>>,
+    Extension(ctx): Extension<Arc<AppContext>>,
     ValidatedJson(input_data): ValidatedJson<LoginRequest>,
 ) -> AppResult<(StatusCode, HeaderMap, Json<Response<LoginResponse>>)> {
     let output = auth_service::login(&ctx, ctx.repos.users.as_ref(), input_data).await?;
 
     let is_prod = ctx.system.app_env.eq_ignore_ascii_case("production");
+
     let mut headers = HeaderMap::new();
 
     // access_token cookie
@@ -42,7 +45,6 @@ pub async fn login(
         if is_prod { "Secure; " } else { "" },
         ctx.auth.refresh_ttl_seconds
     );
-
     headers.append(header::SET_COOKIE, refresh_cookie.parse().unwrap());
 
     let body = Response::with_data("Logged in", output, StatusCode::OK.as_u16());

@@ -50,6 +50,7 @@ impl UsersRepository for PostgresUsersRepository {
         .fetch_one(&self.pool)
         .await
         .map_err(AppError::from)?;
+
         Ok(rec.get("id"))
     }
 
