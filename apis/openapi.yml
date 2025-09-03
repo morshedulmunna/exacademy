@@ -74,11 +74,23 @@ paths:
         required: true
       responses:
         '200':
-          description: Registered
+          description: User successfully registered
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Validation error or bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/crate.pkg.response.ApiErrorResponse'
+        '409':
+          description: Email or username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/crate.pkg.response.ApiErrorResponse'
   /api/auth/resend-otp:
     post:
       tags:
@@ -180,6 +192,20 @@ paths:
               schema:
                 type: string
                 format: uuid
+  /api/courses/:course_id/modules/deep:
+    get:
+      tags:
+      - Courses
+      operationId: list_modules_deep
+      responses:
+        '200':
+          description: Modules with nested lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModuleDeep'
   /api/courses/:id:
     get:
       tags:
@@ -241,18 +267,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lesson'
-  /api/lessons/:id/video:
-    post:
-      tags:
-      - Courses
-      operationId: upload_lesson_video
-      responses:
-        '200':
-          description: Uploaded video and updated lesson
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Lesson'
   /api/modules/:id:
     delete:
       tags:
@@ -278,26 +292,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CourseModule'
-  /api/courses/{course_id}/modules/positions:
-    patch:
-      tags:
-      - Courses
-      operationId: bulk_update_module_positions
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BulkUpdateModulePositionsRequest'
-        required: true
-      responses:
-        '200':
-          description: Updated module positions
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CourseModule'
   /api/modules/:module_id/lessons:
     get:
       tags:
@@ -330,26 +324,6 @@ paths:
               schema:
                 type: string
                 format: uuid
-  /api/modules/{module_id}/lessons/positions:
-    patch:
-      tags:
-      - Courses
-      operationId: bulk_update_lesson_positions
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BulkUpdateLessonPositionsRequest'
-        required: true
-      responses:
-        '200':
-          description: Updated lesson positions
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Lesson'
   /api/users:
     get:
       tags:
@@ -430,11 +404,15 @@ components:
       - duration
       - lessons
       - students
-      - published
       - featured
       - view_count
+      - status
+      - instructor_id
       - created_at
       properties:
+        category:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -457,7 +435,6 @@ components:
         instructor_id:
           type: string
           format: uuid
-          nullable: true
         lessons:
           type: integer
           format: int32
@@ -465,20 +442,30 @@ components:
           type: number
           format: double
           nullable: true
+        outcomes:
+          type: array
+          items:
+            type: string
+          nullable: true
         price:
           type: number
           format: double
-        published:
-          type: boolean
         published_at:
           type: string
           format: date-time
           nullable: true
         slug:
           type: string
+        status:
+          type: string
         students:
           type: integer
           format: int32
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: true
         thumbnail:
           type: string
           nullable: true
@@ -531,6 +518,9 @@ components:
       - duration
       - featured
       properties:
+        category:
+          type: string
+          nullable: true
         description:
           type: string
         duration:
@@ -543,12 +533,27 @@ components:
         original_price:
           type: number
           format: double
+          description: Original price must be non-negative.
+          nullable: true
+        outcomes:
+          type: array
+          items:
+            type: string
           nullable: true
         price:
           type: number
           format: double
+          description: Price must be non-negative.
         slug:
           type: string
+        status:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: true
         thumbnail:
           type: string
           nullable: true
@@ -614,12 +619,18 @@ components:
         avatar_url:
           type: string
           nullable: true
+        email:
+          type: string
+          nullable: true
         full_name:
           type: string
           nullable: true
         id:
           type: string
           format: uuid
+        role:
+          type: string
+          nullable: true
         username:
           type: string
     Lesson:
@@ -762,14 +773,23 @@ components:
       properties:
         email:
           type: string
+          format: email
         first_name:
           type: string
+          maxLength: 50
+          minLength: 1
         last_name:
           type: string
+          maxLength: 50
+          minLength: 1
         password:
           type: string
+          minLength: 8
         username:
           type: string
+          maxLength: 30
+          minLength: 3
+          pattern: ^[a-zA-Z0-9_]+$
     RegisterResponse:
       type: object
       required:
@@ -805,6 +825,9 @@ components:
     UpdateCourseRequest:
       type: object
       properties:
+        category:
+          type: string
+          nullable: true
         description:
           type: string
           nullable: true
@@ -825,16 +848,26 @@ components:
           type: number
           format: double
           nullable: true
+        outcomes:
+          type: array
+          items:
+            type: string
+          nullable: true
         price:
           type: number
           format: double
           nullable: true
-        published:
-          type: boolean
+        status:
+          type: string
           nullable: true
         students:
           type: integer
           format: int32
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
           nullable: true
         thumbnail:
           type: string
@@ -883,64 +916,6 @@ components:
         title:
           type: string
           nullable: true
-    BulkUpdateModulePositionsRequest:
-      type: object
-      required:
-      - course_id
-      - modules
-      properties:
-        course_id:
-          type: string
-          format: uuid
-          description: The ID of the course
-        modules:
-          type: array
-          items:
-            $ref: '#/components/schemas/ModulePositionUpdate'
-          description: Array of module position updates
-    ModulePositionUpdate:
-      type: object
-      required:
-      - id
-      - position
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: The ID of the module
-        position:
-          type: integer
-          format: int32
-          description: The new position of the module
-    BulkUpdateLessonPositionsRequest:
-      type: object
-      required:
-      - module_id
-      - lessons
-      properties:
-        module_id:
-          type: string
-          format: uuid
-          description: The ID of the module
-        lessons:
-          type: array
-          items:
-            $ref: '#/components/schemas/LessonPositionUpdate'
-          description: Array of lesson position updates
-    LessonPositionUpdate:
-      type: object
-      required:
-      - id
-      - position
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: The ID of the lesson
-        position:
-          type: integer
-          format: int32
-          description: The new position of the lesson
     UpdateUserRequest:
       type: object
       properties:

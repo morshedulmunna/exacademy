@@ -69,6 +69,7 @@ futures = "0.3"
 
 # Validation (derive-based, similar to Zod schemas)
 validator = { version = "0.18", features = ["derive"] }
+regex = "1.0"
 
 # OpenAPI / Swagger
 utoipa = { version = "4", features = ["chrono", "uuid"] }

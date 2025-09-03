@@ -42,7 +42,6 @@ use utoipa::{Modify, OpenApi};
         crate::interfaces::http::handlers::lessons::create_lesson::create_lesson,
         crate::interfaces::http::handlers::lessons::update_lesson::update_lesson,
         crate::interfaces::http::handlers::lessons::delete_lesson::delete_lesson,
-        crate::interfaces::http::handlers::lessons::upload_lesson_video::upload_lesson_video,
     ),
     components(schemas(
             // Shared

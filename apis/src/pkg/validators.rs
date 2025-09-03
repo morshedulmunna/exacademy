@@ -1,12 +1,12 @@
 use std::ops::Deref;
 
+use crate::pkg::error::{AppError, ValidationIssue, validation_error};
 use axum::Json;
 use axum::body::Body;
 use axum::extract::FromRequest;
 use axum::http::Request;
+use std::borrow::Cow::Borrowed;
 use validator::Validate;
-
-use crate::pkg::error::{AppError, ValidationIssue, validation_error};
 
 /// ValidatedJson is an Axum extractor that deserializes JSON and runs
 /// `validator` crate validations via `Validate` derive. If validation
@@ -43,7 +43,7 @@ where
                     let message = err
                         .message
                         .clone()
-                        .unwrap_or_else(|| std::borrow::Cow::Borrowed("is invalid"))
+                        .unwrap_or_else(|| Borrowed("is invalid"))
                         .to_string();
                     issues.push(ValidationIssue::new(field.to_string(), message));
                 }

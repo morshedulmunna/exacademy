@@ -2,6 +2,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::{Extension, Router, middleware};
+use tokio::signal;
 use tower::ServiceBuilder;
 use tower_http::{
     compression::CompressionLayer, cors::CorsLayer, services::ServeDir, trace::TraceLayer,
@@ -49,7 +50,7 @@ fn build_app(ctx: Arc<AppContext>) -> Router {
     app.merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi))
 }
 
-/// Start the HTTP server using Axum
+/// Start the HTTP server using Axum with graceful shutdown
 pub async fn start_server(
     host: &str,
     config: &AppContext,
@@ -59,7 +60,13 @@ pub async fn start_server(
 
     let addr: SocketAddr = format!("{}:{}", host, config.system.api_port).parse()?;
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await?;
+
+    // Start the server with graceful shutdown
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
+
+    info("Server shutdown complete".to_string());
     Ok(())
 }
 
@@ -74,7 +81,36 @@ pub async fn start_default_server() -> Result<(), Box<dyn std::error::Error>> {
         ctx.system.api_host, ctx.system.api_port
     ));
 
-    start_server(&ctx.system.api_host, ctx.as_ref()).await
+    return start_server(&ctx.system.api_host, ctx.as_ref()).await;
+}
+
+/// Graceful shutdown signal handler
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {
+            info("Received Ctrl+C, shutting down gracefully...".to_string());
+        },
+        _ = terminate => {
+            info("Received SIGTERM, shutting down gracefully...".to_string());
+        },
+    }
 }
 
 /// Entry called by `apis_command` to run the HTTP server.

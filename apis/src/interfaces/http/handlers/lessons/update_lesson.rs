@@ -23,5 +23,3 @@ pub async fn update_lesson(
     let body = Response::with_data("Updated lesson", lesson, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
-
-
