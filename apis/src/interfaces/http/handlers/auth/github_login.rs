@@ -6,7 +6,7 @@ use crate::configs::app_context::AppContext;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::{GithubLoginRequest, LoginResponse};
+use crate::types::users::{request_type::GithubLoginRequest, response_type::LoginResponse};
 use axum::http::{HeaderMap, header};
 
 /// GitHub OAuth login

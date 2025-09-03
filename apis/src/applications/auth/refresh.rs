@@ -1,7 +1,8 @@
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::security::{Claims, build_access_claims};
-use crate::types::user_types::{RefreshRequest, TokenResponse};
+use crate::types::users::request_type::RefreshRequest;
+use crate::types::users::response_type::TokenResponse;
 
 /// Exchange a refresh token for an access token
 pub async fn refresh(ctx: &AppContext, input: RefreshRequest) -> AppResult<TokenResponse> {

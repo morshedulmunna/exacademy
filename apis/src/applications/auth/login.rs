@@ -2,7 +2,8 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::security::build_access_claims;
 use crate::repositories::users::UsersRepository;
-use crate::types::user_types::{LoginRequest, LoginResponse, UserResponse};
+use crate::types::users::request_type::LoginRequest;
+use crate::types::users::response_type::{LoginResponse, UserResponse};
 
 /// Authenticate a user and return tokens
 pub async fn login(
@@ -12,7 +13,7 @@ pub async fn login(
 ) -> AppResult<LoginResponse> {
     let user = match repo.find_by_email(&input.email).await? {
         Some(u) => u,
-        None => return Err(AppError::Unauthorized("Invalid credentials".into())),
+        None => return Err(AppError::Unauthorized("User not registered".into())),
     };
     let hashed: &str = user
         .password_hash
@@ -24,7 +25,7 @@ pub async fn login(
         .verify(&input.password, hashed)
         .map_err(|e| AppError::Internal(e.to_string()))?;
     if !ok {
-        return Err(AppError::Unauthorized("Invalid credentials".into()));
+        return Err(AppError::Unauthorized("Invalid password".into()));
     }
 
     // Prevent login for inactive accounts

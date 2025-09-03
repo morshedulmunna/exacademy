@@ -2,7 +2,7 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::repositories::users::{UpdateUserRecord, UsersRepository};
 use crate::pkg::redis::RedisOps;
-use crate::types::user_types::VerifyOtpRequest;
+use crate::types::users::request_type::VerifyOtpRequest;
 use std::time::Duration;
 
 use super::utils::{otp_key, store_otp};

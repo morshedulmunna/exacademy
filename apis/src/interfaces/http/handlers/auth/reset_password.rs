@@ -6,7 +6,7 @@ use crate::configs::app_context::AppContext;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::{ResetPasswordRequest, OkResponse};
+use crate::types::users::{request_type::ResetPasswordRequest, response_type::OkResponse};
 
 /// Reset password with code
 #[utoipa::path(

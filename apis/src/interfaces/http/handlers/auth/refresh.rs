@@ -6,7 +6,7 @@ use crate::configs::app_context::AppContext;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::{RefreshRequest, TokenResponse};
+use crate::types::users::{request_type::RefreshRequest, response_type::TokenResponse};
 use axum::http::{HeaderMap, header};
 
 /// Exchange refresh token for new access token

@@ -2,7 +2,7 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::redis::RedisOps;
 use crate::repositories::users::{UpdateUserRecord, UsersRepository};
-use crate::types::user_types::{UpdateUserRequest, UserProfile};
+use crate::types::users::{request_type::UpdateUserRequest, user_types::UserProfile};
 use std::time::Duration;
 
 /// Fetch a user by id

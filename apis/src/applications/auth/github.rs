@@ -2,7 +2,8 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::security::build_access_claims;
 use crate::repositories::users::{CreateUserRecord, UpdateUserRecord, UsersRepository};
-use crate::types::user_types::{GithubLoginRequest, LoginResponse, UserResponse};
+use crate::types::users::request_type::GithubLoginRequest;
+use crate::types::users::response_type::{LoginResponse, UserResponse};
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 
 #[derive(serde::Deserialize)]

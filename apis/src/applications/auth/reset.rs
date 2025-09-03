@@ -5,7 +5,7 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::pkg::redis::RedisOps;
 use crate::repositories::users::UsersRepository;
-use crate::types::user_types::{ForgotPasswordRequest, ResetPasswordRequest};
+use crate::types::users::request_type::{ForgotPasswordRequest, ResetPasswordRequest};
 
 use super::utils::{generate_otp_code, store_otp};
 

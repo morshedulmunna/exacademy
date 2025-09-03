@@ -9,8 +9,8 @@ use std::sync::Arc;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::RegisterResponse;
 use crate::types::users::request_type::RegisterRequest;
+use crate::types::users::response_type::RegisterResponse;
 
 /// Register a new user account
 #[utoipa::path(
@@ -20,7 +20,8 @@ use crate::types::users::request_type::RegisterRequest;
     responses(
         (status = 200, description = "User successfully registered", body = RegisterResponse),
         (status = 400, description = "Validation error or bad request", body = ApiErrorResponse),
-        (status = 409, description = "Email or username already exists", body = ApiErrorResponse)
+        (status = 409, description = "Email or username already exists", body = ApiErrorResponse),
+        (status = 500, description = "Internal Server Error", body = ApiErrorResponse)
     ),
     tag = "Auth"
 )]

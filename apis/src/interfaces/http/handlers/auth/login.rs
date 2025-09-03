@@ -8,7 +8,7 @@ use crate::configs::app_context::AppContext;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::{LoginRequest, LoginResponse};
+use crate::types::users::{request_type::LoginRequest, response_type::LoginResponse};
 use axum::http::{HeaderMap, header};
 
 /// Log in and receive access/refresh tokens
@@ -16,7 +16,11 @@ use axum::http::{HeaderMap, header};
     post,
     path = "/api/auth/login",
     request_body = LoginRequest,
-    responses((status = 200, description = "Logged in", body = LoginResponse)),
+    responses((status = 200, description = "Logged in", body = LoginResponse),
+        (status = 400, description = "Bad Request", body = ApiErrorResponse),
+        (status = 403, description = "Forbidden", body = ApiErrorResponse),
+        (status = 500, description = "Internal Server Error", body = ApiErrorResponse)
+    ),
     tag = "Auth"
 )]
 pub async fn login(
