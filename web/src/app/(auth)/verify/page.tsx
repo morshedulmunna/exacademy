@@ -23,20 +23,6 @@ function VerifyPageInner() {
   // Resend control
   const [attemptCount, setAttemptCount] = useState(0);
   const [resendDisabledUntil, setResendDisabledUntil] = useState<number>(0);
-  const [timerNow, setTimerNow] = useState<number>(Date.now());
-  const remainingMs = Math.max(0, resendDisabledUntil - timerNow);
-  const remainingSec = Math.ceil(remainingMs / 1000);
-
-  useEffect(() => {
-    if (resendDisabledUntil === 0) return;
-    const id = setInterval(() => {
-      setTimerNow(Date.now());
-      if (Date.now() >= resendDisabledUntil) {
-        clearInterval(id);
-      }
-    }, 1000);
-    return () => clearInterval(id);
-  }, [resendDisabledUntil]);
 
   // Auto-clear success message after 5 seconds
   useEffect(() => {
@@ -87,7 +73,9 @@ function VerifyPageInner() {
       const res = await VerifyOtpAction({ email, otp: joined });
       if (res.success) {
         router.push("/login");
-      } else {
+      }
+
+      if (!res.success) {
         setError(res.message);
       }
     } catch (e: any) {
@@ -108,14 +96,16 @@ function VerifyPageInner() {
     const nowTs = Date.now();
     if (nowTs < resendDisabledUntil) return;
 
+    setIsResending(true);
     try {
       const res = await ResendOtpAction({ email });
       if (res.success) {
         setSuccess("Verification code sent successfully!");
+        // Set a 30-second cooldown period
+        setResendDisabledUntil(Date.now() + 30000);
       } else {
         setError(res.message);
       }
-      setIsResending(false);
     } catch (e: any) {
       setError("Failed to resend code.");
     } finally {
@@ -158,8 +148,8 @@ function VerifyPageInner() {
           </button>
 
           <div className="mt-4 flex items-center justify-between text-xs sm:text-sm">
-            <button type="button" onClick={handleResend} disabled={isResending || timerNow < resendDisabledUntil} className="text-purple-600 dark:text-purple-400 disabled:opacity-50">
-              {isResending ? "Sending..." : timerNow < resendDisabledUntil ? `Resend in ${remainingSec}s` : "Resend code"}
+            <button type="button" onClick={handleResend} disabled={isResending || Date.now() < resendDisabledUntil} className="text-purple-600 dark:text-purple-400 disabled:opacity-50">
+              {isResending ? "Sending..." : "Resend code"}
             </button>
             <Link href="/login" className="text-gray-600 dark:text-gray-300">
               Back to Sign in

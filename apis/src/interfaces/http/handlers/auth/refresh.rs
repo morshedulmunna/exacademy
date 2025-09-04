@@ -10,11 +10,16 @@ use crate::types::users::{request_type::RefreshRequest, response_type::TokenResp
 use axum::http::{HeaderMap, header};
 
 /// Exchange refresh token for new access token
+/// Exchange refresh token for a new access token
 #[utoipa::path(
     post,
     path = "/api/auth/refresh",
     request_body = RefreshRequest,
-    responses((status = 200, description = "New access token", body = TokenResponse)),
+    responses(
+        (status = 200, description = "New access token", body = TokenResponse),
+        (status = 401, description = "Unauthorized", body = ApiErrorResponse),
+        (status = 500, description = "Internal Server Error", body = ApiErrorResponse)
+    ),
     tag = "Auth"
 )]
 pub async fn refresh(
