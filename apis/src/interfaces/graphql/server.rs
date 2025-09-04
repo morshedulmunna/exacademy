@@ -15,19 +15,19 @@ use tokio::signal;
 use tower::ServiceBuilder;
 use tower_http::{compression::CompressionLayer, cors::CorsLayer, trace::TraceLayer};
 
-use super::middlewares::axum_error_handler::error_handler as error_handler_mw;
-use super::middlewares::axum_rate_limit::{RateLimitState, rate_limit as rate_limit_mw};
-use super::middlewares::axum_request_logger::request_logger as request_logger_mw;
 use crate::configs::app_context::AppContext;
+use crate::interfaces::middlewares::axum_error_handler::error_handler as error_handler_mw;
+use crate::interfaces::middlewares::axum_rate_limit::{
+    RateLimitState, rate_limit as rate_limit_mw,
+};
+use crate::interfaces::middlewares::axum_request_logger::request_logger as request_logger_mw;
 use crate::pkg::logger::info;
 
-use super::queries::QueryRoot;
+use super::queries::{MutationRoot, QueryRoot};
 
-/// Build the GraphQL schema with queries
-fn build_schema(
-    ctx: Arc<AppContext>,
-) -> SchemaBuilder<QueryRoot, EmptyMutation, EmptySubscription> {
-    Schema::build(QueryRoot, EmptyMutation, EmptySubscription).data(ctx)
+/// Build the GraphQL schema with queries and mutations
+fn build_schema(ctx: Arc<AppContext>) -> SchemaBuilder<QueryRoot, MutationRoot, EmptySubscription> {
+    Schema::build(QueryRoot, MutationRoot, EmptySubscription).data(ctx)
 }
 
 /// Build the Axum application router with middlewares and GraphQL endpoint
@@ -37,7 +37,7 @@ fn build_app(ctx: Arc<AppContext>) -> Router {
     let compression = CompressionLayer::new();
 
     let schema = build_schema(ctx.clone()).finish();
-    let rate_limit_state = RateLimitState::new(25, 60);
+    let rate_limit_state = RateLimitState::new(2, 60);
 
     let app = Router::new()
         .route("/graphql", post(graphql_handler))
