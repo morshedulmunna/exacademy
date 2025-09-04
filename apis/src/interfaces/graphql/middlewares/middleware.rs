@@ -8,9 +8,9 @@ use std::sync::Arc;
 use tower::ServiceBuilder;
 use tower_http::{compression::CompressionLayer, cors::CorsLayer, trace::TraceLayer};
 
-use super::handlers::{graphql_handler, graphql_playground};
-use super::schema::create_schema;
 use crate::configs::app_context::AppContext;
+use crate::interfaces::graphql::handlers::{graphql_handler, graphql_playground};
+use crate::interfaces::graphql::schema::create_schema;
 use crate::interfaces::middlewares::axum_error_handler::error_handler as error_handler_mw;
 use crate::interfaces::middlewares::axum_rate_limit::{
     RateLimitState, rate_limit as rate_limit_mw,

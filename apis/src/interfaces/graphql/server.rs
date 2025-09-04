@@ -2,9 +2,9 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use crate::configs::app_context::AppContext;
+use crate::interfaces::graphql::middlewares::middleware::build_app;
 use crate::pkg::logger::info;
 
-use super::middleware::build_app;
 use super::shutdown::shutdown_signal;
 
 /// GraphQL server implementation

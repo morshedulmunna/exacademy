@@ -43,8 +43,7 @@ impl AuthQueries {
                     .parse::<Uuid>()
                     .map_err(|_| AppError::Unauthorized("Invalid user ID in token".into()))?,
             )
-            .await
-            .map_err(|e| AppError::Internal(e.to_string()))?
+            .await?
             .ok_or_else(|| AppError::NotFound("User not found".into()))?;
 
         let user_response = UserResponse {

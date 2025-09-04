@@ -12,7 +12,6 @@ use crate::applications::auth::{
     reset_password, verify_otp,
 };
 use crate::configs::app_context::AppContext;
-use crate::pkg::error::AppError;
 use crate::types::users::request_type::{
     ForgotPasswordRequest, GithubLoginRequest, GoogleLoginRequest, LoginRequest, RefreshRequest,
     RegisterRequest, ResendOtpRequest, ResetPasswordRequest, VerifyOtpRequest,
@@ -42,9 +41,7 @@ impl AuthMutations {
             password: input.password,
         };
 
-        let result = register(&app_ctx, request)
-            .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+        let result = register(&app_ctx, request).await.map_err(|e| e)?;
 
         Ok(result)
     }
@@ -60,7 +57,7 @@ impl AuthMutations {
 
         let result = login(&app_ctx, app_ctx.repos.users.as_ref(), request)
             .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+            .map_err(|e| e)?;
 
         Ok(result)
     }
@@ -77,9 +74,7 @@ impl AuthMutations {
             refresh_token: input.refresh_token,
         };
 
-        let result = refresh(&app_ctx, request)
-            .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+        let result = refresh(&app_ctx, request).await.map_err(|e| e)?;
 
         Ok(result)
     }
@@ -98,7 +93,7 @@ impl AuthMutations {
 
         let result = google_login(&app_ctx, app_ctx.repos.users.as_ref(), request)
             .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+            .map_err(|e| e)?;
 
         Ok(result)
     }
@@ -115,7 +110,7 @@ impl AuthMutations {
 
         let result = github_login(&app_ctx, app_ctx.repos.users.as_ref(), request)
             .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+            .map_err(|e| e)?;
 
         Ok(result)
     }
@@ -135,7 +130,7 @@ impl AuthMutations {
 
         verify_otp(&app_ctx, app_ctx.repos.users.as_ref(), request)
             .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+            .map_err(|e| e)?;
 
         Ok(OkResponse { ok: true })
     }
@@ -152,7 +147,7 @@ impl AuthMutations {
 
         resend_otp(&app_ctx, app_ctx.repos.users.as_ref(), request)
             .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+            .map_err(|e| e)?;
 
         Ok(OkResponse { ok: true })
     }
@@ -169,7 +164,7 @@ impl AuthMutations {
 
         forgot_password(&app_ctx, app_ctx.repos.users.as_ref(), request)
             .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+            .map_err(|e| e)?;
 
         Ok(OkResponse { ok: true })
     }
@@ -190,7 +185,7 @@ impl AuthMutations {
 
         reset_password(&app_ctx, app_ctx.repos.users.as_ref(), request)
             .await
-            .map_err(|e| AppError::Internal(e.to_string()))?;
+            .map_err(|e| e)?;
 
         Ok(OkResponse { ok: true })
     }

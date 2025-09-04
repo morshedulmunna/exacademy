@@ -11,7 +11,7 @@
 
 pub mod actions;
 pub mod handlers;
-pub mod middleware;
+pub mod middlewares;
 pub mod schema;
 pub mod server;
 pub mod shutdown;
