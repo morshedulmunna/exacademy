@@ -9,7 +9,10 @@ use crate::pkg::error::AppResult;
     delete,
     path = "/api/lessons/:id",
     responses((status = 200, description = "Deleted")),
-    tag = "Courses"
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "lessons"
 )]
 pub async fn delete_lesson(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
@@ -23,5 +26,3 @@ pub async fn delete_lesson(
     );
     Ok((StatusCode::OK, Json(body)))
 }
-
-

@@ -54,7 +54,10 @@ impl ParsedCreateCourseFields {
     path = "/api/courses",
     request_body = CreateCourseRequest,
     responses((status = 201, description = "Created course", body = uuid::Uuid)),
-    tag = "Courses"
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "courses"
 )]
 pub async fn create_course(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,

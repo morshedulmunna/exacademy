@@ -1,15 +1,18 @@
 use axum::{Extension, Json, extract::Path, http::StatusCode};
 
+use crate::applications::courses as service;
 use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::applications::courses as service;
 use crate::types::course_types::Course;
 
 #[utoipa::path(
     get,
     path = "/api/courses/:id",
     responses((status = 200, description = "Course", body = Course)),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Courses"
 )]
 pub async fn get_course_by_id(
@@ -20,5 +23,3 @@ pub async fn get_course_by_id(
     let body = Response::with_data("Course", course, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
-
-

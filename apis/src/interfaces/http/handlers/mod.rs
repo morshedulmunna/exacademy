@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod graphql;
 pub mod health;
 pub mod not_found;
 pub mod root;

@@ -12,14 +12,17 @@ use crate::types::course_types::{BulkUpdateLessonPositionsRequest, Lesson};
     path = "/api/modules/{module_id}/lessons/positions",
     request_body = BulkUpdateLessonPositionsRequest,
     responses((status = 200, description = "Updated lesson positions", body = Vec<Lesson>)),
-    tag = "Courses"
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "lessons"
 )]
 pub async fn bulk_update_lesson_positions(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
     ValidatedJson(input): ValidatedJson<BulkUpdateLessonPositionsRequest>,
 ) -> AppResult<(StatusCode, Json<Response<Vec<Lesson>>>)> {
     let lessons = service::bulk_update_lesson_positions(ctx.repos.lessons.as_ref(), input).await?;
-    
+
     let body = Response::with_data("Updated lesson positions", lessons, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }

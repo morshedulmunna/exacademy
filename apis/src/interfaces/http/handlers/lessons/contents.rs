@@ -14,7 +14,10 @@ use crate::types::course_types::{
     path = "/api/lessons/:lesson_id/contents",
     request_body = CreateLessonContentRequest,
     responses((status = 201, description = "Created lesson content", body = uuid::Uuid)),
-    tag = "Lessons"
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "lessons"
 )]
 pub async fn create_lesson_content(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,

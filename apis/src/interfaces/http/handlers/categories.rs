@@ -12,6 +12,9 @@ use crate::types::course_types::{Category, CreateCategoryRequest, UpdateCategory
     path = "/api/categories",
     request_body = CreateCategoryRequest,
     responses((status = 201, description = "Created category", body = i32)),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Categories"
 )]
 pub async fn create_category(
@@ -27,6 +30,9 @@ pub async fn create_category(
     get,
     path = "/api/categories",
     responses((status = 200, description = "List categories", body = [Category])),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Categories"
 )]
 pub async fn list_categories(
@@ -41,6 +47,9 @@ pub async fn list_categories(
     get,
     path = "/api/categories/:id",
     responses((status = 200, description = "Get category", body = Category)),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Categories"
 )]
 pub async fn get_category(
@@ -57,6 +66,9 @@ pub async fn get_category(
     path = "/api/categories/:id",
     request_body = UpdateCategoryRequest,
     responses((status = 200, description = "Updated category", body = Category)),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Categories"
 )]
 pub async fn update_category(
@@ -73,6 +85,9 @@ pub async fn update_category(
     delete,
     path = "/api/categories/:id",
     responses((status = 200, description = "Deleted category")),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Categories"
 )]
 pub async fn delete_category(
@@ -83,5 +98,3 @@ pub async fn delete_category(
     let body = Response::with_message("Deleted", StatusCode::OK.as_u16());
     Ok(Json(body))
 }
-
-

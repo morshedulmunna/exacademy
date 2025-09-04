@@ -1,14 +1,17 @@
 use axum::{Extension, Json, extract::Path, http::StatusCode};
 
+use crate::applications::courses as service;
 use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::applications::courses as service;
 
 #[utoipa::path(
     delete,
     path = "/api/courses/:id",
     responses((status = 200, description = "Deleted")),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Courses"
 )]
 pub async fn delete_course(
@@ -23,5 +26,3 @@ pub async fn delete_course(
     );
     Ok((StatusCode::OK, Json(body)))
 }
-
-
