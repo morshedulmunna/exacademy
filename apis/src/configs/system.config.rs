@@ -19,6 +19,8 @@ pub struct SystemConfig {
     pub api_host: String,
     /// HTTP API bind port.
     pub api_port: u16,
+    /// GraphQL API bind port.
+    pub graphql_port: u16,
     /// gRPC bind host.
     pub grpc_host: String,
     /// gRPC bind port.
@@ -50,6 +52,7 @@ impl SystemConfig {
         let grpc_port = parse_port_with_default("GRPC_PORT", 50051)?;
         let shutdown_grace_seconds = parse_u64_with_default("SHUTDOWN_GRACE_SECONDS", 10)?;
         let max_upload_bytes = parse_usize_with_default("MAX_UPLOAD_BYTES", 10 * 1024 * 1024)?;
+        let graphql_port = parse_port_with_default("GRAPHQL_PORT", 9099)?;
 
         Ok(Self {
             app_env,
@@ -60,6 +63,7 @@ impl SystemConfig {
             grpc_port,
             shutdown_grace_seconds,
             max_upload_bytes,
+            graphql_port,
         })
     }
 }
@@ -138,6 +142,7 @@ mod tests {
             "GRPC_PORT",
             "SHUTDOWN_GRACE_SECONDS",
             "MAX_UPLOAD_BYTES",
+            "GRAPHQL_PORT",
         ]);
 
         let cfg = SystemConfig::load_from_env().expect("should load defaults");
@@ -149,6 +154,7 @@ mod tests {
         assert_eq!(cfg.grpc_port, 50051);
         assert_eq!(cfg.shutdown_grace_seconds, 10);
         assert_eq!(cfg.max_upload_bytes, 10 * 1024 * 1024);
+        assert_eq!(cfg.graphql_port, 9099);
     }
 
     #[test]
@@ -163,6 +169,7 @@ mod tests {
             "GRPC_PORT",
             "SHUTDOWN_GRACE_SECONDS",
             "MAX_UPLOAD_BYTES",
+            "GRAPHQL_PORT",
         ]);
 
         unsafe {
@@ -174,6 +181,7 @@ mod tests {
             env::set_var("GRPC_PORT", "6000");
             env::set_var("SHUTDOWN_GRACE_SECONDS", "30");
             env::set_var("MAX_UPLOAD_BYTES", "2097152");
+            env::set_var("GRAPHQL_PORT", "9099");
         }
 
         let cfg = SystemConfig::load_from_env().expect("should load custom values");
@@ -185,23 +193,31 @@ mod tests {
         assert_eq!(cfg.grpc_port, 6000);
         assert_eq!(cfg.shutdown_grace_seconds, 30);
         assert_eq!(cfg.max_upload_bytes, 2 * 1024 * 1024);
+        assert_eq!(cfg.graphql_port, 9099);
     }
 
     #[test]
     #[serial]
     fn invalid_ports_error() {
-        clear_vars(&["API_PORT", "GRPC_PORT"]);
+        clear_vars(&["API_PORT", "GRPC_PORT", "GRAPHQL_PORT"]);
         unsafe {
             env::set_var("API_PORT", "not-a-number");
         }
         let err = SystemConfig::load_from_env().unwrap_err();
         assert!(format!("{}", err).contains("API_PORT"));
 
-        clear_vars(&["API_PORT", "GRPC_PORT"]);
+        clear_vars(&["API_PORT", "GRPC_PORT", "GRAPHQL_PORT"]);
         unsafe {
             env::set_var("GRPC_PORT", "-1");
         }
         let err = SystemConfig::load_from_env().unwrap_err();
         assert!(format!("{}", err).contains("GRPC_PORT"));
+
+        clear_vars(&["API_PORT", "GRPC_PORT", "GRAPHQL_PORT"]);
+        unsafe {
+            env::set_var("GRAPHQL_PORT", "-1");
+        }
+        let err = SystemConfig::load_from_env().unwrap_err();
+        assert!(format!("{}", err).contains("GRAPHQL_PORT"));
     }
 }

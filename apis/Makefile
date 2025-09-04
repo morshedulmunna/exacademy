@@ -55,7 +55,7 @@ run:
 
 # Run GraphQL server on port 9098
 graphql:
-	API_PORT=9099 cargo run -- graphql
+	cargo run -- graphql
 
 # Run SQLx migrations using the built-in command
 migrate:
