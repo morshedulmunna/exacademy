@@ -9,9 +9,9 @@
 //! - `server`: Main server implementation and startup logic
 //! - `shutdown`: Graceful shutdown signal handling
 
+pub mod actions;
 pub mod handlers;
 pub mod middleware;
-pub mod queries;
 pub mod schema;
 pub mod server;
 pub mod shutdown;

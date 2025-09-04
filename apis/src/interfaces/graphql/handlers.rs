@@ -12,9 +12,8 @@ use axum::{
 };
 use serde_json::{Value, json};
 
-use super::queries::{MutationRoot, QueryRoot};
+use super::actions::{MutationRoot, QueryRoot};
 use async_graphql::EmptySubscription;
-
 /// GraphQL query handler for POST requests
 ///
 /// Handles GraphQL queries and mutations sent via POST with JSON content type.

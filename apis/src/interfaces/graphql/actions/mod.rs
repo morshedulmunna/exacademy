@@ -1,6 +1,6 @@
-//! GraphQL queries module
+//! GraphQL queries and mutations module
 //!
-//! This module organizes GraphQL queries by domain for better maintainability
+//! This module organizes GraphQL queries and mutations by domain for better maintainability
 //! and scalability.
 
 pub mod auth;
@@ -12,9 +12,6 @@ use async_graphql::Object;
 
 /// Root query type that combines all domain-specific queries
 pub struct QueryRoot;
-
-/// Root mutation type that combines all domain-specific mutations
-pub struct MutationRoot;
 
 #[Object]
 impl QueryRoot {
@@ -38,6 +35,9 @@ impl QueryRoot {
         courses::CourseQueries
     }
 }
+
+/// Root mutation type that combines all domain-specific mutations
+pub struct MutationRoot;
 
 #[Object]
 impl MutationRoot {

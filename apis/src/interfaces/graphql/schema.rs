@@ -6,7 +6,7 @@
 use async_graphql::{EmptySubscription, Schema, SchemaBuilder};
 use std::sync::Arc;
 
-use super::queries::{MutationRoot, QueryRoot};
+use super::actions::{MutationRoot, QueryRoot};
 use crate::configs::app_context::AppContext;
 
 /// Build the GraphQL schema with queries, mutations, and application context
