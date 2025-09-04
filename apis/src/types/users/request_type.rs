@@ -1,8 +1,9 @@
+use async_graphql::InputObject;
 use serde::Deserialize;
 use utoipa::ToSchema;
 use validator::{Validate, ValidationError};
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct RegisterRequest {
     #[validate(length(min = 1, max = 50))]
     #[schema(min_length = 1, max_length = 50, nullable = true, example = "Jone")]
@@ -45,7 +46,7 @@ pub struct RegisterRequest {
 // Auth route types
 // ========================
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct LoginRequest {
     #[validate(email)]
     pub email: String,
@@ -53,7 +54,7 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct RefreshRequest {
     #[validate(length(min = 1))]
     pub refresh_token: String,
@@ -64,14 +65,14 @@ pub struct RefreshRequest {
 // ========================
 
 /// Google Sign-In using an ID token from Google.
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct GoogleLoginRequest {
     #[validate(length(min = 10))]
     pub id_token: String,
 }
 
 /// GitHub OAuth login using an authorization code.
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct GithubLoginRequest {
     #[validate(length(min = 10))]
     pub code: String,
@@ -81,7 +82,7 @@ pub struct GithubLoginRequest {
 // Email verification (OTP)
 // ========================
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct VerifyOtpRequest {
     #[validate(email)]
     pub email: String,
@@ -89,7 +90,7 @@ pub struct VerifyOtpRequest {
     pub code: String,
 }
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct ResendOtpRequest {
     #[validate(email)]
     pub email: String,
@@ -99,13 +100,13 @@ pub struct ResendOtpRequest {
 // Password reset (OTP)
 // ========================
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct ForgotPasswordRequest {
     #[validate(email)]
     pub email: String,
 }
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct ResetPasswordRequest {
     #[validate(email)]
     pub email: String,
@@ -115,7 +116,7 @@ pub struct ResetPasswordRequest {
     pub new_password: String,
 }
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, ToSchema, InputObject, Validate)]
 pub struct UpdateUserRequest {
     #[validate(length(min = 3, max = 30))]
     pub username: Option<String>,

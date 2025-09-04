@@ -1,8 +1,9 @@
+use async_graphql::SimpleObject;
 use serde::Serialize;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, SimpleObject, Clone)]
 pub struct UserResponse {
     pub id: Uuid,
     pub username: String,
@@ -16,7 +17,7 @@ pub struct UserResponse {
     pub is_blocked: bool,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, SimpleObject, Clone)]
 pub struct LoginResponse {
     pub user: UserResponse,
     pub access_token: String,
@@ -25,12 +26,12 @@ pub struct LoginResponse {
     pub expires_in: i64,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, SimpleObject, Clone)]
 pub struct RegisterResponse {
     pub id: Uuid,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, SimpleObject, Clone)]
 pub struct TokenResponse {
     pub access_token: String,
     pub refresh_token: String,
@@ -38,7 +39,7 @@ pub struct TokenResponse {
     pub expires_in: i64,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, SimpleObject, Clone)]
 pub struct OkResponse {
     pub ok: bool,
 }

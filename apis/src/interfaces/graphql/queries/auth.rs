@@ -7,69 +7,26 @@
 //! - `AuthQueries`: Read-only operations (e.g., get current user)
 //! - `AuthMutations`: Write operations (e.g., login, register, logout)
 //! - GraphQL-specific types: All response types implement `SimpleObject` for GraphQL compatibility
-//!
-//! ## TODO
-//! All mutation implementations are currently placeholders. To complete:
-//! 1. Uncomment the service calls in each mutation
-//! 2. Add conversion functions from HTTP response types to GraphQL types
-//! 3. Implement proper error handling and validation
 
 use std::sync::Arc;
 
-use async_graphql::{Context, InputObject, Object, Result as GraphQLResult, SimpleObject};
-use serde::{Deserialize, Serialize};
+use async_graphql::{Context, Object, Result as GraphQLResult};
 use uuid::Uuid;
 
+use crate::applications::auth::{
+    forgot_password, github_login, google_login, login, refresh, register, resend_otp,
+    reset_password, verify_otp,
+};
 use crate::configs::app_context::AppContext;
+use crate::pkg::error::AppError;
+use crate::pkg::security::Claims;
 use crate::types::users::request_type::{
     ForgotPasswordRequest, GithubLoginRequest, GoogleLoginRequest, LoginRequest, RefreshRequest,
     RegisterRequest, ResendOtpRequest, ResetPasswordRequest, VerifyOtpRequest,
 };
-
-// ========================
-// GraphQL Output Types
-// ========================
-
-#[derive(SimpleObject, Serialize, Clone)]
-pub struct GraphQLUserResponse {
-    pub id: Uuid,
-    pub username: String,
-    pub email: String,
-    pub role: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub full_name: Option<String>,
-    pub avatar_url: Option<String>,
-    pub is_active: bool,
-    pub is_blocked: bool,
-}
-
-#[derive(SimpleObject, Serialize, Clone)]
-pub struct GraphQLLoginResponse {
-    pub user: GraphQLUserResponse,
-    pub access_token: String,
-    pub refresh_token: String,
-    pub token_type: String,
-    pub expires_in: i64,
-}
-
-#[derive(SimpleObject, Serialize, Clone)]
-pub struct GraphQLRegisterResponse {
-    pub id: Uuid,
-}
-
-#[derive(SimpleObject, Serialize, Clone)]
-pub struct GraphQLTokenResponse {
-    pub access_token: String,
-    pub refresh_token: String,
-    pub token_type: String,
-    pub expires_in: i64,
-}
-
-#[derive(SimpleObject, Serialize, Clone)]
-pub struct GraphQLOkResponse {
-    pub ok: bool,
-}
+use crate::types::users::response_type::{
+    LoginResponse, OkResponse, RegisterResponse, TokenResponse, UserResponse,
+};
 
 /// Authentication queries for GraphQL
 pub struct AuthQueries;
@@ -77,10 +34,48 @@ pub struct AuthQueries;
 #[Object]
 impl AuthQueries {
     /// Get current user information
-    async fn me(&self, _ctx: &Context<'_>) -> GraphQLResult<GraphQLUserResponse> {
-        // TODO: Implement get current user from context
-        // This would typically extract user from JWT token in context
-        Err("Not implemented yet".into())
+    async fn me(&self, ctx: &Context<'_>) -> GraphQLResult<UserResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
+
+        // Extract JWT token from context headers
+        let token = ctx
+            .data_opt::<String>()
+            .ok_or_else(|| AppError::Unauthorized("No token provided".into()))?;
+
+        // Verify and decode the token
+        let claims: Claims = app_ctx
+            .jwt_service
+            .verify(token)
+            .map_err(|_| AppError::Unauthorized("Invalid token".into()))?;
+
+        // Get user from database
+        let user = app_ctx
+            .repos
+            .users
+            .find_by_id(
+                claims
+                    .sub
+                    .parse::<Uuid>()
+                    .map_err(|_| AppError::Unauthorized("Invalid user ID in token".into()))?,
+            )
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?
+            .ok_or_else(|| AppError::NotFound("User not found".into()))?;
+
+        let user_response = UserResponse {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            full_name: user.full_name,
+            avatar_url: user.avatar_url,
+            is_active: user.is_active,
+            is_blocked: user.is_blocked,
+        };
+
+        Ok(user_response)
     }
 }
 
@@ -93,11 +88,11 @@ impl AuthMutations {
     async fn register(
         &self,
         ctx: &Context<'_>,
-        input: RegisterInput,
-    ) -> GraphQLResult<GraphQLRegisterResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: RegisterRequest,
+    ) -> GraphQLResult<RegisterResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = RegisterRequest {
+        let request = RegisterRequest {
             first_name: input.first_name,
             last_name: input.last_name,
             username: input.username,
@@ -105,224 +100,166 @@ impl AuthMutations {
             password: input.password,
         };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::register(&app_ctx, request).await?;
-        // Ok(GraphQLRegisterResponse { id: result.id })
+        let result = register(&app_ctx, request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(result)
     }
 
     /// Login with email and password
-    async fn login(
-        &self,
-        ctx: &Context<'_>,
-        input: LoginInput,
-    ) -> GraphQLResult<GraphQLLoginResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+    async fn login(&self, ctx: &Context<'_>, input: LoginRequest) -> GraphQLResult<LoginResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = LoginRequest {
+        let request = LoginRequest {
             email: input.email,
             password: input.password,
         };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::login(&app_ctx, app_ctx.repos.users.as_ref(), request).await?;
-        // Ok(convert_to_graphql_login_response(result))
+        let result = login(&app_ctx, app_ctx.repos.users.as_ref(), request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(result)
     }
 
     /// Refresh access token using refresh token
     async fn refresh(
         &self,
         ctx: &Context<'_>,
-        input: RefreshInput,
-    ) -> GraphQLResult<GraphQLTokenResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: RefreshRequest,
+    ) -> GraphQLResult<TokenResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = RefreshRequest {
+        let request = RefreshRequest {
             refresh_token: input.refresh_token,
         };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::refresh(&app_ctx, request).await?;
-        // Ok(convert_to_graphql_token_response(result))
+        let result = refresh(&app_ctx, request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(result)
     }
 
     /// Login with Google OAuth
     async fn google_login(
         &self,
         ctx: &Context<'_>,
-        input: GoogleLoginInput,
-    ) -> GraphQLResult<GraphQLLoginResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: GoogleLoginRequest,
+    ) -> GraphQLResult<LoginResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = GoogleLoginRequest {
+        let request = GoogleLoginRequest {
             id_token: input.id_token,
         };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::google_login(&app_ctx, request).await?;
-        // Ok(convert_to_graphql_login_response(result))
+        let result = google_login(&app_ctx, app_ctx.repos.users.as_ref(), request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(result)
     }
 
     /// Login with GitHub OAuth
     async fn github_login(
         &self,
         ctx: &Context<'_>,
-        input: GithubLoginInput,
-    ) -> GraphQLResult<GraphQLLoginResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: GithubLoginRequest,
+    ) -> GraphQLResult<LoginResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = GithubLoginRequest { code: input.code };
+        let request = GithubLoginRequest { code: input.code };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::github_login(&app_ctx, request).await?;
-        // Ok(convert_to_graphql_login_response(result))
+        let result = github_login(&app_ctx, app_ctx.repos.users.as_ref(), request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(result)
     }
 
     /// Verify email OTP
     async fn verify_otp(
         &self,
         ctx: &Context<'_>,
-        input: VerifyOtpInput,
-    ) -> GraphQLResult<GraphQLOkResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: VerifyOtpRequest,
+    ) -> GraphQLResult<OkResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = VerifyOtpRequest {
+        let request = VerifyOtpRequest {
             email: input.email,
             code: input.code,
         };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::verify(&app_ctx, request).await?;
-        // Ok(convert_to_graphql_ok_response(result))
+        verify_otp(&app_ctx, app_ctx.repos.users.as_ref(), request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(OkResponse { ok: true })
     }
 
     /// Resend email OTP
     async fn resend_otp(
         &self,
         ctx: &Context<'_>,
-        input: ResendOtpInput,
-    ) -> GraphQLResult<GraphQLOkResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: ResendOtpRequest,
+    ) -> GraphQLResult<OkResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = ResendOtpRequest { email: input.email };
+        let request = ResendOtpRequest { email: input.email };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::resend_otp(&app_ctx, request).await?;
-        // Ok(convert_to_graphql_ok_response(result))
+        resend_otp(&app_ctx, app_ctx.repos.users.as_ref(), request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(OkResponse { ok: true })
     }
 
     /// Request password reset
     async fn forgot_password(
         &self,
         ctx: &Context<'_>,
-        input: ForgotPasswordInput,
-    ) -> GraphQLResult<GraphQLOkResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: ForgotPasswordRequest,
+    ) -> GraphQLResult<OkResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = ForgotPasswordRequest { email: input.email };
+        let request = ForgotPasswordRequest { email: input.email };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::forgot_password(&app_ctx, request).await?;
-        // Ok(convert_to_graphql_ok_response(result))
+        forgot_password(&app_ctx, app_ctx.repos.users.as_ref(), request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(OkResponse { ok: true })
     }
 
     /// Reset password with OTP
     async fn reset_password(
         &self,
         ctx: &Context<'_>,
-        input: ResetPasswordInput,
-    ) -> GraphQLResult<GraphQLOkResponse> {
-        let _app_ctx = ctx.data::<Arc<AppContext>>()?;
+        input: ResetPasswordRequest,
+    ) -> GraphQLResult<OkResponse> {
+        let app_ctx = ctx.data::<Arc<AppContext>>()?;
 
-        let _request = ResetPasswordRequest {
+        let request = ResetPasswordRequest {
             email: input.email,
             code: input.code,
             new_password: input.new_password,
         };
 
-        // TODO: Call auth service
-        // let result = crate::applications::auth::reset_password(&app_ctx, request).await?;
-        // Ok(convert_to_graphql_ok_response(result))
+        reset_password(&app_ctx, app_ctx.repos.users.as_ref(), request)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        Err("Not implemented yet".into())
+        Ok(OkResponse { ok: true })
     }
 
     /// Logout user
-    async fn logout(&self, _ctx: &Context<'_>) -> GraphQLResult<GraphQLOkResponse> {
-        // TODO: Implement logout logic
-        // This would typically invalidate the current session/token
-        Ok(GraphQLOkResponse { ok: true })
+    async fn logout(&self, _ctx: &Context<'_>) -> GraphQLResult<OkResponse> {
+        // For now, logout is handled client-side by removing the token
+        // In a more sophisticated implementation, you might want to:
+        // 1. Add the token to a blacklist in Redis
+        // 2. Invalidate the refresh token
+        // 3. Log the logout event
+        Ok(OkResponse { ok: true })
     }
-}
-
-// ========================
-// Input Types
-// ========================
-
-#[derive(InputObject, Deserialize)]
-pub struct RegisterInput {
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub username: String,
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct LoginInput {
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct RefreshInput {
-    pub refresh_token: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct GoogleLoginInput {
-    pub id_token: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct GithubLoginInput {
-    pub code: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct VerifyOtpInput {
-    pub email: String,
-    pub code: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct ResendOtpInput {
-    pub email: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct ForgotPasswordInput {
-    pub email: String,
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct ResetPasswordInput {
-    pub email: String,
-    pub code: String,
-    pub new_password: String,
 }
