@@ -8,10 +8,12 @@ use tower_http::{
     compression::CompressionLayer, cors::CorsLayer, services::ServeDir, trace::TraceLayer,
 };
 
-use super::middlewares::axum_error_handler::error_handler as error_handler_mw;
-use super::middlewares::axum_rate_limit::{RateLimitState, rate_limit as rate_limit_mw};
-use super::middlewares::axum_request_logger::request_logger as request_logger_mw;
 use crate::configs::app_context::AppContext;
+use crate::interfaces::middlewares::axum_error_handler::error_handler as error_handler_mw;
+use crate::interfaces::middlewares::axum_rate_limit::{
+    RateLimitState, rate_limit as rate_limit_mw,
+};
+use crate::interfaces::middlewares::axum_request_logger::request_logger as request_logger_mw;
 use crate::pkg::logger::info;
 
 use super::routes;
