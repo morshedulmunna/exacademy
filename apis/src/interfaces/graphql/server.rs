@@ -5,7 +5,7 @@ use async_graphql::{EmptyMutation, EmptySubscription, Schema, SchemaBuilder};
 use axum::{
     Json, Router,
     body::Bytes,
-    extract::Extension,
+    extract::{Extension, State},
     http::{HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
@@ -37,32 +37,20 @@ fn build_app(ctx: Arc<AppContext>) -> Router {
     let compression = CompressionLayer::new();
 
     let schema = build_schema(ctx.clone()).finish();
-    let rate_limit_state = RateLimitState::new(2, 60);
+    let rate_limit_state = RateLimitState::new(100, 60);
 
     let app = Router::new()
         .route("/graphql", post(graphql_handler))
         .route("/graphql", get(graphql_playground))
-        .layer(Extension(schema))
-        .layer(Extension(ctx))
-        .layer(
-            ServiceBuilder::new()
-                .layer(trace)
-                .layer(cors)
-                .layer(compression),
-        )
-        .layer(axum::middleware::from_fn(request_logger_mw))
-        .layer(axum::middleware::from_fn(error_handler_mw))
-        .route_layer(axum::middleware::from_fn_with_state(
-            rate_limit_state.clone(),
-            rate_limit_mw,
-        ));
+        .with_state(schema)
+        .layer(Extension(ctx));
 
     app
 }
 
 /// GraphQL query handler
 async fn graphql_handler(
-    Extension(schema): Extension<Schema<QueryRoot, EmptyMutation, EmptySubscription>>,
+    State(schema): State<Schema<QueryRoot, MutationRoot, EmptySubscription>>,
     headers: HeaderMap,
     body: Bytes,
 ) -> impl IntoResponse {
