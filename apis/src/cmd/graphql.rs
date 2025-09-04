@@ -5,7 +5,7 @@ use crate::interfaces::graphql;
 /// Loads configuration, establishes core connections, and serves until
 /// a shutdown signal is received.
 pub async fn graphql_command() -> Result<(), Box<dyn std::error::Error>> {
-    http::graphql::server::run().await?;
+    graphql::server::run().await?;
 
     Ok(())
 }
