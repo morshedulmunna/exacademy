@@ -154,7 +154,7 @@ fn map_user_row(row: sqlx::postgres::PgRow) -> UserRecord {
         id: row.get("id"),
         username: row.get("username"),
         email: row.get("email"),
-        password_hash: row.try_get("password_hash").ok(),
+        password_hash: None,
         role: row.get("role"),
         first_name: row.get("first_name"),
         last_name: row.get("last_name"),

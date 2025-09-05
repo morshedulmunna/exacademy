@@ -9,6 +9,7 @@ use std::time::Duration;
 /// Register a new user and send an email verification OTP.
 pub async fn register(ctx: &AppContext, input: RegisterRequest) -> AppResult<RegisterResponse> {
     let existing = ctx.repos.users.find_by_email(&input.email).await?;
+
     if existing.is_some() {
         return Err(AppError::Conflict("Email already exists".into()));
     }

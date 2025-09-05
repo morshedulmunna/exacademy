@@ -30,6 +30,7 @@ pub async fn register(
     ValidatedJson(input_data): ValidatedJson<RegisterRequest>,
 ) -> AppResult<(StatusCode, Json<Response<RegisterResponse>>)> {
     let output = auth_service::register(&ctx, input_data).await?;
+
     let body = Response::with_data("Registered", output, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
