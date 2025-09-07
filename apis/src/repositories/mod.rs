@@ -10,6 +10,10 @@ pub mod lessons;
 pub mod modules;
 pub mod postgresql;
 pub mod users;
+pub mod blog_posts;
+pub mod blog_tags;
+pub mod blog_likes;
+pub mod blog_comments;
 
 use categories::CategoriesRepository;
 use course_categories::CourseCategoriesRepository;
@@ -20,6 +24,10 @@ use lesson_questions::LessonQuestionsRepository;
 use lessons::LessonsRepository;
 use modules::ModulesRepository;
 use users::UsersRepository;
+use blog_posts::BlogPostsRepository;
+use blog_tags::BlogTagsRepository;
+use blog_likes::BlogLikesRepository;
+use blog_comments::BlogCommentsRepository;
 
 /// Central registry for all repositories.
 ///
@@ -36,6 +44,10 @@ pub struct Repositories {
     pub lesson_assignments: Arc<dyn LessonAssignmentsRepository>,
     pub categories: Arc<dyn CategoriesRepository>,
     pub course_categories: Arc<dyn CourseCategoriesRepository>,
+    pub blog_posts: Arc<dyn BlogPostsRepository>,
+    pub blog_tags: Arc<dyn BlogTagsRepository>,
+    pub blog_likes: Arc<dyn BlogLikesRepository>,
+    pub blog_comments: Arc<dyn BlogCommentsRepository>,
 }
 
 impl Repositories {
@@ -81,6 +93,26 @@ impl Repositories {
         );
         let course_categories: Arc<dyn CourseCategoriesRepository> = Arc::new(
             crate::repositories::postgresql::course_categories::PostgresCourseCategoriesRepository {
+                pool: pool.clone(),
+            },
+        );
+        let blog_posts: Arc<dyn BlogPostsRepository> = Arc::new(
+            crate::repositories::postgresql::blog_posts::PostgresBlogPostsRepository {
+                pool: pool.clone(),
+            },
+        );
+        let blog_tags: Arc<dyn BlogTagsRepository> = Arc::new(
+            crate::repositories::postgresql::blog_tags::PostgresBlogTagsRepository {
+                pool: pool.clone(),
+            },
+        );
+        let blog_likes: Arc<dyn BlogLikesRepository> = Arc::new(
+            crate::repositories::postgresql::blog_likes::PostgresBlogLikesRepository {
+                pool: pool.clone(),
+            },
+        );
+        let blog_comments: Arc<dyn BlogCommentsRepository> = Arc::new(
+            crate::repositories::postgresql::blog_comments::PostgresBlogCommentsRepository {
                 pool,
             },
         );
@@ -95,6 +127,10 @@ impl Repositories {
             lesson_assignments,
             categories,
             course_categories,
+            blog_posts,
+            blog_tags,
+            blog_likes,
+            blog_comments,
         }
     }
 }

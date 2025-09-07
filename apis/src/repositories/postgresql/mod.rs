@@ -7,3 +7,7 @@ pub mod lesson_questions;
 pub mod lesson_assignments;
 pub mod categories;
 pub mod course_categories;
+pub mod blog_posts;
+pub mod blog_tags;
+pub mod blog_likes;
+pub mod blog_comments;
