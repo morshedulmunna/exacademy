@@ -24,6 +24,3 @@ pub mod auth_config;
 #[path = "email.config.rs"]
 pub mod email_config;
 
-// Vimeo config
-#[path = "vimeo.config.rs"]
-pub mod vimeo_config;

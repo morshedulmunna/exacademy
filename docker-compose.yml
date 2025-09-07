@@ -17,7 +17,7 @@ services:
 
   api:
     build:
-      context: ./api-server
+      context: ./apis
       dockerfile: Dockerfile
     container_name: execute_academy-api
     depends_on:
@@ -30,13 +30,14 @@ services:
       API_HOST: "0.0.0.0"
       API_PORT: "9098"
       DATABASE_URL: "postgres://execute_academy@postgres:5432/execute_academy?sslmode=disable"
+      # Individual DB variables for consistency
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_USER: "execute_academy"
+      DB_PASSWORD: "password"
+      DB_NAME: "execute_academy"
+      DB_SSLMODE: "disable"
       REDIS_URL: "redis://redis:6379/0"
-      # Vimeo token required by runtime (dummy for local)
-      VIMEO_TOKEN: "dummy-local-token"
-      # Kafka configuration for email queue
-      KAFKA_BROKERS: "kafka:9092"
-      KAFKA_EMAIL_TOPIC: "emails"
-      KAFKA_CLIENT_ID: "execute_academy_api"
       # Optional: seed admin defaults (use env or secrets in production)
       ADMIN_USERNAME: "admin"
       ADMIN_EMAIL: "admin@execute_academy.local"

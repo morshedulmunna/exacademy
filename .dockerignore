@@ -1,0 +1,210 @@
+# ===========================================
+# Execute Academy - Docker Ignore File
+# ===========================================
+
+# VCS and metadata
+.git
+.gitignore
+.dockerignore
+.github
+.gitattributes
+
+# Docker and orchestration files
+Dockerfile
+Dockerfile.*
+docker-compose.yml
+docker-compose.yaml
+docker-compose.prod.yml
+.dockerignore
+
+# Environment and secrets
+.env
+.env.*
+.env.local
+.env.development
+.env.production
+.env.test
+PROD_ENV
+cookies.txt
+session_control.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.jks
+*.keystore
+
+# Rust build artifacts and caches
+apis/target/
+apis/Cargo.lock
+.cargo-target/
+.cargo/
+coverage/
+*.pdb
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Node.js build artifacts and caches
+web/node_modules/
+web/.next/
+web/.turbo/
+web/.cache/
+web/dist/
+web/build/
+web/out/
+**/node_modules/
+**/.parcel-cache/
+**/.vite/
+**/.turbo/
+**/.next/
+**/.cache/
+**/dist/
+**/build/
+**/out/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.npmrc
+.yarnrc
+.yarnrc.yml
+.pnpm-store/
+.pnpm-debug.log*
+
+# TypeScript and build artifacts
+*.tsbuildinfo
+*.d.ts.map
+*.js.map
+*.css.map
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+logs/
+tmp/
+temp/
+.cache/
+
+# OS noise
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Testing and coverage
+coverage/
+.nyc_output/
+.coverage/
+htmlcov/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Documentation and development files
+README.md
+docs/
+*.md
+!package.json
+!Cargo.toml
+
+# CI/CD and deployment
+Jenkinsfile
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+azure-pipelines.yml
+.azure/
+
+# Kubernetes and Helm
+helm/
+k8s/
+kubernetes/
+*.yaml
+*.yml
+!docker-compose*.yml
+
+# Scripts and utilities
+scripts/
+Makefile
+*.sh
+*.bat
+*.cmd
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Upload directories (keep structure but ignore content)
+apis/uploads/*
+!apis/uploads/.gitkeep
+
+# OpenAPI and API generation
+web/public/openapi.yml
+web/openapitools.json
+web/generate.sh
+
+# Next.js specific
+web/.next/
+web/next-env.d.ts
+
+# Rust specific
+rust-toolchain.toml
+rust-toolchain
+Cargo.lock
+
+# Local development
+.local/
+local/
+dev/
+development/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Large media files (if any)
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.mp3
+*.wav
+*.flac
+*.aac

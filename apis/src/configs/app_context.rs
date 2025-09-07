@@ -10,7 +10,6 @@ use crate::configs::db_config::DatabaseConfig;
 use crate::configs::email_config::EmailConfig;
 use crate::configs::redis_config::RedisConfig;
 use crate::configs::system_config::SystemConfig;
-use crate::configs::vimeo_config::VimeoConfig;
 // Email is sent directly where needed; no producer required
 use crate::pkg::security_services::{
     Argon2PasswordHasher, Hs256JwtService, JwtService, PasswordHasher,
@@ -19,7 +18,6 @@ use crate::repositories::Repositories;
 
 use crate::pkg::redis::RedisManager;
 use crate::pkg::redis::RedisOps;
-use crate::pkg::vimeo::VimeoClient;
 use tokio::sync::OnceCell;
 
 /// Application context containing runtime configuration and core connections.
@@ -35,8 +33,6 @@ pub struct AppContext {
     pub jwt_service: Arc<dyn JwtService>,
     pub email: EmailConfig,
     pub email_sender: Arc<dyn crate::pkg::email::EmailSender>,
-    pub vimeo: VimeoConfig,
-    pub vimeo_client: Arc<VimeoClient>,
 }
 
 impl AppContext {
@@ -49,7 +45,6 @@ impl AppContext {
         let redis_cfg = RedisConfig::load_from_env()?;
         let auth = AuthConfig::load_from_env()?;
         let email_cfg = EmailConfig::load_from_env()?;
-        let vimeo_cfg = VimeoConfig::load_from_env()?;
 
         let db_pool = PgPoolOptions::new()
             .max_connections(10)
@@ -76,9 +71,6 @@ impl AppContext {
             crate::pkg::email::smtp_sender::SmtpEmailSender::try_new(&email_cfg)?;
         let email_sender: Arc<dyn crate::pkg::email::EmailSender> = Arc::new(email_sender_impl);
 
-        // Vimeo client
-        let vimeo_client: Arc<VimeoClient> = Arc::new(VimeoClient::new(&vimeo_cfg.token));
-
         Ok(Self {
             system,
             db_pool: db_pool.clone(),
@@ -90,8 +82,6 @@ impl AppContext {
             jwt_service,
             email: email_cfg,
             email_sender,
-            vimeo: vimeo_cfg,
-            vimeo_client,
         })
     }
 
