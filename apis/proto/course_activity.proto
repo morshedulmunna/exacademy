@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package course_activity;
+
+// Course User Activity Streaming Service
+service CourseActivityService {
+  // Server-side streaming for real-time course user activities
+  rpc StreamCourseActivities(StreamCourseActivitiesRequest) returns (stream CourseActivityEvent);
+  
+  // Get recent activities for a specific course
+  rpc GetCourseActivities(GetCourseActivitiesRequest) returns (GetCourseActivitiesResponse);
+  
+  // Get user's activity history for a course
+  rpc GetUserCourseActivities(GetUserCourseActivitiesRequest) returns (GetUserCourseActivitiesResponse);
+}
+
+// Request to start streaming course activities
+message StreamCourseActivitiesRequest {
+  string course_id = 1;
+  optional string user_id = 2; // If provided, filter for specific user
+  repeated ActivityType activity_types = 3; // Filter by activity types
+}
+
+// Real-time course activity event
+message CourseActivityEvent {
+  string id = 1;
+  string course_id = 2;
+  string user_id = 3;
+  string user_name = 4;
+  string user_avatar_url = 5;
+  ActivityType activity_type = 6;
+  string activity_description = 7;
+  map<string, string> metadata = 8; // Additional activity-specific data
+  int64 timestamp = 9; // Unix timestamp in milliseconds
+}
+
+// Activity types for course user interactions
+enum ActivityType {
+  ACTIVITY_TYPE_UNSPECIFIED = 0;
+  ACTIVITY_TYPE_COURSE_VIEWED = 1;
+  ACTIVITY_TYPE_LESSON_STARTED = 2;
+  ACTIVITY_TYPE_LESSON_COMPLETED = 3;
+  ACTIVITY_TYPE_QUIZ_ATTEMPTED = 4;
+  ACTIVITY_TYPE_QUIZ_COMPLETED = 5;
+  ACTIVITY_TYPE_ASSIGNMENT_SUBMITTED = 6;
+  ACTIVITY_TYPE_COURSE_ENROLLED = 7;
+  ACTIVITY_TYPE_COURSE_COMPLETED = 8;
+  ACTIVITY_TYPE_COMMENT_ADDED = 9;
+  ACTIVITY_TYPE_QUESTION_ASKED = 10;
+  ACTIVITY_TYPE_RATING_GIVEN = 11;
+}
+
+// Request to get recent course activities
+message GetCourseActivitiesRequest {
+  string course_id = 1;
+  int32 limit = 2; // Maximum number of activities to return
+  optional int64 since_timestamp = 3; // Only return activities after this timestamp
+  repeated ActivityType activity_types = 4; // Filter by activity types
+}
+
+// Response with course activities
+message GetCourseActivitiesResponse {
+  repeated CourseActivityEvent activities = 1;
+  int64 total_count = 2;
+  bool has_more = 3;
+}
+
+// Request to get user's course activities
+message GetUserCourseActivitiesRequest {
+  string user_id = 1;
+  string course_id = 2;
+  int32 limit = 3;
+  optional int64 since_timestamp = 4;
+  repeated ActivityType activity_types = 5;
+}
+
+// Response with user's course activities
+message GetUserCourseActivitiesResponse {
+  repeated CourseActivityEvent activities = 1;
+  int64 total_count = 2;
+  bool has_more = 3;
+}

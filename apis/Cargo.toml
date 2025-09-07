@@ -90,5 +90,14 @@ serde_yaml = "0.9"
 async-graphql = { version = "7", features = ["chrono", "uuid", "chrono-tz"] }
 async-graphql-axum = "7"
 
+# gRPC dependencies
+tonic = { version = "0.12", features = ["tls"] }
+prost = "0.13"
+prost-types = "0.13"
+async-stream = "0.3"
+
+[build-dependencies]
+tonic-build = "0.12"
+
 [dev-dependencies]
 serial_test = "3"

@@ -29,7 +29,8 @@ impl RootCommand {
                 rt.block_on(crate::cmd::graphql::graphql_command())?;
             }
             "grpc" => {
-                crate::cmd::grpc::grpc_command()?;
+                let rt = tokio::runtime::Runtime::new()?;
+                rt.block_on(crate::cmd::grpc::grpc_command())?;
             }
             "migrate" => {
                 let rt = tokio::runtime::Runtime::new()?;
