@@ -6,15 +6,20 @@ use crate::configs::app_context::AppContext;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::{RefreshRequest, TokenResponse};
+use crate::types::users::{request_type::RefreshRequest, response_type::TokenResponse};
 use axum::http::{HeaderMap, header};
 
 /// Exchange refresh token for new access token
+/// Exchange refresh token for a new access token
 #[utoipa::path(
     post,
     path = "/api/auth/refresh",
     request_body = RefreshRequest,
-    responses((status = 200, description = "New access token", body = TokenResponse)),
+    responses(
+        (status = 200, description = "New access token", body = TokenResponse),
+        (status = 401, description = "Unauthorized", body = ApiErrorResponse),
+        (status = 500, description = "Internal Server Error", body = ApiErrorResponse)
+    ),
     tag = "Auth"
 )]
 pub async fn refresh(
@@ -28,7 +33,7 @@ pub async fn refresh(
 
     // Update access_token and refresh_token cookies
     let access_cookie = format!(
-        "access_token={}; Path=/; HttpOnly; SameSite=Lax; {}Domain=localhost; Max-Age={}",
+        "access_token={}; Path=/; HttpOnly; SameSite=Lax; {}Max-Age={}",
         output.access_token,
         if is_prod { "Secure; " } else { "" },
         ctx.auth.access_ttl_seconds
@@ -36,7 +41,7 @@ pub async fn refresh(
     headers.append(header::SET_COOKIE, access_cookie.parse().unwrap());
 
     let refresh_cookie = format!(
-        "refresh_token={}; Path=/; HttpOnly; SameSite=Lax; {}Domain=localhost; Max-Age={}",
+        "refresh_token={}; Path=/; HttpOnly; SameSite=Lax; {}Max-Age={}",
         output.refresh_token,
         if is_prod { "Secure; " } else { "" },
         ctx.auth.refresh_ttl_seconds

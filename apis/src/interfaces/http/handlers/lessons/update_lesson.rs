@@ -12,7 +12,10 @@ use crate::types::course_types::{Lesson, UpdateLessonRequest};
     path = "/api/lessons/:id",
     request_body = UpdateLessonRequest,
     responses((status = 200, description = "Updated lesson", body = Lesson)),
-    tag = "Courses"
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "lessons"
 )]
 pub async fn update_lesson(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
@@ -23,5 +26,3 @@ pub async fn update_lesson(
     let body = Response::with_data("Updated lesson", lesson, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
-
-

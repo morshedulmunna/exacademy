@@ -3,6 +3,8 @@
 #  make dev               # hot-reload server (requires cargo-watch)
 #  make run               # run default command (apis)
 #  make run CMD=cli       # run with a specific subcommand
+#  make graphql           # run GraphQL server on port 9098
+#  make dev-graphql       # hot-reload GraphQL server
 #  make test              # run tests
 #  make fmt               # format code
 #  make clippy            # lint with clippy (deny warnings)
@@ -15,12 +17,14 @@ BIN ?= execute_academy
 # Default subcommand for `cargo run -- <CMD>`
 CMD ?= execute_academy-apis
 
-.PHONY: help dev run build build-release test fmt fmt-check clippy check clean migrate migrate-down sqlx-install seed openapi
+.PHONY: help dev dev-graphql run graphql build build-release test fmt fmt-check clippy check clean migrate migrate-down sqlx-install seed openapi graphql-docs
 
 help:
 	@echo "Available targets:"
 	@echo "  dev             - Hot-reload run (cargo-watch)"
+	@echo "  dev-graphql     - Hot-reload GraphQL server (cargo-watch)"
 	@echo "  run [CMD=...]   - Run the binary with a subcommand (default: execute_academy-apis)"
+	@echo "  graphql         - Run GraphQL server on port 9098"
 	@echo "  build           - Build in debug mode"
 	@echo "  build-release   - Build in release mode"
 	@echo "  test            - Run tests"
@@ -33,6 +37,7 @@ help:
 	@echo "  migrate-down    - Revert the last migration (requires sqlx-cli)"
 	@echo "  sqlx-install    - Install sqlx-cli (rustls, postgres)"
 	@echo "  docs            - Build rustdoc and open in browser"
+	@echo "  graphql-docs    - Generate GraphQL API documentation"
 	@echo "  seed            - Seed default admin user (idempotent)"
 	@echo "  openapi         - Generate OpenAPI YAML documentation"
 
@@ -40,9 +45,17 @@ help:
 dev:
 	cargo watch -q -c -w src -x 'run -- $(CMD)'
 
+# Hot-reload GraphQL server (requires cargo-watch: cargo install cargo-watch)
+dev-graphql:
+	cargo watch -q -c -w src -x 'run -- graphql'
+
 # Run the binary with a subcommand (default CMD=apis)
 run:
 	cargo run -- $(CMD)
+
+# Run GraphQL server on port 9098
+graphql:
+	cargo run -- graphql
 
 # Run SQLx migrations using the built-in command
 migrate:
@@ -50,7 +63,7 @@ migrate:
 
 # Revert the last applied migration using sqlx-cli
 migrate-down:
-	sqlx migrate revert -y
+	sqlx migrate revert
 
 # Helper to install sqlx-cli if you don't have it
 sqlx-install:
@@ -91,3 +104,11 @@ clean:
 .PHONY: docs
 docs:
 	cargo doc --no-deps --open
+
+# Generate GraphQL API documentation
+graphql-docs:
+	@echo "🚀 Generating GraphQL documentation..."
+	@./scripts/generate-graphql-docs.sh
+	@echo "✅ GraphQL documentation generated successfully!"
+	@echo "📁 Check the docs/graphql/ directory for generated files"
+	@echo "📖 Main documentation: GRAPHQL_API_DOCS.md"

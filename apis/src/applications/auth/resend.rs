@@ -1,7 +1,7 @@
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
 use crate::repositories::users::UsersRepository;
-use crate::types::user_types::ResendOtpRequest;
+use crate::types::users::request_type::ResendOtpRequest;
 use std::time::Duration;
 
 use super::utils::{generate_otp_code, send_otp_email, store_otp};
@@ -25,5 +25,3 @@ pub async fn resend_otp(
     send_otp_email(ctx, &user.email, &code).await?;
     Ok(())
 }
-
-

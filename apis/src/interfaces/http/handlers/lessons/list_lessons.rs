@@ -10,7 +10,10 @@ use crate::types::course_types::Lesson;
     get,
     path = "/api/modules/:module_id/lessons",
     responses((status = 200, description = "Lessons", body = [Lesson])),
-    tag = "Courses"
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "lessons"
 )]
 pub async fn list_lessons(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
@@ -20,5 +23,3 @@ pub async fn list_lessons(
     let body = Response::with_data("Lessons", items, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
-
-

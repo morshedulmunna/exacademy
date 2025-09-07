@@ -31,6 +31,10 @@ export interface Lesson {
   description?: string;
   content?: string;
   video_url?: string;
+  // source for the lesson video: either a direct URL or an uploaded file
+  video_source?: "url" | "file";
+  // when video_source is "file", hold the File object temporarily in client state
+  video_file?: File | null;
   duration: string;
   position: number;
   is_free: boolean;

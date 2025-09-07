@@ -12,6 +12,9 @@ use crate::types::course_types::{CourseModule, UpdateModuleRequest};
     path = "/api/modules/:id",
     request_body = UpdateModuleRequest,
     responses((status = 200, description = "Updated module", body = CourseModule)),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Courses"
 )]
 pub async fn update_module(
@@ -23,5 +26,3 @@ pub async fn update_module(
     let body = Response::with_data("Updated module", module, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
-
-

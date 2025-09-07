@@ -1,7 +1,9 @@
 use sqlx::Row;
 
 use crate::pkg::error::{AppError, AppResult};
-use crate::repositories::lessons::{CreateLessonRecord, LessonRecord, LessonsRepository, UpdateLessonRecord};
+use crate::repositories::lessons::{
+    CreateLessonRecord, LessonRecord, LessonsRepository, UpdateLessonRecord,
+};
 
 pub struct PostgresLessonsRepository {
     pub pool: sqlx::Pool<sqlx::Postgres>,
@@ -61,7 +63,11 @@ impl LessonsRepository for PostgresLessonsRepository {
         Ok(rows.into_iter().map(map_lesson_row).collect())
     }
 
-    async fn update_partial(&self, id: uuid::Uuid, input: UpdateLessonRecord) -> AppResult<Option<LessonRecord>> {
+    async fn update_partial(
+        &self,
+        id: uuid::Uuid,
+        input: UpdateLessonRecord,
+    ) -> AppResult<Option<LessonRecord>> {
         let row = sqlx::query(
             r#"UPDATE lessons SET
                     title = COALESCE($1, title),
@@ -101,6 +107,92 @@ impl LessonsRepository for PostgresLessonsRepository {
             .map_err(AppError::from)?;
         Ok(())
     }
+
+    async fn bulk_update_positions(
+        &self,
+        module_id: uuid::Uuid,
+        lessons: Vec<crate::types::course_types::LessonPositionUpdate>,
+    ) -> AppResult<Vec<LessonRecord>> {
+        // Validate input
+        if lessons.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        // Check for duplicate positions
+        let mut positions: std::collections::HashSet<i32> = std::collections::HashSet::new();
+        for lesson_update in &lessons {
+            if !positions.insert(lesson_update.position) {
+                return Err(AppError::BadRequest(format!(
+                    "Duplicate position {} found in lesson updates",
+                    lesson_update.position
+                )));
+            }
+        }
+
+        // Start a transaction to ensure all position updates are atomic
+        let mut tx = self.pool.begin().await.map_err(AppError::from)?;
+
+        // Get the current maximum position in the module to use as a safe offset
+        let max_pos_row = sqlx::query(
+            "SELECT COALESCE(MAX(position), 0) as max_pos FROM lessons WHERE module_id = $1",
+        )
+        .bind(module_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(AppError::from)?;
+
+        let max_pos: i32 = max_pos_row.get("max_pos");
+        let safe_offset = max_pos + 10000; // Use a very high offset to avoid conflicts
+
+        // First, move all lessons to very high temporary positions
+        for lesson_update in &lessons {
+            sqlx::query(
+                r#"UPDATE lessons 
+                   SET position = $1, updated_at = NOW()
+                   WHERE id = $2 AND module_id = $3"#,
+            )
+            .bind(safe_offset + lesson_update.position)
+            .bind(lesson_update.id)
+            .bind(module_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(AppError::from)?;
+        }
+
+        // Now update to the final positions
+        for lesson_update in &lessons {
+            sqlx::query(
+                r#"UPDATE lessons 
+                   SET position = $1, updated_at = NOW()
+                   WHERE id = $2 AND module_id = $3"#,
+            )
+            .bind(lesson_update.position)
+            .bind(lesson_update.id)
+            .bind(module_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(AppError::from)?;
+        }
+
+        // Fetch all updated lessons
+        let rows = sqlx::query(
+            r#"SELECT id, module_id, title, description, content, video_url, duration, position, is_free, published, created_at, updated_at
+               FROM lessons 
+               WHERE module_id = $1 
+               ORDER BY position ASC, created_at ASC"#,
+        )
+        .bind(module_id)
+        .fetch_all(&mut *tx)
+        .await
+        .map_err(AppError::from)?;
+
+        let updated_lessons: Vec<LessonRecord> = rows.into_iter().map(map_lesson_row).collect();
+
+        // Commit the transaction
+        tx.commit().await.map_err(AppError::from)?;
+
+        Ok(updated_lessons)
+    }
 }
 
 fn map_lesson_row(row: sqlx::postgres::PgRow) -> LessonRecord {
@@ -119,5 +211,3 @@ fn map_lesson_row(row: sqlx::postgres::PgRow) -> LessonRecord {
         updated_at: row.try_get("updated_at").ok(),
     }
 }
-
-

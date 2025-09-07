@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod graphql;
 pub mod health;
 pub mod not_found;
 pub mod root;
@@ -7,3 +8,5 @@ pub mod courses;
 pub mod modules;
 pub mod lessons;
 pub mod media;
+pub mod categories;
+pub mod course_categories;

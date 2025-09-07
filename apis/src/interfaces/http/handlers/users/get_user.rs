@@ -4,7 +4,7 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::auth::AuthUser;
 use crate::pkg::error::AppResult;
-use crate::{applications::users as users_service, types::user_types::UserProfile};
+use crate::{applications::users as users_service, types::users::user_types::UserProfile};
 
 /// Get a user profile by id
 #[utoipa::path(

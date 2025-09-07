@@ -4,8 +4,8 @@ use crate::pkg::Response;
 use crate::pkg::auth::AuthUser;
 use crate::pkg::error::AppResult;
 use crate::pkg::validators::ValidatedJson;
-use crate::{applications::users as users_service, types::user_types::UserProfile};
-use crate::{configs::app_context::AppContext, types::user_types::UpdateUserRequest};
+use crate::{applications::users as users_service, types::users::user_types::UserProfile};
+use crate::{configs::app_context::AppContext, types::users::request_type::UpdateUserRequest};
 
 #[utoipa::path(
     patch,
@@ -30,5 +30,3 @@ pub async fn update_user(
     let body = Response::with_data("Updated user", updated, StatusCode::OK.as_u16());
     Ok((StatusCode::OK, Json(body)))
 }
-
-

@@ -5,14 +5,17 @@ use crate::configs::app_context::AppContext;
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
 use crate::pkg::validators::ValidatedJson;
-use crate::types::course_types::{CreateLessonRequest};
+use crate::types::course_types::CreateLessonRequest;
 
 #[utoipa::path(
     post,
     path = "/api/modules/:module_id/lessons",
     request_body = CreateLessonRequest,
     responses((status = 201, description = "Created lesson", body = uuid::Uuid)),
-    tag = "Courses"
+    security(
+        ("bearerAuth" = [])
+    ),
+    tag = "lessons"
 )]
 pub async fn create_lesson(
     Extension(ctx): Extension<std::sync::Arc<AppContext>>,
@@ -23,5 +26,3 @@ pub async fn create_lesson(
     let body = Response::with_data("Lesson created", id, StatusCode::CREATED.as_u16());
     Ok((StatusCode::CREATED, Json(body)))
 }
-
-

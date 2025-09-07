@@ -3,17 +3,36 @@
 import { useEffect, useState } from "react";
 import type { Module, Lesson, LessonContent } from "./types";
 import type { FileUploadResult } from "@/hooks/useCourseContentUpload";
+import { apiCreateDeepModules, apiListModulesDeep } from "./services/api";
+import { moduleSchema } from "./services/schemas";
+import { transformDeepModulesResponse } from "./services/transformers";
+import { buildCreateModulePayload, sanitizePayload } from "./services/payload";
+import { deleteModuleAction } from "@/actions/modules/delete-module-action";
+import { deleteLessonAction } from "@/actions/lessons/delete-lesson-action";
+import { bulkUpdateModulePositions } from "@/actions/modules/bulk-update-positions";
+import { bulkUpdateLessonPositions } from "@/actions/lessons/bulk-update-positions";
+import toast from "react-hot-toast";
+// toast and API calls are intentionally not used when only logging payloads
+
+// Ensure crypto.randomUUID is available
+const generateId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+};
 
 type LessonTab = "resources" | "questions" | "assignment" | null;
 
 export interface UseCourseBuilderArgs {
   courseId?: string;
-  onModulesChange?: (modules: Module[]) => void;
 }
 
-export default function useCourseBuilder({ courseId, onModulesChange }: UseCourseBuilderArgs) {
+export default function useCourseBuilder({ courseId }: UseCourseBuilderArgs) {
   const [modules, setModules] = useState<Module[]>([]);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
   const [editingModule, setEditingModule] = useState<string | null>(null);
   const [editingLesson, setEditingLesson] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,18 +40,76 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   const [draggedLesson, setDraggedLesson] = useState<{ moduleId: string; lessonId: string } | null>(null);
   const [lessonActiveTab, setLessonActiveTab] = useState<Record<string, LessonTab>>({});
   const [submittingModuleId, setSubmittingModuleId] = useState<string | null>(null);
+  // Delete confirmation modal state
+  type DeleteTarget = { kind: "module"; moduleId: string } | { kind: "lesson"; moduleId: string; lessonId: string };
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; target: DeleteTarget | null }>({ isOpen: false, target: null });
 
   useEffect(() => {
     loadModules();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
-  const loadModules = () => {
+  // Safety check to ensure modules are serializable
+  const safeSetModules = (newModules: Module[]) => {
+    try {
+      // Test serialization to catch any non-serializable data
+      JSON.stringify(newModules);
+      setModules(newModules);
+    } catch (error) {
+      console.error("Modules contain non-serializable data:", error);
+      // Fallback to empty array if serialization fails
+      setModules([]);
+    }
+  };
+
+  // Safe version of functional setModules
+  const safeSetModulesFn = (updater: (prev: Module[]) => Module[]) => {
+    setModules((prev) => {
+      try {
+        const newModules = updater(prev);
+        // Test serialization to catch any non-serializable data
+        JSON.stringify(newModules);
+        return newModules;
+      } catch (error) {
+        console.error("Modules contain non-serializable data:", error);
+        // Fallback to previous state if serialization fails
+        return prev;
+      }
+    });
+  };
+
+  const loadModules = async () => {
+    if (!courseId) {
+      setModules([]);
+      return;
+    }
+
     setIsLoading(true);
-    const initial: Module[] = [];
-    setModules(initial);
-    onModulesChange?.(initial);
-    setIsLoading(false);
+    try {
+      const response = await apiListModulesDeep(courseId);
+
+      // Validate response structure
+      if (response && typeof response === "object" && "success" in response) {
+        if (response.success && response.data) {
+          const transformedModules: Module[] = transformDeepModulesResponse(response);
+          safeSetModules(transformedModules);
+        } else {
+          console.error("API returned error:", response.message);
+          setModules([]);
+        }
+      } else {
+        console.error("Unexpected response format:", response);
+        setModules([]);
+      }
+
+      // Keep all modules collapsed by default after load
+      setExpandedModules(new Set());
+    } catch (error) {
+      console.error("Error loading modules:", error);
+      setModules([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleModuleExpansion = (moduleId: string) => {
@@ -40,6 +117,13 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     if (newExpanded.has(moduleId)) newExpanded.delete(moduleId);
     else newExpanded.add(moduleId);
     setExpandedModules(newExpanded);
+  };
+
+  const toggleLessonExpansion = (lessonId: string) => {
+    const newExpanded = new Set(expandedLessons);
+    if (newExpanded.has(lessonId)) newExpanded.delete(lessonId);
+    else newExpanded.add(lessonId);
+    setExpandedLessons(newExpanded);
   };
 
   // Drag & Drop: Modules
@@ -60,7 +144,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   const handleModuleDragLeave = (e: React.DragEvent) => {
     e.currentTarget.classList.remove("border-blue-400", "bg-blue-50", "dark:bg-blue-900/20");
   };
-  const handleModuleDrop = (e: React.DragEvent, targetModuleId: string) => {
+  const handleModuleDrop = async (e: React.DragEvent, targetModuleId: string) => {
     e.preventDefault();
     e.currentTarget.classList.remove("border-blue-400", "bg-blue-50", "dark:bg-blue-900/20");
     if (!draggedModule || draggedModule === targetModuleId) return;
@@ -74,7 +158,51 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     newModules.splice(targetIndex, 0, draggedModuleData);
 
     const updatedModules = newModules.map((module, index) => ({ ...module, position: index + 1 }));
-    setModules(updatedModules);
+    safeSetModules(updatedModules);
+
+    // Call backend API to update module positions
+    if (courseId) {
+      try {
+        const modulesPayload = updatedModules.map((m) => ({ id: m.id, position: m.position }));
+
+        // Validate payload before sending
+        const positions = new Set(modulesPayload.map((m) => m.position));
+        if (positions.size !== modulesPayload.length) {
+          console.error("Duplicate positions detected, reverting local state");
+          // Revert to original state if we have duplicate positions
+          safeSetModules(modules);
+          return;
+        }
+
+        // Filter out modules with temporary IDs (they haven't been saved to backend yet)
+        const validModules = modulesPayload.filter((module) => !module.id.startsWith("tmp_"));
+
+        if (validModules.length === 0) {
+          console.log("No valid modules to update (all are temporary)");
+          return;
+        }
+
+        if (validModules.length !== modulesPayload.length) {
+          console.log(`Skipping ${modulesPayload.length - validModules.length} temporary modules`);
+        }
+
+        const response = await bulkUpdateModulePositions(courseId, validModules);
+
+        if (!response.success) {
+          console.error("Failed to update module positions:", response.message);
+          toast.error("Failed to save module order. Please try again.");
+          // Optionally revert the local state if the backend update fails
+          // For now, we'll keep the local state and just log the error
+        } else {
+          toast.success("Module order updated successfully");
+        }
+      } catch (err) {
+        console.error("Failed to update module positions", err);
+        toast.error("Failed to save module order. Please try again.");
+        // Optionally revert the local state if the backend update fails
+        // For now, we'll keep the local state and just log the error
+      }
+    }
     setDraggedModule(null);
   };
 
@@ -96,7 +224,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   const handleLessonDragLeave = (e: React.DragEvent) => {
     e.currentTarget.classList.remove("border-green-400", "bg-green-50", "dark:bg-green-900/20");
   };
-  const handleLessonDrop = (e: React.DragEvent, targetModuleId: string, targetLessonId: string) => {
+  const handleLessonDrop = async (e: React.DragEvent, targetModuleId: string, targetLessonId: string) => {
     e.preventDefault();
     if (!draggedLesson) return;
     const { moduleId: sourceModuleId, lessonId: sourceLessonId } = draggedLesson;
@@ -116,22 +244,60 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     const sourceModuleIndex = newModules.findIndex((m) => m.id === sourceModuleId);
     const [movedLesson] = newModules[sourceModuleIndex].lessons.splice(sourceLessonIndex, 1);
     newModules[sourceModuleIndex].lessons.splice(targetLessonIndex, 0, movedLesson);
+    // Re-index lessons positions within the module after drop
     newModules[sourceModuleIndex].lessons = newModules[sourceModuleIndex].lessons.map((lesson, index) => ({ ...lesson, position: index + 1 }));
 
-    setModules(newModules);
+    safeSetModules(newModules);
+
+    // Call backend API to update lesson positions
+    try {
+      const lessonsPayload = newModules[sourceModuleIndex].lessons.map((l) => ({ id: l.id, position: l.position }));
+
+      // Validate payload before sending
+      const positions = new Set(lessonsPayload.map((l) => l.position));
+      if (positions.size !== lessonsPayload.length) {
+        console.error("Duplicate positions detected, reverting local state");
+        // Revert to original state if we have duplicate positions
+        safeSetModules(modules);
+        return;
+      }
+
+      // Filter out lessons with temporary IDs (they haven't been saved to backend yet)
+      const validLessons = lessonsPayload.filter((lesson) => !lesson.id.startsWith("tmp_"));
+
+      if (validLessons.length === 0) {
+        console.log("No valid lessons to update (all are temporary)");
+        return;
+      }
+
+      if (validLessons.length !== lessonsPayload.length) {
+        console.log(`Skipping ${lessonsPayload.length - validLessons.length} temporary lessons`);
+      }
+
+      const response = await bulkUpdateLessonPositions(sourceModuleId, validLessons);
+
+      if (!response.success) {
+        console.error("Failed to update lesson positions:", response.message);
+        toast.error("Failed to save lesson order. Please try again.");
+      } else {
+        toast.success("Lesson order updated successfully");
+      }
+    } catch (err) {
+      console.error("Failed to update lesson positions", err);
+      toast.error("Failed to save lesson order. Please try again.");
+    }
+
     setDraggedLesson(null);
   };
 
   const createModule = async () => {
     try {
       const payload = { title: "New Module", description: "", position: modules.length + 1 } as any;
-      const backendId = `tmp_${crypto.randomUUID()}`;
+      const backendId = `tmp_${generateId()}`;
       const newModule: Module = { id: backendId, title: payload.title, description: payload.description, position: payload.position, lessons: [] };
       const next = [...modules, newModule];
-      setModules(next);
+      safeSetModules(next);
       setExpandedModules((prev) => new Set([...prev, newModule.id]));
-      onModulesChange?.(next);
-      console.log("Created module (local):", newModule);
     } catch (error) {
       console.error("Error creating module:", error);
     }
@@ -140,22 +306,31 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   const updateModule = async (moduleId: string, data: Partial<Module>) => {
     try {
       const next = modules.map((m) => (m.id === moduleId ? { ...m, ...data } : m));
-      setModules(next);
-      onModulesChange?.(next);
+      safeSetModules(next);
       setEditingModule(null);
     } catch (error) {
       console.error("Error updating module:", error);
     }
   };
 
+  /**
+   * Permanently remove a module and its lessons from local state.
+   * Caller is expected to confirm with the user before invoking.
+   */
   const deleteModule = async (moduleId: string) => {
-    if (!confirm("Are you sure you want to delete this module? This will also delete all lessons within it.")) return;
     try {
+      // Call the backend API to delete the module
+      await deleteModuleAction(moduleId);
+
+      // Update local state after successful deletion
       const next = modules.filter((m) => m.id !== moduleId);
-      setModules(next);
-      onModulesChange?.(next);
+      // Re-index remaining modules' positions starting from 1
+      const reindexed = next.map((module, index) => ({ ...module, position: index + 1 }));
+      safeSetModules(reindexed);
     } catch (error) {
       console.error("Error deleting module:", error);
+      // Re-throw the error so the UI can handle it appropriately
+      throw error;
     }
   };
 
@@ -163,14 +338,99 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     try {
       const module = modules.find((m) => m.id === moduleId);
       const lessonPosition = module ? module.lessons.length + 1 : 1;
-      const id = `tmp_${crypto.randomUUID()}`;
-      const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", video_url: "", duration: "0m", position: lessonPosition, is_free: false, published: false, contents: [], questions: [], assignment: null };
+      const id = `tmp_${generateId()}`;
+      const newLesson: Lesson = { id, title: "New Lesson", description: "", content: "", video_url: "", video_source: "url", video_file: null, duration: "0m", position: lessonPosition, is_free: false, published: false, contents: [], questions: [], assignment: null };
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m));
-      setModules(next);
-      onModulesChange?.(next);
+      safeSetModules(next);
       setEditingLesson(newLesson.id);
     } catch (error) {
       console.error("Error creating lesson:", error);
+    }
+  };
+
+  const createModuleWithLesson = async () => {
+    try {
+      const moduleId = `tmp_${generateId()}`;
+      const newModule: Module = {
+        id: moduleId,
+        title: "New Module",
+        description: "",
+        position: modules.length + 1,
+        lessons: [],
+      };
+      const lessonId = `tmp_${generateId()}`;
+      const newLesson: Lesson = {
+        id: lessonId,
+        title: "New Lesson",
+        description: "",
+        content: "",
+        video_url: "",
+        video_source: "url",
+        video_file: null,
+        duration: "0m",
+        position: 1,
+        is_free: false,
+        published: false,
+        contents: [],
+        questions: [],
+        assignment: null,
+      };
+
+      const composed: Module = { ...newModule, lessons: [newLesson] };
+      const next = [...modules, composed];
+      safeSetModules(next);
+      setExpandedModules((prev) => new Set([...prev, composed.id]));
+      setEditingModule(moduleId);
+
+      // Compose and log payload in requested format (snake_case keys)
+      const payload: any = {
+        course_id: courseId ?? "",
+        title: composed.title,
+        description: composed.description ?? "",
+        position: composed.position,
+        lessons: (composed.lessons ?? []).map((l, lessonIndex) => ({
+          title: l.title,
+          description: l.description ?? null,
+          content: l.content ?? null,
+          video_url: l.video_url ?? null,
+          duration: l.duration,
+          position: l.position ?? lessonIndex + 1,
+          is_free: !!l.is_free,
+          published: !!l.published,
+          contents: (l.contents ?? []).map((c, contentIndex) => ({
+            title: c.title,
+            content_type: c.type,
+            url: c.url,
+            file_size: c.size ?? undefined,
+            filename: c.filename,
+            position: contentIndex + 1,
+          })),
+          questions: (l.questions ?? []).map((q, qIndex) => ({
+            question_text: q.text,
+            position: qIndex + 1,
+            options: (q.options ?? []).map((o, oIndex) => ({
+              option_text: o.text,
+              is_correct: !!o.is_correct,
+              position: oIndex + 1,
+            })),
+          })),
+          assignment: l.assignment
+            ? {
+                title: l.assignment.title,
+                description: l.assignment.description ?? "",
+              }
+            : null,
+        })),
+      };
+      try {
+        await moduleSchema.validate(payload, { abortEarly: false });
+      } catch (err: any) {
+        // Do not block creation of the local draft, only warn
+        const msg = (err?.errors as string[])?.[0] || "Validation failed";
+        toast.error(msg);
+      }
+    } catch (error) {
+      console.error("Error creating module with lesson:", error);
     }
   };
 
@@ -202,9 +462,71 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
           })),
         },
       };
-      console.log("Submitting lessons (local only):", consolePayload);
     } catch (error) {
       console.error("Error submitting lessons:", error);
+    } finally {
+      setSubmittingModuleId(null);
+    }
+  };
+
+  const createModuleAndAllLessons = async (moduleId: string) => {
+    // Prevent multiple simultaneous calls
+    if (submittingModuleId === moduleId) {
+      return;
+    }
+
+    try {
+      const module = modules.find((m) => m.id === moduleId);
+      if (!module || !courseId) return;
+      setSubmittingModuleId(moduleId);
+
+      const payload = buildCreateModulePayload(courseId, {
+        ...module,
+        position: module.position ?? modules.findIndex((m) => m.id === moduleId) + 1,
+      } as Module);
+
+      const sanitizedPayload = sanitizePayload(payload);
+
+      try {
+        await moduleSchema.validate(sanitizedPayload, { abortEarly: false });
+      } catch (err: any) {
+        const msg = (err?.errors as string[])?.[0] || "Validation failed";
+        console.error("Validation failed:", err);
+        toast.error(msg);
+        throw err;
+      }
+
+      const finalPayload = sanitizePayload(sanitizedPayload);
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("API call timeout")), 30000); // 30 seconds timeout
+      });
+
+      const apiPromise = apiCreateDeepModules(finalPayload.course_id, finalPayload);
+      const res = await Promise.race([apiPromise, timeoutPromise]);
+
+      // Handle the response
+      if (res && typeof res === "object" && "success" in res) {
+        if (res.success) {
+          // Success - you can handle the response data here if needed
+          console.log("Module created successfully:", res.data);
+          toast.success("Module created successfully!");
+        } else {
+          // API returned an error
+          const errorMessage = res.message || "Failed to create module";
+          toast.error(errorMessage);
+          throw new Error(errorMessage);
+        }
+      } else {
+        // Unexpected response format
+        console.error("Unexpected API response format:", res);
+        toast.error("Unexpected response from server");
+        throw new Error("Unexpected response format");
+      }
+    } catch (error) {
+      console.error("Error creating module and lessons:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
     } finally {
       setSubmittingModuleId(null);
     }
@@ -213,55 +535,102 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   const updateLesson = async (moduleId: string, lessonId: string, data: Partial<Lesson>) => {
     try {
       const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, ...data } : l)) } : m));
-      setModules(next);
-      onModulesChange?.(next);
+      safeSetModules(next);
       setEditingLesson(null);
     } catch (error) {
       console.error("Error updating lesson:", error);
     }
   };
 
+  /**
+   * Permanently remove a lesson from a module in local state.
+   * Caller is expected to confirm with the user before invoking.
+   */
   const deleteLesson = async (moduleId: string, lessonId: string) => {
-    if (!confirm("Are you sure you want to delete this lesson?")) return;
     try {
-      const next = modules.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) } : m));
-      setModules(next);
-      onModulesChange?.(next);
+      // Call the backend API to delete the lesson
+      await deleteLessonAction(lessonId);
+
+      // Update local state after successful deletion
+      const next = modules.map((m) => {
+        if (m.id !== moduleId) return m;
+        // Remove lesson and re-index positions starting from 1
+        const reindexedLessons = m.lessons.filter((l) => l.id !== lessonId).map((lesson, index) => ({ ...lesson, position: index + 1 }));
+        return { ...m, lessons: reindexedLessons };
+      });
+
+      safeSetModules(next);
     } catch (error) {
       console.error("Error deleting lesson:", error);
+      // Re-throw the error so the UI can handle it appropriately
+      throw error;
+    }
+  };
+
+  /**
+   * Open the delete confirmation modal for a module.
+   */
+  const openDeleteModuleModal = (moduleId: string) => {
+    setDeleteModal({ isOpen: true, target: { kind: "module", moduleId } });
+  };
+
+  /**
+   * Open the delete confirmation modal for a lesson.
+   */
+  const openDeleteLessonModal = (moduleId: string, lessonId: string) => {
+    setDeleteModal({ isOpen: true, target: { kind: "lesson", moduleId, lessonId } });
+  };
+
+  /**
+   * Close the delete confirmation modal without taking action.
+   */
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, target: null });
+  };
+
+  /**
+   * Confirm current deletion in the modal and perform the action.
+   */
+  const confirmDelete = async () => {
+    const target = deleteModal.target;
+    if (!target) return;
+    try {
+      if (target.kind === "module") {
+        await deleteModule(target.moduleId);
+        toast.success("Module deleted successfully!");
+      } else {
+        await deleteLesson(target.moduleId, target.lessonId);
+        toast.success("Lesson deleted successfully!");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setDeleteModal({ isOpen: false, target: null });
     }
   };
 
   const addContentToLesson = async (moduleId: string, lessonId: string, fileResult: FileUploadResult) => {
     try {
       const newContent: LessonContent = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         title: fileResult.originalName,
         type: fileResult.type,
         url: fileResult.url,
         size: fileResult.size,
         filename: fileResult.filename,
       };
-      setModules((prev) =>
-        prev.map((m) =>
+      safeSetModulesFn((prev) => {
+        const updatedModules = prev.map((m) =>
           m.id === moduleId
             ? {
                 ...m,
                 lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
               }
             : m
-        )
-      );
-      onModulesChange?.(
-        modules.map((m) =>
-          m.id === moduleId
-            ? {
-                ...m,
-                lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, contents: [...(l.contents ?? []), newContent] } : l)),
-              }
-            : m
-        )
-      );
+        );
+        return updatedModules;
+      });
       setLessonActiveTab((prev) => ({ ...prev, [lessonId]: "resources" }));
     } catch (error) {
       console.error("Error adding content to lesson:", error);
@@ -269,7 +638,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const addQuestion = (moduleId: string, lessonId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -281,11 +650,11 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
                       questions: [
                         ...(l.questions ?? []),
                         {
-                          id: crypto.randomUUID(),
+                          id: generateId(),
                           text: "New question",
                           options: [
-                            { id: crypto.randomUUID(), text: "Option 1", is_correct: true },
-                            { id: crypto.randomUUID(), text: "Option 2", is_correct: false },
+                            { id: generateId(), text: "Option 1", is_correct: true },
+                            { id: generateId(), text: "Option 2", is_correct: false },
                           ],
                         },
                       ],
@@ -300,7 +669,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const updateQuestion = (moduleId: string, lessonId: string, questionId: string, text: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -316,7 +685,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     let remaining = 0;
     let hasAssignment = false;
     let hasResources = false;
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -342,7 +711,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const addOption = (moduleId: string, lessonId: string, questionId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -355,7 +724,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
                         q.id === questionId
                           ? {
                               ...q,
-                              options: [...q.options, { id: crypto.randomUUID(), text: "New option", is_correct: false }],
+                              options: [...q.options, { id: generateId(), text: "New option", is_correct: false }],
                             }
                           : q
                       ),
@@ -369,7 +738,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const updateOptionText = (moduleId: string, lessonId: string, questionId: string, optionId: string, text: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -396,7 +765,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const setCorrectOption = (moduleId: string, lessonId: string, questionId: string, optionId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -423,7 +792,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const deleteOption = (moduleId: string, lessonId: string, questionId: string, optionId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -450,12 +819,12 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const enableAssignment = (moduleId: string, lessonId: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
               ...m,
-              lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, assignment: { id: crypto.randomUUID(), title: "", description: "" } } : l)),
+              lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, assignment: { id: generateId(), title: "", description: "" } } : l)),
             }
           : m
       )
@@ -466,7 +835,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   const removeAssignment = (moduleId: string, lessonId: string) => {
     let hasQuestions = false;
     let hasResources = false;
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -489,7 +858,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
   };
 
   const updateAssignmentField = (moduleId: string, lessonId: string, field: "title" | "description", value: string) => {
-    setModules((prev) =>
+    safeSetModulesFn((prev) =>
       prev.map((m) =>
         m.id === moduleId
           ? {
@@ -498,7 +867,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
                 l.id === lessonId
                   ? {
                       ...l,
-                      assignment: { id: l.assignment?.id ?? crypto.randomUUID(), title: field === "title" ? value : l.assignment?.title ?? "", description: field === "description" ? value : l.assignment?.description },
+                      assignment: { id: l.assignment?.id ?? generateId(), title: field === "title" ? value : l.assignment?.title ?? "", description: field === "description" ? value : l.assignment?.description },
                     }
                   : l
               ),
@@ -512,6 +881,7 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     // state
     modules,
     expandedModules,
+    expandedLessons,
     editingModule,
     setEditingModule,
     editingLesson,
@@ -522,8 +892,10 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     lessonActiveTab,
     setLessonActiveTab,
     submittingModuleId,
+    deleteModal,
     // actions
     toggleModuleExpansion,
+    toggleLessonExpansion,
     handleModuleDragStart,
     handleModuleDragEnd,
     handleModuleDragOver,
@@ -538,9 +910,15 @@ export default function useCourseBuilder({ courseId, onModulesChange }: UseCours
     updateModule,
     deleteModule,
     createLesson,
-    submitLessons,
-    updateLesson,
     deleteLesson,
+    createModuleWithLesson,
+    submitLessons,
+    createModuleAndAllLessons,
+    updateLesson,
+    openDeleteModuleModal,
+    openDeleteLessonModal,
+    closeDeleteModal,
+    confirmDelete,
     addContentToLesson,
     addQuestion,
     updateQuestion,

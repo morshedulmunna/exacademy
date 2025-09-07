@@ -6,7 +6,7 @@ use crate::configs::app_context::AppContext;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::{VerifyOtpRequest, OkResponse};
+use crate::types::users::{request_type::VerifyOtpRequest, response_type::OkResponse};
 
 /// Verify email with OTP code
 #[utoipa::path(

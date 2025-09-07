@@ -75,6 +75,7 @@ pub struct UpdateCourseRecord {
 
 #[async_trait::async_trait]
 pub trait CoursesRepository: Send + Sync {
+    // create course
     async fn create(&self, input: CreateCourseRecord) -> AppResult<String>;
 
     /// List courses created by a specific instructor with pagination; returns (items, total)
@@ -84,13 +85,20 @@ pub trait CoursesRepository: Send + Sync {
         offset: i64,
         limit: i64,
     ) -> AppResult<(Vec<CourseRecord>, i64)>;
+
     /// Return a page of courses and the total count for pagination
     async fn find_by_id(&self, id: uuid::Uuid) -> AppResult<Option<CourseRecord>>;
+
+    // find course by slug
     async fn find_by_slug(&self, slug: &str) -> AppResult<Option<CourseRecord>>;
+
+    // update course partially by id
     async fn update_partial(
         &self,
         id: uuid::Uuid,
         input: UpdateCourseRecord,
     ) -> AppResult<Option<CourseRecord>>;
+
+    // delete course by id
     async fn delete_by_id(&self, id: uuid::Uuid) -> AppResult<()>;
 }

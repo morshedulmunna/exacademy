@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface ModalProps {
@@ -11,13 +14,13 @@ interface ModalProps {
 export default function Modal({ isOpen, onClose, children, title }: ModalProps) {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal Content */}
-      <div className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[90vh] overflow-hidden">
         {/* Header */}
         {title && (
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -38,6 +41,7 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
         {/* Content */}
         <div className="p-0 max-h-[75vh] overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

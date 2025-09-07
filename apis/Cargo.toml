@@ -86,5 +86,9 @@ urlencoding = "2.1.3"
 # YAML serialization for OpenAPI generation
 serde_yaml = "0.9"
 
+# GraphQL dependencies
+async-graphql = { version = "7", features = ["chrono", "uuid", "chrono-tz"] }
+async-graphql-axum = "7"
+
 [dev-dependencies]
 serial_test = "3"

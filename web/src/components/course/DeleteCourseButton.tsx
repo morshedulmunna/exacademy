@@ -5,6 +5,7 @@ import { Trash2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { deleteCourse } from "@/actions/courses/delete.action";
 import LoaderOverlay from "@/common/LoaderOverlay";
+import ConfirmDialog from "@common/ConfirmDialog";
 
 interface DeleteCourseButtonProps {
   courseId: string;
@@ -58,46 +59,17 @@ export default function DeleteCourseButton({ courseId, courseTitle, onDelete }: 
         <Trash2 className="w-4 h-4" />
       </button>
 
-      {/* Confirmation Modal */}
-      {showConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-              </div>
-              <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Delete Course</h3>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Are you sure you want to delete <strong className="text-gray-900 dark:text-white">"{courseTitle}"</strong>? This action cannot be undone and will permanently remove the course and all its content.
-              </p>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-              </div>
-            )}
-
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowConfirmation(false)}
-                disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button onClick={handleDelete} disabled={isDeleting} className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50">
-                {isDeleting ? "Deleting..." : "Delete Course"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={showConfirmation}
+        title="Delete Course"
+        description={`Are you sure you want to delete "${courseTitle}"? This action cannot be undone and will permanently remove the course and all its content.`}
+        variant="danger"
+        confirmText={isDeleting ? "Deleting..." : "Delete Course"}
+        cancelText="Cancel"
+        onCancel={() => setShowConfirmation(false)}
+        onConfirm={handleDelete}
+        loading={isDeleting}
+      />
 
       {/* Global Loader Overlay */}
       <LoaderOverlay open={isDeleting} text={`Deleting "${courseTitle}"...`} />

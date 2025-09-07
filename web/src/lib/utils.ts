@@ -187,7 +187,6 @@ export function isNetworkError(error: any): boolean {
  * @returns A user-friendly error message
  */
 export function extractErrorMessage(error: any): string {
-  console.log(error);
   // Handle network errors first
   if (isNetworkError(error)) {
     return "Network error: Please check your internet connection";
@@ -236,7 +235,13 @@ export function isAxiosError(error: any): boolean {
  * @returns Formatted error object
  */
 export function ErrorObj(error: any) {
-  console.error(error);
+  console.error({
+    success: false,
+    message: extractErrorMessage(error),
+    status: extractErrorStatus(error),
+    details: error?.response?.data || error,
+    isAxiosError: isAxiosError(error),
+  });
   return {
     success: false,
     message: extractErrorMessage(error),
@@ -247,6 +252,12 @@ export function ErrorObj(error: any) {
 }
 
 export function DataObj(data: any) {
+  console.info({
+    success: true,
+    message: data.data.message,
+    status: data.data.status_code,
+    data: data.data.data,
+  });
   return {
     success: true,
     message: data.data.message,

@@ -24,6 +24,10 @@ impl RootCommand {
                 let rt = tokio::runtime::Runtime::new()?;
                 rt.block_on(crate::cmd::apis::apis_command())?;
             }
+            "graphql" => {
+                let rt = tokio::runtime::Runtime::new()?;
+                rt.block_on(crate::cmd::graphql::graphql_command())?;
+            }
             "grpc" => {
                 crate::cmd::grpc::grpc_command()?;
             }

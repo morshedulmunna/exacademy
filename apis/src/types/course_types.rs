@@ -100,6 +100,28 @@ where
     pub meta: PageMeta,
 }
 
+// ----- Categories -----
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct Category {
+    pub id: i32,
+    pub name: String,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct CreateCategoryRequest {
+    #[validate(length(min = 1))]
+    pub name: String,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct UpdateCategoryRequest {
+    pub name: Option<String>,
+    pub description: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CourseModule {
     pub id: Uuid,
@@ -163,6 +185,30 @@ pub struct UpdateModuleRequest {
 }
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct BulkUpdateModulePositionsRequest {
+    pub course_id: Uuid,
+    pub modules: Vec<ModulePositionUpdate>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct ModulePositionUpdate {
+    pub id: Uuid,
+    pub position: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct BulkUpdateLessonPositionsRequest {
+    pub module_id: Uuid,
+    pub lessons: Vec<LessonPositionUpdate>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct LessonPositionUpdate {
+    pub id: Uuid,
+    pub position: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
 pub struct CreateLessonRequest {
     pub module_id: Uuid,
     #[validate(length(min = 1))]
@@ -189,4 +235,207 @@ pub struct UpdateLessonRequest {
     pub position: Option<i32>,
     pub is_free: Option<bool>,
     pub published: Option<bool>,
+}
+
+// ----- Lesson Contents -----
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct LessonContent {
+    pub id: Uuid,
+    pub lesson_id: Uuid,
+    pub title: String,
+    pub content_type: String,
+    pub url: String,
+    pub file_size: Option<i64>,
+    pub filename: Option<String>,
+    pub position: i32,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct CreateLessonContentRequest {
+    pub lesson_id: Uuid,
+    #[validate(length(min = 1))]
+    pub title: String,
+    #[validate(length(min = 1))]
+    pub content_type: String,
+    #[validate(length(min = 1))]
+    pub url: String,
+    pub file_size: Option<i64>,
+    pub filename: Option<String>,
+    pub position: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct UpdateLessonContentRequest {
+    pub title: Option<String>,
+    pub content_type: Option<String>,
+    pub url: Option<String>,
+    pub file_size: Option<i64>,
+    pub filename: Option<String>,
+    pub position: Option<i32>,
+}
+
+// ----- Lesson Questions / Options -----
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct LessonQuestion {
+    pub id: Uuid,
+    pub lesson_id: Uuid,
+    pub question_text: String,
+    pub position: i32,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct CreateLessonQuestionRequest {
+    pub lesson_id: Uuid,
+    #[validate(length(min = 1))]
+    pub question_text: String,
+    pub position: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct UpdateLessonQuestionRequest {
+    pub question_text: Option<String>,
+    pub position: Option<i32>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct QuestionOption {
+    pub id: Uuid,
+    pub question_id: Uuid,
+    pub option_text: String,
+    pub is_correct: bool,
+    pub position: i32,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct CreateQuestionOptionRequest {
+    pub question_id: Uuid,
+    #[validate(length(min = 1))]
+    pub option_text: String,
+    pub is_correct: bool,
+    pub position: i32,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct UpdateQuestionOptionRequest {
+    pub option_text: Option<String>,
+    pub is_correct: Option<bool>,
+    pub position: Option<i32>,
+}
+
+// ----- Lesson Assignment -----
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct LessonAssignment {
+    pub lesson_id: Uuid,
+    pub title: String,
+    pub description: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Deserialize, ToSchema, Validate)]
+pub struct UpsertLessonAssignmentRequest {
+    pub lesson_id: Uuid,
+    #[validate(length(min = 1))]
+    pub title: String,
+    pub description: Option<String>,
+}
+
+// ----- Deep Create Module (with Lessons, Contents, Questions, Assignment) -----
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
+pub struct CreateLessonContentInput {
+    #[validate(length(min = 1))]
+    pub title: String,
+    #[validate(length(min = 1))]
+    pub content_type: String,
+    #[validate(length(min = 1))]
+    pub url: String,
+    pub file_size: Option<i64>,
+    pub filename: Option<String>,
+    pub position: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
+pub struct CreateQuestionOptionInput {
+    #[validate(length(min = 1))]
+    pub option_text: String,
+    pub is_correct: bool,
+    pub position: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
+pub struct CreateLessonQuestionInput {
+    #[validate(length(min = 1))]
+    pub question_text: String,
+    pub position: i32,
+    #[validate(length(min = 1))]
+    pub options: Vec<CreateQuestionOptionInput>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
+pub struct CreateLessonAssignmentInput {
+    #[validate(length(min = 1))]
+    pub title: String,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
+pub struct CreateLessonDeepRequest {
+    #[validate(length(min = 1))]
+    pub title: String,
+    pub description: Option<String>,
+    pub content: Option<String>,
+    #[validate(url)]
+    pub video_url: Option<String>,
+    #[validate(length(min = 1))]
+    pub duration: String,
+    pub position: i32,
+    pub is_free: bool,
+    pub published: bool,
+    #[validate(length(min = 0))]
+    pub contents: Vec<CreateLessonContentInput>,
+    #[validate(length(min = 0))]
+    pub questions: Vec<CreateLessonQuestionInput>,
+    pub assignment: Option<CreateLessonAssignmentInput>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
+pub struct CreateModuleDeepRequest {
+    #[validate(length(min = 1))]
+    pub title: String,
+    pub description: Option<String>,
+    pub position: i32,
+    #[validate(length(min = 0))]
+    pub lessons: Vec<CreateLessonDeepRequest>,
+}
+
+// Response shapes for deep-created payload
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct QuestionWithOptions {
+    pub question: LessonQuestion,
+    pub options: Vec<QuestionOption>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct LessonDeep {
+    pub lesson: Lesson,
+    pub contents: Vec<LessonContent>,
+    pub questions: Vec<QuestionWithOptions>,
+    pub assignment: Option<LessonAssignment>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ModuleDeep {
+    pub module: CourseModule,
+    pub lessons: Vec<LessonDeep>,
 }

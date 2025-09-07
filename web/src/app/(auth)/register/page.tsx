@@ -45,7 +45,15 @@ export default function RegisterPage() {
       .min(3, "Username must be at least 3 characters")
       .max(30, "Username must be at most 30 characters")
       .required("Username is required"),
-    password: Yup.string().min(6, "Password must be at least 6 characters").max(72).required("Password is required"),
+    // Password must be at least 8 characters, include uppercase, lowercase, number, and special character
+    password: Yup.string()
+      .min(8, "Password must be at least 8 characters")
+      .max(72)
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/[0-9]/, "Password must contain at least one number")
+      .matches(/[^A-Za-z0-9]/, "Password must contain at least one special character")
+      .required("Password is required"),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref("password"), ""], "Passwords do not match")
       .required("Confirm your password"),
@@ -101,11 +109,17 @@ export default function RegisterPage() {
                   username,
                   password,
                 });
+
                 if (res.success) {
                   setSuccess(res.message);
                   router.push(`/verify?email=${email}`);
                 }
+
+                if (!res.success) {
+                  setError(res.message);
+                }
               } catch (error: any) {
+                console.log(error, "============");
                 setError(error.message);
               } finally {
                 setSubmitting(false);

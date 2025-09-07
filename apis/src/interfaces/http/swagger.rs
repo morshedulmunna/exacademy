@@ -12,7 +12,8 @@ use utoipa::{Modify, OpenApi};
         description = "REST API for execute_academy. See category, product, auth, and user endpoints."
     ),
     servers(
-        (url = "http://localhost:9098", description = "Local dev")
+        (url = "http://localhost:9098", description = "Local dev"),
+        (url = "https://api.executeacademy.com", description = "Production")
     ),
     paths(
         // Auth
@@ -33,6 +34,7 @@ use utoipa::{Modify, OpenApi};
         crate::interfaces::http::handlers::courses::delete_course::delete_course,
         // Modules
         crate::interfaces::http::handlers::modules::list_modules::list_modules,
+        crate::interfaces::http::handlers::modules::list_modules_deep::list_modules_deep,
         crate::interfaces::http::handlers::modules::create_module::create_module,
         crate::interfaces::http::handlers::modules::update_module::update_module,
         crate::interfaces::http::handlers::modules::delete_module::delete_module,
@@ -41,24 +43,23 @@ use utoipa::{Modify, OpenApi};
         crate::interfaces::http::handlers::lessons::create_lesson::create_lesson,
         crate::interfaces::http::handlers::lessons::update_lesson::update_lesson,
         crate::interfaces::http::handlers::lessons::delete_lesson::delete_lesson,
-        crate::interfaces::http::handlers::lessons::upload_lesson_video::upload_lesson_video,
     ),
     components(schemas(
             // Shared
             crate::pkg::response::ApiErrorResponse,
             // Users
-            crate::types::user_types::RegisterRequest,
-            crate::types::user_types::RegisterResponse,
-            crate::types::user_types::LoginRequest,
-            crate::types::user_types::LoginResponse,
-            crate::types::user_types::RefreshRequest,
-            crate::types::user_types::VerifyOtpRequest,
-            crate::types::user_types::TokenResponse,
-            crate::types::user_types::OkResponse,
-            crate::types::user_types::UserResponse,
-            crate::types::user_types::UserProfile,
-            crate::types::user_types::UpdateUserRequest,
-            crate::types::user_types::ResendOtpRequest,
+            crate::types::users::request_type::RegisterRequest,
+            crate::types::users::response_type::RegisterResponse,
+            crate::types::users::request_type::LoginRequest,
+            crate::types::users::response_type::LoginResponse,
+            crate::types::users::request_type::RefreshRequest,
+            crate::types::users::request_type::VerifyOtpRequest,
+            crate::types::users::response_type::TokenResponse,
+            crate::types::users::response_type::OkResponse,
+            crate::types::users::response_type::UserResponse,
+            crate::types::users::user_types::UserProfile,
+            crate::types::users::request_type::UpdateUserRequest,
+            crate::types::users::request_type::ResendOtpRequest,
             // Courses & content
             crate::types::course_types::Course,
             crate::types::course_types::Instructor,

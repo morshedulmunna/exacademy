@@ -16,6 +16,9 @@ use validator::Validate;
     path = "/api/courses/:id",
     request_body = UpdateCourseRequest,
     responses((status = 200, description = "Updated course", body = Course)),
+    security(
+        ("bearerAuth" = [])
+    ),
     tag = "Courses"
 )]
 pub async fn update_course(

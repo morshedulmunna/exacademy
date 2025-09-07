@@ -8,6 +8,7 @@ import CursorGlow from "@/common/Effect/CursorGlow";
 import CursorLaser from "@/common/Effect/CursorLaser";
 import TechLogosBackground from "@/common/Effect/tech-logos-background";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Morshedul Islam Munna - Software Engineer",
@@ -44,6 +45,7 @@ export default function RootLayout({
       </head>
       <body className={`antialiased w-full min-h-screen relative`} style={{ backgroundColor: "hsl(var(--background))", color: "hsl(var(--foreground))" }}>
         <PageLoader />
+        <Toaster />
         <SessionProvider>
           <LoadingProvider>
             <ThemeProvider>

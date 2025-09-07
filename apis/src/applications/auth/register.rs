@@ -1,17 +1,15 @@
 use super::utils::{generate_otp_code, send_otp_email, store_otp};
 use crate::configs::app_context::AppContext;
 use crate::pkg::error::{AppError, AppResult};
-use crate::repositories::users::{CreateUserRecord, UsersRepository};
-use crate::types::user_types::{RegisterRequest, RegisterResponse};
+use crate::repositories::users::CreateUserRecord;
+use crate::types::users::request_type::RegisterRequest;
+use crate::types::users::response_type::RegisterResponse;
 use std::time::Duration;
 
 /// Register a new user and send an email verification OTP.
-pub async fn register(
-    ctx: &AppContext,
-    repo: &dyn UsersRepository,
-    input: RegisterRequest,
-) -> AppResult<RegisterResponse> {
-    let existing = repo.find_by_email(&input.email).await?;
+pub async fn register(ctx: &AppContext, input: RegisterRequest) -> AppResult<RegisterResponse> {
+    let existing = ctx.repos.users.find_by_email(&input.email).await?;
+
     if existing.is_some() {
         return Err(AppError::Conflict("Email already exists".into()));
     }
@@ -21,7 +19,9 @@ pub async fn register(
         .hash(&input.password)
         .map_err(|e| AppError::Internal(e.to_string()))?;
 
-    let id = repo
+    let id = ctx
+        .repos
+        .users
         .create(CreateUserRecord {
             username: input.username,
             email: input.email,
@@ -31,20 +31,22 @@ pub async fn register(
         .await?;
 
     // After registration, generate an email verification OTP and send it.
-    let user = repo
+    let user = ctx
+        .repos
+        .users
         .find_by_id(id)
         .await?
         .ok_or_else(|| AppError::Internal("User not found after create".into()))?;
+
     let code = generate_otp_code();
 
     store_otp(ctx, &user.email, &code, Duration::from_secs(10 * 60)).await?;
 
     if let Err(e) = send_otp_email(ctx, &user.email, &code).await {
         // Email failed to send; clean up the just-created user to avoid dangling accounts.
-        let _ = repo.delete_by_id(id).await;
+        let _ = ctx.repos.users.delete_by_id(id).await;
         return Err(e);
     }
-    dbg!(id);
 
     Ok(RegisterResponse { id })
 }

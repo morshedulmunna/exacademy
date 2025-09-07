@@ -4,11 +4,16 @@ pub mod create;
 pub mod delete_by_id;
 pub mod list_by_module;
 pub mod update_by_id;
+pub mod contents;
+pub mod questions;
+pub mod assignment;
+pub mod bulk_update_positions;
 
 pub use create::create_lesson;
 pub use delete_by_id::delete_lesson_by_id as delete_lesson;
 pub use list_by_module::list_lessons_by_module;
 pub use update_by_id::update_lesson_by_id as update_lesson;
+pub use bulk_update_positions::bulk_update_lesson_positions;
 
 use crate::repositories::lessons::LessonRecord;
 use crate::types::course_types::Lesson;

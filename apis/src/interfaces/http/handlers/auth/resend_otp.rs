@@ -6,7 +6,7 @@ use crate::configs::app_context::AppContext;
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::{ResendOtpRequest, OkResponse};
+use crate::types::users::{request_type::ResendOtpRequest, response_type::OkResponse};
 
 /// Resend OTP email
 #[utoipa::path(

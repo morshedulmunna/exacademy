@@ -3,7 +3,7 @@ use axum::{Json, http::StatusCode};
 
 use crate::pkg::Response;
 use crate::pkg::error::AppResult;
-use crate::types::user_types::OkResponse;
+use crate::types::users::response_type::OkResponse;
 
 /// Logout (stateless)
 #[utoipa::path(
