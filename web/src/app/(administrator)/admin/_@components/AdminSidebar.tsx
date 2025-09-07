@@ -31,6 +31,12 @@ export default function AdminSidebar() {
       description: "Overview & Analytics",
     },
     {
+      href: "/admin/analytics",
+      icon: BarChart3,
+      label: "Analytics",
+      description: "Site statistics",
+    },
+    {
       href: "/admin/blog",
       icon: FileText,
       label: "Blog Posts",
@@ -48,12 +54,7 @@ export default function AdminSidebar() {
       label: "Users",
       description: "User management",
     },
-    {
-      href: "/admin/analytics",
-      icon: BarChart3,
-      label: "Analytics",
-      description: "Site statistics",
-    },
+    
     {
       href: "/admin/settings",
       icon: Settings,
