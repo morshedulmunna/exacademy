@@ -86,7 +86,7 @@ pub trait CoursesRepository: Send + Sync {
         limit: i64,
     ) -> AppResult<(Vec<CourseRecord>, i64)>;
 
-    async fn list_all(&self, offset: i64, limit: i64) -> AppResult<Vec<CourseRecord>>;
+    async fn list_all(&self, offset: i64, limit: i64) -> AppResult<(Vec<CourseRecord>, i64)>;
 
     /// Return a page of courses and the total count for pagination
     async fn find_by_id(&self, id: uuid::Uuid) -> AppResult<Option<CourseRecord>>;

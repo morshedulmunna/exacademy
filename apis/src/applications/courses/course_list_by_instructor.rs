@@ -16,7 +16,9 @@ pub async fn list_courses_paginated_by_instructor(
     let (records, total) = repo
         .list_by_instructor_paginated(instructor_id, offset, safe_per_page)
         .await?;
+
     let items: Vec<Course> = records.into_iter().map(Into::into).collect();
+
     let total_pages = if total == 0 {
         1
     } else {

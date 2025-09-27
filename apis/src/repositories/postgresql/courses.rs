@@ -40,17 +40,17 @@ impl CoursesRepository for PostgresCoursesRepository {
         Ok(rec.get("slug"))
     }
 
-    async fn list_all(&self, offset: i64, limit: i64) -> AppResult<Vec<CourseRecord>> {
-        let query = r#"SELECT id, slug, title, description, excerpt, thumbnail,
-                       price, original_price, duration, lessons,
-                       status, featured, view_count, outcomes, category, tags,
-                       instructor_id,
-                       published_at, created_at, updated_at,
-                       id as instructor_id_join, username as instructor_username,
-                       full_name as instructor_full_name, avatar_url as instructor_avatar_url,
-                       email as instructor_email, role as instructor_role
+    async fn list_all(&self, offset: i64, limit: i64) -> AppResult<(Vec<CourseRecord>, i64)> {
+        let query = r#"SELECT courses.id, courses.slug, courses.title, courses.description, courses.excerpt, courses.thumbnail,
+                       courses.price, courses.original_price, courses.duration, courses.lessons,
+                       courses.status, courses.featured, courses.view_count, courses.outcomes, courses.category, courses.tags,
+                       courses.instructor_id,
+                       courses.published_at, courses.created_at, courses.updated_at,
+                       users.id as instructor_id_join, users.username as instructor_username,
+                       users.full_name as instructor_full_name, users.avatar_url as instructor_avatar_url,
+                       users.email as instructor_email, users.role as instructor_role
                     FROM courses
-                    LEFT JOIN users ON id = instructor_id
+                    LEFT JOIN users ON users.id = courses.instructor_id
                     ORDER BY created_at DESC
                     OFFSET $1 LIMIT $2"#;
 
@@ -61,10 +61,17 @@ impl CoursesRepository for PostgresCoursesRepository {
             .await
             .map_err(AppError::from)?;
 
-        Ok(rows
-            .into_iter()
-            .map(map_course_row_with_instructor)
-            .collect())
+        let count_row: (i64,) = sqlx::query_as(r#"SELECT COUNT(*) as count FROM courses"#)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(AppError::from)?;
+
+        Ok((
+            rows.into_iter()
+                .map(map_course_row_with_instructor)
+                .collect(),
+            count_row.0,
+        ))
     }
 
     async fn list_by_instructor_paginated(
