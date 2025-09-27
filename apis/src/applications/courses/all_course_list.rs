@@ -27,7 +27,7 @@ pub async fn get_all_course(
     };
 
     Ok(Page {
-        items: courses,
+        data: courses,
         meta: PageMeta {
             page: safe_page,
             per_page: safe_per_page,

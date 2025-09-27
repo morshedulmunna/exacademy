@@ -26,7 +26,7 @@ pub async fn list_courses_paginated_by_instructor(
     };
 
     Ok(Page {
-        items,
+        data: items,
         meta: PageMeta {
             page: safe_page,
             per_page: safe_per_page,

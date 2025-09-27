@@ -20,7 +20,7 @@ export default async function Home({ searchParams }: { searchParams?: Promise<{ 
         <Header />
         <main className="flex-1 pt-24">
           <Hero1 />
-          <Course page={Number(sp.page ?? 1)} perPage={Number(sp.per_page ?? 6)} />
+          <Course  />
           <Blogs />
           <NewsLatter />
           <YoutubeSection />

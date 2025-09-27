@@ -96,7 +96,7 @@ pub struct Page<T>
 where
     T: Serialize,
 {
-    pub items: Vec<T>,
+    pub data: Vec<T>,
     pub meta: PageMeta,
 }
 

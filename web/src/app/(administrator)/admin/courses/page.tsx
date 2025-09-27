@@ -44,7 +44,7 @@ export default async function CourseManagementPage({ searchParams }: { searchPar
     image: c.thumbnail || undefined,
   });
 
-  const courses: AdminCourseItem[] = success ? (data?.items || []).map(toAdminCourseItem) : [];
+  const courses: AdminCourseItem[] = success ? (data?.data || []).map(toAdminCourseItem) : [];
   const total = success ? data?.meta?.total || courses.length : courses.length;
 
   const stats = {

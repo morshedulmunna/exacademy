@@ -17,6 +17,15 @@ export async function getInstructorCoursesAction({ page = 1, per_page = 50 }: { 
   }
 }
 
+export async function getAllCoursesAction({ page = 1, per_page = 50 }: { page?: number; per_page?: number } = {}) {
+  try {
+    const res = await API.get(`/api/courses`, { params: { page, per_page } });
+    return DataObj(res) as any;
+  } catch (error) {
+    return ErrorObj(error) as any;
+  }
+}
+
 /**
  * getCourseBySlugAction
  * Fetch a single course by slug.
