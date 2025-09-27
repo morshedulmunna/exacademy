@@ -15,6 +15,8 @@ pub async fn login(
         Some(u) => u,
         None => return Err(AppError::Unauthorized("User not registered".into())),
     };
+    dbg!(&user);
+
     let hashed: &str = user
         .password_hash
         .as_deref()
