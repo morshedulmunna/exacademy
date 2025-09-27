@@ -1,5 +1,6 @@
 //! Course application services - split by function files
 
+pub mod all_course_list;
 pub mod course_list_by_instructor;
 pub mod create;
 pub mod delete_by_id;
@@ -7,6 +8,7 @@ pub mod get_by_id;
 pub mod get_by_slug;
 pub mod update_by_id;
 
+pub use all_course_list::get_all_course;
 pub use course_list_by_instructor::list_courses_paginated_by_instructor;
 pub use create::create_course;
 pub use delete_by_id::delete_course_by_id;

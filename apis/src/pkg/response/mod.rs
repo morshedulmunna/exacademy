@@ -44,7 +44,7 @@ impl ApiErrorResponse {
 }
 
 /// Standard success response payload returned by the API
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct Response<T>
 where
     T: Serialize,

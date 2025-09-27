@@ -12,7 +12,7 @@ use utoipa::{Modify, OpenApi};
         description = "REST API for execute_academy. See category, product, auth, and user endpoints."
     ),
     servers(
-        (url = "http://localhost:9098", description = "Local dev"),
+        (url = "http://localhost:8080", description = "Local dev"),
         (url = "https://api.executeacademy.com", description = "Production")
     ),
     paths(
@@ -28,6 +28,7 @@ use utoipa::{Modify, OpenApi};
         crate::interfaces::http::handlers::users::update_user::update_user,
         // Courses
         crate::interfaces::http::handlers::courses::create_course::create_course,
+        crate::interfaces::http::handlers::courses::get_all_course::all_course_list,
         crate::interfaces::http::handlers::courses::get_course_by_id::get_course_by_id,
         crate::interfaces::http::handlers::courses::get_course_by_slug::get_course_by_slug,
         crate::interfaces::http::handlers::courses::update_course::update_course,

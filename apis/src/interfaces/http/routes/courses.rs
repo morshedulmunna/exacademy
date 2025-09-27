@@ -8,6 +8,7 @@ use crate::interfaces::http::handlers::courses as h;
 pub fn router() -> Router {
     Router::new()
         .route("/api/courses", post(h::create_course))
+        .route("/api/courses", get(h::all_course_list))
         .route("/api/courses/:id", get(h::get_course_by_id))
         .route("/api/courses/:id", patch(h::update_course))
         .route("/api/courses/:id", delete(h::delete_course))
